@@ -5,6 +5,9 @@ This checklist is for the draft integration branch and must be completed before 
 ## Automated check
 - [x] GitHub Actions TypeScript check and Vite production build passed on the initial integration snapshot.
 - [ ] Re-run and confirm the latest integration commit after the district and navigation fixes.
+- [x] Shared district source contains 38 Bihar districts and 24 Jharkhand districts.
+- [x] Demo job filtering now respects the selected state and district.
+- [x] Candidate tabs no longer render Home content underneath their own screen.
 
 ## Manual browser checks
 
