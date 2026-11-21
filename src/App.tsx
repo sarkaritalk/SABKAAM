@@ -22,9 +22,9 @@ const categories: Category[] = [
 ]
 
 const demoJobs = [
-  { title: 'दुकान में सेल्स हेल्पर', company: 'डेमो किराना स्टोर', place: 'मधुबनी', pay: '₹8,000–₹10,000 / माह', type: 'फुल टाइम', category: 'दुकान और रिटेल' },
-  { title: 'रेस्टोरेंट में किचन हेल्पर', company: 'डेमो फूड कॉर्नर', place: 'दरभंगा', pay: '₹9,000–₹12,000 / माह', type: 'फुल टाइम', category: 'होटल और रेस्टोरेंट' },
-  { title: 'डिलीवरी पार्टनर', company: 'डेमो लोकल सर्विस', place: 'पटना', pay: 'काम के अनुसार', type: 'पार्ट टाइम', category: 'ड्राइवर और डिलीवरी' },
+  { title: 'दुकान में सेल्स हेल्पर', state: 'Bihar', company: 'डेमो किराना स्टोर', place: 'मधुबनी', pay: '₹8,000–₹10,000 / माह', type: 'फुल टाइम', category: 'दुकान और रिटेल' },
+  { title: 'रेस्टोरेंट में किचन हेल्पर', state: 'Bihar', company: 'डेमो फूड कॉर्नर', place: 'दरभंगा', pay: '₹9,000–₹12,000 / माह', type: 'फुल टाइम', category: 'होटल और रेस्टोरेंट' },
+  { title: 'डिलीवरी पार्टनर', state: 'Bihar', company: 'डेमो लोकल सर्विस', place: 'पटना', pay: 'काम के अनुसार', type: 'पार्ट टाइम', category: 'ड्राइवर और डिलीवरी' },
 ]
 
 function App() {
@@ -42,9 +42,10 @@ function App() {
   const visibleJobs = useMemo(() => demoJobs.filter((job) => {
     const matchesQuery = !query || `${job.title} ${job.company} ${job.place} ${job.category}`.toLowerCase().includes(query.toLowerCase())
     const matchesCategory = !selectedCategory || job.category === selectedCategory
+    const matchesState = job.state === stateName
     const matchesLocation = district === 'सभी जिले' || job.place === district
-    return matchesQuery && matchesCategory && matchesLocation
-  }), [query, selectedCategory, district])
+    return matchesQuery && matchesCategory && matchesState && matchesLocation
+  }), [query, selectedCategory, stateName, district])
 
   if (showEmployer) return <EmployerDashboard onBack={() => setShowEmployer(false)} />
 
