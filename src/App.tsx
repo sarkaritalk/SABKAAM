@@ -6,6 +6,8 @@ import EmployerDashboard from './EmployerDashboard'
 
 import { districts, type StateName } from './locations'
 
+type Category = { name: string; icon: string; count: string }
+
 const categories: Category[] = [
   { name: 'दुकान और रिटेल', icon: '🛍️', count: 'दुकान, सेल्स, काउंटर' },
   { name: 'होटल और रेस्टोरेंट', icon: '🍽️', count: 'कुक, वेटर, हेल्पर' },
