@@ -48,6 +48,8 @@ function App() {
   const [selectedCategory, setSelectedCategory] = useState('')
   const [activeTab, setActiveTab] = useState('होम')
   const [showDemo, setShowDemo] = useState(false)
+  const [selectedJob, setSelectedJob] = useState<(typeof demoJobs)[number] | null>(null)
+  const [applicationSent, setApplicationSent] = useState(false)
 
   const visibleJobs = useMemo(() => demoJobs.filter((job) => {
     const matchesQuery = !query || `${job.title} ${job.company} ${job.place} ${job.category}`.toLowerCase().includes(query.toLowerCase())
@@ -113,10 +115,27 @@ function App() {
 
         {showDemo && <section className="jobs-section">
           <div className="section-heading"><div><span className="section-kicker">उदाहरण के लिए</span><h2>काम के नमूने</h2></div><span className="demo-label">डेमो डेटा · असली नौकरी नहीं</span></div>
-          {visibleJobs.length ? <div className="job-list">{visibleJobs.map((job) => <article className="job-card" key={job.title}><div><span className="job-type">{job.type}</span><h3>{job.title}</h3><p>{job.company} · 📍 {job.place}</p></div><div className="job-pay">{job.pay}<small>वेतन का डेमो उदाहरण</small></div></article>)}</div> : <p className="empty-state">इस फ़िल्टर के लिए अभी कोई डेमो उदाहरण नहीं है। फ़िल्टर बदलकर देखें।</p>}
+          {visibleJobs.length ? <div className="job-list">{visibleJobs.map((job) => <article className="job-card" key={job.title} onClick={() => { setSelectedJob(job); setApplicationSent(false) }}><div><span className="job-type">{job.type}</span><h3>{job.title}</h3><p>{job.company} · 📍 {job.place}</p></div><div className="job-pay">{job.pay}<small>वेतन का डेमो उदाहरण</small><button type="button" className="job-detail-button">विवरण देखें →</button></div></article>)}</div> : <p className="empty-state">इस फ़िल्टर के लिए अभी कोई डेमो उदाहरण नहीं है। फ़िल्टर बदलकर देखें।</p>}
           <p className="demo-note">ये केवल स्क्रीन समझाने के लिए काल्पनिक उदाहरण हैं। SABKAAM पर अभी वास्तविक नौकरी की लिस्टिंग उपलब्ध नहीं है।</p>
         </section>}
 
+        {selectedJob && <div className="apply-overlay" role="presentation" onClick={() => setSelectedJob(null)}>
+          <section className="apply-modal" role="dialog" aria-modal="true" aria-labelledby="apply-title" onClick={event => event.stopPropagation()}>
+            <button className="modal-close" onClick={() => setSelectedJob(null)} aria-label="बंद करें">×</button>
+            <span className="section-kicker">नौकरी का विवरण · डेमो</span>
+            <h2 id="apply-title">{selectedJob.title}</h2>
+            <p className="modal-company">{selectedJob.company} · {selectedJob.place}</p>
+            <div className="modal-facts"><span>वेतन <b>{selectedJob.pay}</b></span><span>काम <b>{selectedJob.type}</b></span><span>श्रेणी <b>{selectedJob.category}</b></span></div>
+            <p className="modal-disclaimer">यह एक काल्पनिक उदाहरण है, वास्तविक नौकरी या नियोक्ता नहीं। यहाँ आवेदन भेजने से किसी कंपनी को जानकारी नहीं जाएगी।</p>
+            {applicationSent ? <div className="application-confirm"><strong>डेमो आवेदन तैयार हुआ।</strong><p>आपका विवरण केवल इस स्क्रीन पर दिखाया गया है; कहीं सेव या भेजा नहीं गया।</p></div> : <form className="apply-form" onSubmit={event => { event.preventDefault(); setApplicationSent(true) }}>
+              <h3>आवेदन का नमूना</h3>
+              <label>आपका नाम *<input required placeholder="पूरा नाम" /></label>
+              <label>मोबाइल नंबर *<input required type="tel" inputMode="numeric" pattern="[0-9]{10}" maxLength={10} placeholder="10 अंकों का नंबर" /></label>
+              <label>आपके बारे में (वैकल्पिक)<textarea rows={3} placeholder="अनुभव या काम की जानकारी लिखें" /></label>
+              <button type="submit">डेमो आवेदन देखें →</button>
+            </form>}
+          </section>
+        </div>}
         <section className="trust-strip"><span className="trust-icon">✓</span><div><strong>सही जानकारी, सुरक्षित शुरुआत</strong><p>हमारा लक्ष्य है कि हर नौकरी में वेतन, समय और जगह की जानकारी साफ़ दिखाई दे।</p></div><span className="trust-side">SABKAAM <b>01</b></span></section>
       </main>
 
