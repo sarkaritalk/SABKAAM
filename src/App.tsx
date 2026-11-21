@@ -4,25 +4,7 @@ import CandidateArea from './CandidateArea'
 import SafetyCenter from './safety-center'
 import EmployerDashboard from './EmployerDashboard'
 
-type StateName = 'Bihar' | 'Jharkhand'
-type Category = { name: string; icon: string; count: string }
-
-const districts: Record<StateName, string[]> = {
-  Bihar: [
-    'सभी जिले', 'अररिया', 'अरवल', 'औरंगाबाद', 'बांका', 'बेगूसराय', 'भागलपुर',
-    'भोजपुर', 'बक्सर', 'दरभंगा', 'पूर्वी चंपारण', 'गया', 'गोपालगंज', 'जमुई',
-    'जहानाबाद', 'कैमूर', 'कटिहार', 'खगड़िया', 'किशनगंज', 'लखीसराय', 'मधेपुरा',
-    'मधुबनी', 'मुंगेर', 'मुजफ्फरपुर', 'नालंदा', 'नवादा', 'पटना', 'पूर्णिया',
-    'रोहतास', 'सहरसा', 'समस्तीपुर', 'सारण', 'शेखपुरा', 'शिवहर', 'सीतामढ़ी',
-    'सीवान', 'सुपौल', 'वैशाली', 'पश्चिमी चंपारण'
-  ],
-  Jharkhand: [
-    'सभी जिले', 'बोकारो', 'चतरा', 'देवघर', 'धनबाद', 'दुमका', 'पूर्वी सिंहभूम',
-    'गढ़वा', 'गिरिडीह', 'गोड्डा', 'गुमला', 'हजारीबाग', 'जामताड़ा', 'खूंटी',
-    'कोडरमा', 'लातेहार', 'लोहरदगा', 'पाकुड़', 'पलामू', 'रामगढ़', 'रांची',
-    'साहिबगंज', 'सरायकेला-खरसावां', 'सिमडेगा', 'पश्चिमी सिंहभूम'
-  ],
-}
+import { districts, type StateName } from './locations'
 
 const categories: Category[] = [
   { name: 'दुकान और रिटेल', icon: '🛍️', count: 'दुकान, सेल्स, काउंटर' },
@@ -60,8 +42,9 @@ function App() {
   const visibleJobs = useMemo(() => demoJobs.filter((job) => {
     const matchesQuery = !query || `${job.title} ${job.company} ${job.place} ${job.category}`.toLowerCase().includes(query.toLowerCase())
     const matchesCategory = !selectedCategory || job.category === selectedCategory
-    return matchesQuery && matchesCategory
-  }), [query, selectedCategory])
+    const matchesLocation = district === 'सभी जिले' || job.place === district
+    return matchesQuery && matchesCategory && matchesLocation
+  }), [query, selectedCategory, district])
 
   if (showEmployer) return <EmployerDashboard onBack={() => setShowEmployer(false)} />
 
@@ -87,6 +70,7 @@ function App() {
 
       <main>{showSafety && <SafetyCenter />}
         {(activeTab === 'मेरे आवेदन' || activeTab === 'सूचनाएँ' || activeTab === 'प्रोफ़ाइल') && <CandidateArea mode={activeTab} />}
+        {activeTab === 'होम' && <>
         <section className="hero">
           <div className="hero-copy">
             <span className="eyebrow"><span className="live-dot" /> बिहार और झारखंड से शुरुआत</span>
@@ -146,6 +130,7 @@ function App() {
           </section>
         </div>}
         <section className="trust-strip"><span className="trust-icon">✓</span><div><strong>सही जानकारी, सुरक्षित शुरुआत</strong><p>हमारा लक्ष्य है कि हर नौकरी में वेतन, समय और जगह की जानकारी साफ़ दिखाई दे।</p></div><span className="trust-side">SABKAAM <b>01</b></span></section>
+        </>}
       </main>
 
       <nav className="bottom-nav" aria-label="मुख्य नेविगेशन">
