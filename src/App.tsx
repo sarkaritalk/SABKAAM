@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import './job-apply.css'
 import CandidateArea from './CandidateArea'
 import SafetyCenter from './safety-center'
+import EmployerDashboard from './EmployerDashboard'
 
 type StateName = 'Bihar' | 'Jharkhand'
 type Category = { name: string; icon: string; count: string }
@@ -54,12 +55,15 @@ function App() {
   const [selectedJob, setSelectedJob] = useState<(typeof demoJobs)[number] | null>(null)
   const [applicationSent, setApplicationSent] = useState(false)
   const [showSafety, setShowSafety] = useState(false)
+  const [showEmployer, setShowEmployer] = useState(false)
 
   const visibleJobs = useMemo(() => demoJobs.filter((job) => {
     const matchesQuery = !query || `${job.title} ${job.company} ${job.place} ${job.category}`.toLowerCase().includes(query.toLowerCase())
     const matchesCategory = !selectedCategory || job.category === selectedCategory
     return matchesQuery && matchesCategory
   }), [query, selectedCategory])
+
+  if (showEmployer) return <EmployerDashboard onBack={() => setShowEmployer(false)} />
 
   function changeState(next: StateName) {
     setStateName(next)
@@ -78,7 +82,7 @@ function App() {
           <span className="brand-mark">स</span>
           <span><strong>SABKAAM</strong><small>हर काम, हर इंसान के लिए।</small></span>
         </a>
-        <div className="topbar-actions"><button className="safety-link" onClick={() => setShowSafety(!showSafety)}>{showSafety ? '← वापस' : '🛡️ सुरक्षा और शिकायत'}</button><button className="employer-link" onClick={() => alert('Employer dashboard अगली विकास प्रक्रिया में बनेगा।')}>नौकरी देने वाले? <span>यहाँ जाएँ ↗</span></button></div>
+        <div className="topbar-actions"><button className="safety-link" onClick={() => setShowSafety(!showSafety)}>{showSafety ? '← वापस' : '🛡️ सुरक्षा और शिकायत'}</button><button className="employer-link" onClick={() => setShowEmployer(true)}>नौकरी देने वाले? <span>यहाँ जाएँ ↗</span></button></div>
       </header>
 
       <main>{showSafety && <SafetyCenter />}
