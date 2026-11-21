@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import './job-apply.css'
 import CandidateArea from './CandidateArea'
-import SafetyCenter from './SafetyCenter'
+import SafetyCenter from './safety-center'
 
 type StateName = 'Bihar' | 'Jharkhand'
 type Category = { name: string; icon: string; count: string }
