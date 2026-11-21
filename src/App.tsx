@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import './job-apply.css'
 import CandidateArea from './CandidateArea'
+import SafetyCenter from './SafetyCenter'
 
 type StateName = 'Bihar' | 'Jharkhand'
 type Category = { name: string; icon: string; count: string }
@@ -52,6 +53,7 @@ function App() {
   const [showDemo, setShowDemo] = useState(false)
   const [selectedJob, setSelectedJob] = useState<(typeof demoJobs)[number] | null>(null)
   const [applicationSent, setApplicationSent] = useState(false)
+  const [showSafety, setShowSafety] = useState(false)
 
   const visibleJobs = useMemo(() => demoJobs.filter((job) => {
     const matchesQuery = !query || `${job.title} ${job.company} ${job.place} ${job.category}`.toLowerCase().includes(query.toLowerCase())
@@ -70,16 +72,16 @@ function App() {
   }
 
   return (
-    <div className="app-shell" data-active-tab={activeTab}>
+    <div className="app-shell" data-active-tab={activeTab} data-safety-open={showSafety}>
       <header className="topbar">
         <a className="brand" href="#" aria-label="SABKAAM होम">
           <span className="brand-mark">स</span>
           <span><strong>SABKAAM</strong><small>हर काम, हर इंसान के लिए।</small></span>
         </a>
-        <button className="employer-link" onClick={() => alert('Employer dashboard अगली विकास प्रक्रिया में बनेगा।')}>नौकरी देने वाले? <span>यहाँ जाएँ ↗</span></button>
+        <div className="topbar-actions"><button className="safety-link" onClick={() => setShowSafety(!showSafety)}>{showSafety ? '← वापस' : '🛡️ सुरक्षा और शिकायत'}</button><button className="employer-link" onClick={() => alert('Employer dashboard अगली विकास प्रक्रिया में बनेगा।')}>नौकरी देने वाले? <span>यहाँ जाएँ ↗</span></button></div>
       </header>
 
-      <main>
+      <main>{showSafety && <SafetyCenter />}
         {(activeTab === 'मेरे आवेदन' || activeTab === 'सूचनाएँ' || activeTab === 'प्रोफ़ाइल') && <CandidateArea mode={activeTab} />}
         <section className="hero">
           <div className="hero-copy">
