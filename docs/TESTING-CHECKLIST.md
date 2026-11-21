@@ -59,3 +59,5 @@ This checklist is for the draft integration branch and must be completed before 
 - No real voice search, push notifications, SMS, or email alerts.
 - Demo job listings are fictional and must not be presented as real vacancies.
 - Before launch: implement backend and access controls, privacy/retention policy, abuse moderation, audit trail, rate limits, logging, backups, and production security review.
+
+- [x] Restored the category type after extracting shared location data; latest TypeScript build pending.
