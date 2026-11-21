@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type FormEvent } from 'react'
 import './employer-dashboard.css'
 
 type Props = { onBack: () => void }
@@ -19,7 +19,7 @@ export default function EmployerDashboard({ onBack }: Props) {
   const [description, setDescription] = useState('')
   const [success, setSuccess] = useState(false)
 
-  function submit(event: React.FormEvent<HTMLFormElement>) {
+  function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setSuccess(true)
   }
