@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import './job-apply.css'
 
 type StateName = 'Bihar' | 'Jharkhand'
 type Category = { name: string; icon: string; count: string }
