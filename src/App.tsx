@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import './job-apply.css'
+import CandidateArea from './CandidateArea'
 
 type StateName = 'Bihar' | 'Jharkhand'
 type Category = { name: string; icon: string; count: string }
@@ -65,11 +66,11 @@ function App() {
 
   function searchJobs() {
     setShowDemo(true)
-    setActiveTab('खोज')
+    setActiveTab('होम')
   }
 
   return (
-    <div className="app-shell">
+    <div className="app-shell" data-active-tab={activeTab}>
       <header className="topbar">
         <a className="brand" href="#" aria-label="SABKAAM होम">
           <span className="brand-mark">स</span>
@@ -79,6 +80,7 @@ function App() {
       </header>
 
       <main>
+        {(activeTab === 'मेरे आवेदन' || activeTab === 'सूचनाएँ' || activeTab === 'प्रोफ़ाइल') && <CandidateArea mode={activeTab} />}
         <section className="hero">
           <div className="hero-copy">
             <span className="eyebrow"><span className="live-dot" /> बिहार और झारखंड से शुरुआत</span>
