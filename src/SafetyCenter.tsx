@@ -13,6 +13,12 @@ export default function SafetyCenter() {
   const [details, setDetails] = useState('')
   const [contact, setContact] = useState('')
   const [submitted, setSubmitted] = useState(false)
+  const [verificationSent, setVerificationSent] = useState(false)
+  const [businessName, setBusinessName] = useState('')
+  const [businessType, setBusinessType] = useState('दुकान / रिटेल')
+  const [businessPhone, setBusinessPhone] = useState('')
+  const [businessDistrict, setBusinessDistrict] = useState('मधुबनी')
+  const [businessAddress, setBusinessAddress] = useState('')
 
   return <section className="safety-center">
     <div className="safety-heading">
@@ -37,7 +43,19 @@ export default function SafetyCenter() {
         </ul>
       </article>
     </div>
-    <div className="safety-status"><strong>नियोक्ता सत्यापन</strong><span>सत्यापित बैज और दस्तावेज़ जाँच सुविधा अभी विकसित हो रही है। फिलहाल किसी डेमो लिस्टिंग को सत्यापित न मानें।</span></div>
+    <div className="safety-status"><strong>नियोक्ता सत्यापन</strong><span>नियोक्ता की पहचान और व्यवसाय की जानकारी जाँचने के बाद ही सत्यापित बैज दिया जाना चाहिए। नीचे अनुरोध प्रक्रिया का प्रोटोटाइप है; अभी कोई बैज जारी नहीं होता।</span></div>
+    <section className="verification-card">
+      <div><span className="section-kicker">EMPLOYER VERIFICATION</span><h2>नियोक्ता सत्यापन के लिए अनुरोध</h2><p>व्यवसाय की बुनियादी जानकारी दें। इस डेमो में कोई पहचान-पत्र, आधार, PAN, बैंक विवरण या दस्तावेज़ अपलोड न करें।</p></div>
+      {verificationSent ? <div className="verification-pending" role="status"><strong>अनुरोध का डेमो तैयार है · स्थिति: समीक्षा बाकी</strong><span>{businessName} · {businessDistrict}</span><small>यह अनुरोध सर्वर पर नहीं भेजा गया है। वास्तविक जाँच और सत्यापन बैज अभी सक्रिय नहीं हैं।</small><button type="button" onClick={() => setVerificationSent(false)}>जानकारी संपादित करें</button></div> : <form onSubmit={event => { event.preventDefault(); setVerificationSent(true) }}>
+        <label>व्यवसाय / कंपनी का नाम<input required value={businessName} onChange={event => setBusinessName(event.target.value)} placeholder="दुकान या कंपनी का नाम" /></label>
+        <label>व्यवसाय का प्रकार<select value={businessType} onChange={event => setBusinessType(event.target.value)}><option>दुकान / रिटेल</option><option>होटल / रेस्टोरेंट</option><option>अस्पताल / क्लिनिक</option><option>फैक्ट्री / कंपनी</option><option>ऑफिस / अन्य</option></select></label>
+        <label>संपर्क मोबाइल नंबर<input required type="tel" inputMode="numeric" pattern="[0-9]{10}" maxLength={10} value={businessPhone} onChange={event => setBusinessPhone(event.target.value)} placeholder="10 अंकों का नंबर" /></label>
+        <label>जिला<input required value={businessDistrict} onChange={event => setBusinessDistrict(event.target.value)} placeholder="जिला" /></label>
+        <label className="verification-address">व्यवसाय का पता<textarea required rows={2} value={businessAddress} onChange={event => setBusinessAddress(event.target.value)} placeholder="बाजार / मोहल्ला और पूरा पता" /></label>
+        <button type="submit">डेमो सत्यापन अनुरोध बनाएँ →</button>
+      </form>}
+      <div className="verification-steps"><strong>वास्तविक सत्यापन प्रक्रिया में ये चरण होंगे</strong><ol><li>व्यवसाय और संपर्क की जानकारी प्राप्त करना</li><li>उचित आधिकारिक स्रोतों से व्यवसाय की जाँच</li><li>प्रशिक्षित एडमिन द्वारा दस्तावेज़ और जानकारी की समीक्षा</li><li>स्वीकृति, अस्वीकृति या अतिरिक्त जानकारी का अनुरोध</li></ol></div>
+    </section>
     <section className="report-card">
       <div><span className="section-kicker">REPORT A PROBLEM</span><h2>शिकायत या संदिग्ध नौकरी की सूचना दें</h2><p>यह फॉर्म अभी केवल प्रोटोटाइप है। शिकायत कहीं भेजी या सेव नहीं होगी।</p></div>
       {submitted ? <div className="report-success" role="status"><strong>डेमो शिकायत तैयार हुई।</strong><span>अभी यह रिपोर्ट SABKAAM टीम तक नहीं पहुँची है और स्क्रीन बंद करने पर सेव नहीं रहेगी।</span><button type="button" onClick={() => { setSubmitted(false); setDetails(''); setContact('') }}>नई शिकायत लिखें</button></div> : <form onSubmit={event => { event.preventDefault(); setSubmitted(true) }}>
