@@ -1,9 +1,10 @@
 import { useState, type FormEvent } from 'react'
 import './employer-dashboard.css'
+import { districts } from './locations'
 
 type Props = { onBack: () => void }
 
-const districts = ['मधुबनी', 'दरभंगा', 'पटना', 'मुजफ्फरपुर', 'समस्तीपुर', 'पूर्णिया', 'भागलपुर', 'गया', 'रांची', 'धनबाद', 'बोकारो', 'जमशेदपुर', 'देवघर', 'हजारीबाग', 'गिरिडीह', 'दुमका']
+const districtsByState = { बिहार: districts.Bihar.slice(1), झारखंड: districts.Jharkhand.slice(1) }
 
 export default function EmployerDashboard({ onBack }: Props) {
   const [company, setCompany] = useState('')
@@ -51,7 +52,7 @@ export default function EmployerDashboard({ onBack }: Props) {
               <label>काम की श्रेणी<select value={category} onChange={e => setCategory(e.target.value)}>{['दुकान और रिटेल','होटल और रेस्टोरेंट','अस्पताल और क्लिनिक','फैक्ट्री और गोदाम','ड्राइवर और डिलीवरी','ऑफिस और कंपनी','टेक्निकल काम','खेती और मजदूरी','घर और घरेलू काम','निर्माण और सिक्योरिटी','शिक्षा और ट्रेनिंग','ऑनलाइन और फ्रीलांस'].map(x => <option key={x}>{x}</option>)}</select></label>
               <label>काम का प्रकार<select value={workType} onChange={e => setWorkType(e.target.value)}>{['फुल टाइम','पार्ट टाइम','दैनिक मजदूरी','वर्क फ्रॉम होम','कॉन्ट्रैक्ट'].map(x => <option key={x}>{x}</option>)}</select></label>
               <label>राज्य<select value={stateName} onChange={e => { setStateName(e.target.value); setDistrict(e.target.value === 'बिहार' ? 'मधुबनी' : 'रांची') }}><option>बिहार</option><option>झारखंड</option></select></label>
-              <label>जिला<select value={district} onChange={e => setDistrict(e.target.value)}>{(stateName === 'बिहार' ? districts.slice(0, 8) : districts.slice(8)).map(x => <option key={x}>{x}</option>)}</select></label>
+              <label>जिला<select value={district} onChange={e => setDistrict(e.target.value)}>{(stateName === 'बिहार' ? districtsByState[stateName as keyof typeof districtsByState]).map(x => <option key={x}>{x}</option>)}</select></label>
               <label>मासिक वेतन / मजदूरी<input value={salary} onChange={e => setSalary(e.target.value)} placeholder="जैसे: ₹8,000–10,000" /></label>
               <label>कुल पद<input type="number" min="1" max="500" value={vacancies} onChange={e => setVacancies(e.target.value)} /></label>
               <label className="full-field">काम और योग्यता का विवरण<textarea rows={4} value={description} onChange={e => setDescription(e.target.value)} placeholder="काम क्या होगा? अनुभव या योग्यता चाहिए? खाना/रहना मिलेगा? काम के घंटे क्या होंगे?" /></label>
