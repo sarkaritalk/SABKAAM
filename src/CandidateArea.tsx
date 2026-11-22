@@ -24,7 +24,7 @@ export default function CandidateArea({ mode, language, session, onSignIn }: { m
     event.preventDefault()
     if (!session) { setProfileMessage('यह डेमो प्रोफ़ाइल केवल इस स्क्रीन पर तैयार हुई। सेव करने के लिए लॉगिन करें।'); return }
     try {
-      await updateMyProfile(session.access_token, session.user.id, { full_name: name, phone, district, state_code: String(getStateCode(stateName)), state_lgd_code: getStateCode(stateName), district_lgd_code: getDistrictCode(stateName, district, language) ?? 0, preferred_language: language })
+      await updateMyProfile(session.access_token, session.user.id, { full_name: name, phone, district, state_code: String(getStateCode(stateName)), state_lgd_code: getStateCode(stateName), district_lgd_code: getDistrictCode(stateName, district, language) ?? 0, preferred_language: language, skills, preferred_work_type: workType })
        setProfileMessage('आपकी प्रोफ़ाइल सुरक्षित रूप से सेव हो गई।')
     } catch (error) { setProfileMessage(error instanceof Error ? error.message : 'प्रोफ़ाइल सेव नहीं हुई।') }
   }
