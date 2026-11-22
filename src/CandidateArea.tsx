@@ -52,7 +52,7 @@ export default function CandidateArea({ mode, language, session, onSignIn }: { m
   return <Localized language={language}><section className="candidate-area">
     <div className="candidate-heading"><span className="section-kicker">आपकी पहचान, आपकी पसंद</span><h1>मेरी प्रोफ़ाइल</h1><p>बिना रिज़्यूमे के भी अपनी बुनियादी जानकारी तैयार रखें।</p></div>
     <div className="profile-layout">
-      <form className="candidate-profile-form" onSubmit={(event) => { event.preventDefault(); setSaved(true) }}>
+      <form className="candidate-profile-form" onSubmit={saveProfile}>
         <label>आपका नाम<input required value={name} onChange={event => { setName(event.target.value); setSaved(false) }} placeholder="अपना नाम लिखें" /></label>
         <label>मोबाइल नंबर<input required type="tel" inputMode="numeric" pattern="[0-9]{10}" maxLength={10} value={phone} onChange={event => { setPhone(event.target.value); setSaved(false) }} placeholder="10 अंकों का नंबर" /></label>
         <label>राज्य<select value={stateName} onChange={event => { const nextState = event.target.value as StateName; setStateName(nextState); setDistrict(getDistrictOptions(nextState, language)[0] ?? ''); setSaved(false) }}>{stateNames.map(state => <option key={state} value={state}>{getStateLabel(state, language)}</option>)}</select></label>
@@ -60,7 +60,7 @@ export default function CandidateArea({ mode, language, session, onSignIn }: { m
         <label>आपको कौन-सा काम आता है?<textarea rows={3} value={skills} onChange={event => { setSkills(event.target.value); setSaved(false) }} placeholder="जैसे: दुकान संभालना, ड्राइविंग, सिलाई..." /></label>
         <label>काम का प्रकार<select value={workType} onChange={event => { setWorkType(event.target.value); setSaved(false) }}><option>फुल टाइम</option><option>पार्ट टाइम</option><option>दैनिक मजदूरी</option><option>घर से काम</option><option>फ्रीलांस</option></select></label>
         <button type="submit">प्रोफ़ाइल सेव करें →</button>
-        {saved && <p className="profile-saved" role="status">डेमो प्रोफ़ाइल इस स्क्रीन पर तैयार हुई। जानकारी सर्वर पर सेव नहीं हुई है।</p>}
+        {profileMessage && <p className="profile-saved" role="status">{profileMessage}</p>}
       </form>
       <aside className="profile-side"><div className="profile-avatar">👤</div><strong>{name || 'आपका नाम'}</strong><span>{district} · {getStateLabel(stateName, language)} · {workType}</span><p>{skills || 'आपकी स्किल यहाँ दिखाई देंगी।'}</p><small>प्रोफ़ाइल प्रीव्यू · केवल इसी स्क्रीन पर</small></aside>
     </div>
