@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import './employer-dashboard.css'
 import { LanguageSelect, Localized, type Language } from './i18n'
 import { stateNames, getStateLabel, getDistrictOptions, getStateCode, getDistrictCode, getDistrictEnglishName, type StateName } from './locations'
+import { normalizeWorkAreaQuery } from './work-areas'
 import { backendConfigured, createEmployer, createJobDraft, getMyEmployer, getEmployerApplications, updateApplicationStatus, submitJobForReview, type AuthSession, type EmployerApplication } from './lib/backend'
 
 type Props = { onBack: () => void; language: Language; onLanguageChange: (language: Language) => void; session: AuthSession | null; onSignIn: () => void; onSignOut: () => void }
@@ -48,7 +49,7 @@ export default function EmployerDashboard({ onBack, language, onLanguageChange, 
       if (!employer?.id) throw new Error('Employer profile could not be created.')
       const numbers = salary.replace(/,/g, '').match(/[0-9]+/g)?.map(Number) ?? []
       const workTypes: Record<string, string> = { 'फुल टाइम': 'full_time', 'पार्ट टाइम': 'part_time', 'दैनिक मजदूरी': 'daily_wage', 'वर्क फ्रॉम होम': 'work_from_home', 'कॉन्ट्रैक्ट': 'contract' }
-      const draft = await createJobDraft(session.access_token, { employer_id: employer.id, employer_display_name: company, title, category, description: description || title, work_type: workTypes[workType] ?? 'full_time', state_lgd_code: getStateCode(stateName), district_lgd_code: getDistrictCode(stateName, district, language) ?? 0, district: getDistrictEnglishName(stateName, district, language) ?? district, town_or_market: townOrMarket.trim(), locality: townOrMarket.trim(), salary_min: numbers[0], salary_max: numbers[1] ?? numbers[0], salary_period: workType === 'दैनिक मजदूरी' ? 'day' : 'month', vacancies: Number(vacancies) || 1 })
+      const draft = await createJobDraft(session.access_token, { employer_id: employer.id, employer_display_name: company, title, category, description: description || title, work_type: workTypes[workType] ?? 'full_time', state_lgd_code: getStateCode(stateName), district_lgd_code: getDistrictCode(stateName, district, language) ?? 0, district: getDistrictEnglishName(stateName, district, language) ?? district, town_or_market: townOrMarket.trim(), locality: normalizeWorkAreaQuery(townOrMarket), salary_min: numbers[0], salary_max: numbers[1] ?? numbers[0], salary_period: workType === 'दैनिक मजदूरी' ? 'day' : 'month', vacancies: Number(vacancies) || 1 })
       if (!draft[0]?.id) throw new Error('Job draft could not be created.')
       await submitJobForReview(session.access_token, draft[0].id)
       setSuccess(true)
