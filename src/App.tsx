@@ -179,12 +179,12 @@ function App() {
         {selectedJob && <div className="apply-overlay" role="presentation" onClick={() => setSelectedJob(null)}>
           <section className="apply-modal" role="dialog" aria-modal="true" aria-labelledby="apply-title" onClick={event => event.stopPropagation()}>
             <button className="modal-close" onClick={() => setSelectedJob(null)} aria-label="बंद करें">×</button>
-            <span className="section-kicker">नौकरी का विवरण · डेमो</span>
+            <span className="section-kicker">{selectedJob.isDemo === false ? "नौकरी का विवरण" : "नौकरी का विवरण · डेमो"}</span>
             <h2 id="apply-title">{selectedJob.title}</h2>
             <p className="modal-company">{selectedJob.company} · {selectedJob.place}</p>
             <div className="modal-facts"><span>वेतन <b>{selectedJob.pay}</b></span><span>काम <b>{selectedJob.type}</b></span><span>श्रेणी <b>{selectedJob.category}</b></span></div>
-            <p className="modal-disclaimer">यह एक काल्पनिक उदाहरण है, वास्तविक नौकरी या नियोक्ता नहीं। यहाँ आवेदन भेजने से किसी कंपनी को जानकारी नहीं जाएगी।</p>
-            {selectedJob.isDemo === false ? (session && selectedJob.id ? <form className="apply-form" onSubmit={async event => {
+            <p className="modal-disclaimer">{selectedJob.isDemo === false ? "यह प्रकाशित नौकरी है। आवेदन भेजने के लिए candidate खाते से लॉगिन करें।" : "यह एक काल्पनिक उदाहरण है, वास्तविक नौकरी या नियोक्ता नहीं। यहाँ आवेदन भेजने से किसी कंपनी को जानकारी नहीं जाएगी।"}</p>
+            {selectedJob.isDemo === false ? (session && session.user.user_metadata?.account_type === 'candidate' && selectedJob.id ? <form className="apply-form" onSubmit={async event => {
               event.preventDefault()
               const form = new FormData(event.currentTarget)
               setLiveApplyBusy(true)
@@ -197,7 +197,7 @@ function App() {
               } finally { setLiveApplyBusy(false) }
             }}>
               <h3>इस नौकरी के लिए आवेदन करें</h3>
-              <label>आपका नाम *<input required name="full_name" defaultValue={session.user.email || ''} /></label>
+              <label>आपका नाम *<input required name="full_name" defaultValue={session.user.user_metadata?.full_name || ''} /></label>
               <label>मोबाइल नंबर *<input required name="phone" type="tel" inputMode="numeric" pattern="[0-9]{10}" maxLength={10} placeholder="10 अंकों का नंबर" /></label>
               <label>संदेश (वैकल्पिक)<textarea name="message" rows={3} placeholder="अपने अनुभव के बारे में लिखें" /></label>
               {liveApplyMessage && <p role="status">{liveApplyMessage}</p>}
