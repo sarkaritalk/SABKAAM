@@ -178,7 +178,25 @@ function App() {
             <p className="modal-company">{selectedJob.company} · {selectedJob.place}</p>
             <div className="modal-facts"><span>वेतन <b>{selectedJob.pay}</b></span><span>काम <b>{selectedJob.type}</b></span><span>श्रेणी <b>{selectedJob.category}</b></span></div>
             <p className="modal-disclaimer">यह एक काल्पनिक उदाहरण है, वास्तविक नौकरी या नियोक्ता नहीं। यहाँ आवेदन भेजने से किसी कंपनी को जानकारी नहीं जाएगी।</p>
-            {selectedJob.isDemo === false ? <div className="application-confirm"><strong>वास्तविक नौकरी चुनी गई है।</strong><p>आवेदन भेजने से पहले उम्मीदवार का सुरक्षित sign-in और profile consent जोड़ना जरूरी है। अभी कोई आवेदन नहीं भेजा जाएगा।</p></div> : applicationSent ? <div className="application-confirm"><strong>डेमो आवेदन तैयार हुआ।</strong><p>आपका विवरण केवल इस स्क्रीन पर दिखाया गया है; कहीं सेव या भेजा नहीं गया।</p></div> : <form className="apply-form" onSubmit={event => { event.preventDefault(); setApplicationSent(true) }}>
+            {selectedJob.isDemo === false ? (session && selectedJob.id ? <form className="apply-form" onSubmit={async event => {
+              event.preventDefault()
+              const form = new FormData(event.currentTarget)
+              setLiveApplyBusy(true)
+              setLiveApplyMessage('')
+              try {
+                await submitApplication(session.access_token, { job_id: selectedJob.id, candidate_id: session.user.id, full_name: String(form.get('full_name') || ''), phone: String(form.get('phone') || ''), message: String(form.get('message') || '') })
+                setLiveApplyMessage('आपका आवेदन सफलतापूर्वक भेजा गया।')
+              } catch (error) {
+                setLiveApplyMessage(error instanceof Error ? error.message : 'आवेदन नहीं भेजा जा सका।')
+              } finally { setLiveApplyBusy(false) }
+            }}>
+              <h3>इस नौकरी के लिए आवेदन करें</h3>
+              <label>आपका नाम *<input required name="full_name" defaultValue={session.user.email || ''} /></label>
+              <label>मोबाइल नंबर *<input required name="phone" type="tel" inputMode="numeric" pattern="[0-9]{10}" maxLength={10} placeholder="10 अंकों का नंबर" /></label>
+              <label>संदेश (वैकल्पिक)<textarea name="message" rows={3} placeholder="अपने अनुभव के बारे में लिखें" /></label>
+              {liveApplyMessage && <p role="status">{liveApplyMessage}</p>}
+              <button type="submit" disabled={liveApplyBusy}>{liveApplyBusy ? 'भेजा जा रहा है...' : 'आवेदन भेजें →'}</button>
+            </form> : <div className="application-confirm"><strong>लॉगिन जरूरी है।</strong><p>वास्तविक नौकरी में आवेदन करने के लिए पहले उम्मीदवार खाते से लॉगिन करें।</p><button type="button" onClick={() => setShowAuth(true)}>लॉगिन करें</button></div>) : applicationSent ? <div className="application-confirm"><strong>डेमो आवेदन तैयार हुआ।</strong><p>आपका विवरण केवल इस स्क्रीन पर दिखाया गया है; कहीं सेव या भेजा नहीं गया।</p></div> : <form className="apply-form" onSubmit={event => { event.preventDefault(); setApplicationSent(true) }}>
               <h3>आवेदन का नमूना</h3>
               <label>आपका नाम *<input required placeholder="पूरा नाम" /></label>
               <label>मोबाइल नंबर *<input required type="tel" inputMode="numeric" pattern="[0-9]{10}" maxLength={10} placeholder="10 अंकों का नंबर" /></label>
