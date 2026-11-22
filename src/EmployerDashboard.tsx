@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import './employer-dashboard.css'
-import { districts, stateNames, getStateLabel, getDistrictOptions, type StateName } from './locations'
+import { stateNames, getStateLabel, getDistrictOptions, type StateName } from './locations'
 
 type Props = { onBack: () => void }
 
