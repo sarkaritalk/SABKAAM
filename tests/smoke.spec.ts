@@ -116,7 +116,7 @@ test.describe('SABKAAM desktop and mobile smoke tests', () => {
   test('city and locality search suggests Delhi areas and accepts custom typed locations', async ({ page }) => {
     await page.goto('/')
     const area = page.getByLabel('शहर, इलाका या सेक्टर')
-    await area.fill('Uttam Nagar')
+    await area.fill('मेट्रो उत्तम नगर')
     await expect(page.getByRole('option', { name: /Uttam Nagar/ }).first()).toBeVisible()
     await page.getByRole('option', { name: /Uttam Nagar/ }).first().click()
     await expect(page.getByLabel('राज्य')).toHaveValue('Delhi')
