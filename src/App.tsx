@@ -81,18 +81,14 @@ function App() {
             <h1>काम की तलाश अब<br /><em>आसान होगी।</em></h1>
             <p>अपने आसपास नौकरी, रोज़गार और काम के मौके खोजें। छोटी दुकान से लेकर बड़ी कंपनी तक — सब एक जगह।</p>
           </div>
-          <div className="hero-art" aria-label="अलग-अलग पेशों के लोगों की तस्वीरें">
+          <div className="hero-art" aria-label="SABKAAM पर उपलब्ध अलग-अलग कामों के लोगों का AI चित्र">
             <div className="hero-city-glow" />
-            <div className="hero-people">
-              <figure className="person-shot person-student"><img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=520&q=85" alt="पढ़ाई पूरी कर काम खोजती युवती" /><figcaption>🎓 छात्र / फ्रेशर</figcaption></figure>
-              <figure className="person-shot person-office"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=520&q=85" alt="ऑफिस में काम करने वाला युवा" /><figcaption>💼 ऑफिस जॉब</figcaption></figure>
-              <figure className="person-shot person-worker"><img src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=520&q=85" alt="हेलमेट पहने निर्माण क्षेत्र का कर्मचारी" /><figcaption>🦺 टेक्निकल / साइट</figcaption></figure>
-              <figure className="person-shot person-care"><img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=520&q=85" alt="स्वास्थ्य सेवा में काम करने वाली महिला" /><figcaption>🩺 हेल्थकेयर</figcaption></figure>
-              <figure className="person-shot person-delivery"><img src="https://images.unsplash.com/photo-1526367790999-0150786686a2?auto=format&fit=crop&w=520&q=85" alt="डिलीवरी सेवा का कर्मचारी" /><figcaption>🛵 डिलीवरी</figcaption></figure>
-            </div>
+            <img className="hero-ai-collage" src="/images/sabkaam-workers-ai.webp" alt="दुकान, डिलीवरी, ऑफिस, हेल्थकेयर और निर्माण क्षेत्र में काम करने वाले लोगों का AI चित्र" />
             <span className="float-tag tag-one">🏪 दुकान / सेल्स</span>
-            <span className="float-tag tag-two">🍽️ होटल / रेस्टोरेंट</span>
+            <span className="float-tag tag-two">🩺 हेल्थकेयर</span>
+            <span className="float-tag tag-three">🦺 कंस्ट्रक्शन / टेक्निकल</span>
             <div className="hero-photo-caption"><b>हर हुनर के लिए एक मौका</b><small>आपका अगला कदम यहीं से</small></div>
+          </div>
           </div>
         </section>
 
