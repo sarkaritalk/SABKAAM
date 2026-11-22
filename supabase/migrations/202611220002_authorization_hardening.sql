@@ -44,10 +44,14 @@ grant execute on function public.is_sabkaam_admin() to authenticated;
 
 -- Staff can review operational records. Only admins can inspect audit logs
 -- or change account roles.
+-- Moderators do not need unrestricted access to every user's profile/phone.
+-- They can review applicant and reporter details from the relevant operational
+-- records; only admins receive broad profile-table access.
 drop policy if exists "staff can read all profiles" on public.profiles;
-create policy "staff can read all profiles"
+drop policy if exists "admins can read all profiles" on public.profiles;
+create policy "admins can read all profiles"
 on public.profiles for select to authenticated
-using (public.is_sabkaam_staff());
+using (public.is_sabkaam_admin());
 
 drop policy if exists "admins can update profiles" on public.profiles;
 create policy "admins can update profiles"
@@ -174,6 +178,12 @@ begin
         raise exception 'New employers must start pending verification';
       end if;
     else
+      -- Employer ownership is immutable through client updates, including
+      -- when a moderator happens to own an employer account.
+      if new.owner_id is distinct from old.owner_id then
+        raise exception 'Employer ownership cannot be changed through client updates';
+      end if;
+
       select (old.owner_id = (select auth.uid())) into v_is_job_owner;
 
       if new.verification_status is distinct from old.verification_status
