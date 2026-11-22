@@ -58,6 +58,12 @@ export function getDistrictCode(state: StateName, districtLabel: string, languag
 }
 
 
+
+export function getDistrictEnglishName(state: StateName, districtLabel: string, language: 'hi' | 'en' | 'hinglish' = 'hi'): string | undefined {
+  const index = getDistrictOptions(state, language).indexOf(districtLabel)
+  return index >= 0 ? locationData.states[state].districts[index]?.name : undefined
+}
+
 export function getStateNameByCode(code: number): StateName | undefined {
   return Object.entries(locationData.states).find(([, value]) => value.code === code)?.[0] as StateName | undefined
 }
