@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import './candidate-area.css'
 import { Localized, type Language } from './i18n'
-import { stateNames, getStateLabel, getDistrictOptions, type StateName } from './locations'
+import { stateNames, getStateLabel, getDistrictOptions, getStateCode, getDistrictCode, type StateName } from './locations'
+import { getMyApplications, getMyNotifications, updateMyProfile, type AuthSession } from './lib/backend'
 
 type Mode = 'मेरे आवेदन' | 'सूचनाएँ' | 'प्रोफ़ाइल'
 
@@ -10,7 +11,7 @@ const sampleApplications = [
   { role: 'रेस्टोरेंट में किचन हेल्पर', employer: 'डेमो फूड कॉर्नर', place: 'दरभंगा', status: 'डेमो: जवाब का इंतज़ार', tone: 'pending' },
 ]
 
-export default function CandidateArea({ mode, language }: { mode: Mode; language: Language }) {
+export default function CandidateArea({ mode, language, session, onSignIn }: { mode: Mode; language: Language; session: AuthSession | null; onSignIn: () => void }) {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [stateName, setStateName] = useState<StateName>('Bihar')
@@ -18,7 +19,20 @@ export default function CandidateArea({ mode, language }: { mode: Mode; language
   const [skills, setSkills] = useState('')
   const [workType, setWorkType] = useState('फुल टाइम')
   const [saved, setSaved] = useState(false)
+  const [profileMessage, setProfileMessage] = useState('')
+  const [realApplications, setRealApplications] = useState<Array<{ id: string; job_id: string; status: string; created_at: string; job_posts?: { title: string; district: string } | null }>>([])
+  const [realNotifications, setRealNotifications] = useState<Array<{ id: string; title: string; body: string; kind: string; read_at: string | null; created_at: string }>>([])
   useEffect(() => { const options = getDistrictOptions(stateName, language); if (!options.includes(district)) setDistrict(options[0] ?? '') }, [stateName, language])
+  useEffect(() => { if (!session) return; if (mode === 'मेरे आवेदन') getMyApplications(session.access_token).then(setRealApplications).catch(error => setProfileMessage(error instanceof Error ? error.message : 'आवेदन लोड नहीं हुए')); if (mode === 'सूचनाएँ') getMyNotifications(session.access_token).then(setRealNotifications).catch(error => setProfileMessage(error instanceof Error ? error.message : 'सूचनाएँ लोड नहीं हुईं')) }, [mode, session?.access_token])
+
+  async function saveProfile(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!session) { setSaved(true); setProfileMessage('यह डेमो प्रोफ़ाइल केवल इस स्क्रीन पर तैयार हुई। सेव करने के लिए लॉगिन करें।'); return }
+    try {
+      await updateMyProfile(session.access_token, session.user.id, { full_name: name, phone, district, state_code: String(getStateCode(stateName)), state_lgd_code: getStateCode(stateName), district_lgd_code: getDistrictCode(stateName, district, language) ?? 0, preferred_language: language })
+      setSaved(true); setProfileMessage('आपकी प्रोफ़ाइल सुरक्षित रूप से सेव हो गई।')
+    } catch (error) { setProfileMessage(error instanceof Error ? error.message : 'प्रोफ़ाइल सेव नहीं हुई।') }
+  }
 
   if (mode === 'मेरे आवेदन') {
     return <Localized language={language}><section className="candidate-area">
