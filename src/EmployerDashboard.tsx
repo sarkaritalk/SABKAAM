@@ -15,6 +15,7 @@ export default function EmployerDashboard({ onBack, language, onLanguageChange, 
   const [category, setCategory] = useState('दुकान और रिटेल')
   const [stateName, setStateName] = useState<StateName>('Bihar')
   const [district, setDistrict] = useState('मधुबनी')
+  const [townOrMarket, setTownOrMarket] = useState('')
   const [workType, setWorkType] = useState('फुल टाइम')
   const [salary, setSalary] = useState('')
   const [vacancies, setVacancies] = useState('1')
@@ -47,7 +48,7 @@ export default function EmployerDashboard({ onBack, language, onLanguageChange, 
       if (!employer?.id) throw new Error('Employer profile could not be created.')
       const numbers = salary.replace(/,/g, '').match(/[0-9]+/g)?.map(Number) ?? []
       const workTypes: Record<string, string> = { 'फुल टाइम': 'full_time', 'पार्ट टाइम': 'part_time', 'दैनिक मजदूरी': 'daily_wage', 'वर्क फ्रॉम होम': 'work_from_home', 'कॉन्ट्रैक्ट': 'contract' }
-      const draft = await createJobDraft(session.access_token, { employer_id: employer.id, employer_display_name: company, title, category, description: description || title, work_type: workTypes[workType] ?? 'full_time', state_lgd_code: getStateCode(stateName), district_lgd_code: getDistrictCode(stateName, district, language) ?? 0, district: getDistrictEnglishName(stateName, district, language) ?? district, salary_min: numbers[0], salary_max: numbers[1] ?? numbers[0], salary_period: workType === 'दैनिक मजदूरी' ? 'day' : 'month', vacancies: Number(vacancies) || 1 })
+      const draft = await createJobDraft(session.access_token, { employer_id: employer.id, employer_display_name: company, title, category, description: description || title, work_type: workTypes[workType] ?? 'full_time', state_lgd_code: getStateCode(stateName), district_lgd_code: getDistrictCode(stateName, district, language) ?? 0, district: getDistrictEnglishName(stateName, district, language) ?? district, town_or_market: townOrMarket.trim(), locality: townOrMarket.trim(), salary_min: numbers[0], salary_max: numbers[1] ?? numbers[0], salary_period: workType === 'दैनिक मजदूरी' ? 'day' : 'month', vacancies: Number(vacancies) || 1 })
       if (!draft[0]?.id) throw new Error('Job draft could not be created.')
       await submitJobForReview(session.access_token, draft[0].id)
       setSuccess(true)
@@ -84,6 +85,7 @@ export default function EmployerDashboard({ onBack, language, onLanguageChange, 
               <label>काम का प्रकार<select value={workType} onChange={e => setWorkType(e.target.value)}>{['फुल टाइम','पार्ट टाइम','दैनिक मजदूरी','वर्क फ्रॉम होम','कॉन्ट्रैक्ट'].map(x => <option key={x}>{x}</option>)}</select></label>
               <label>राज्य<select value={stateName} onChange={e => { const nextState = e.target.value as StateName; setStateName(nextState); setDistrict(getDistrictOptions(nextState, language)[0] ?? '') }}>{stateNames.map(state => <option key={state} value={state}>{getStateLabel(state, language)}</option>)}</select></label>
               <label>जिला<select value={district} onChange={e => setDistrict(e.target.value)}>{getDistrictOptions(stateName, language).map(x => <option key={x}>{x}</option>)}</select></label>
+              <label className="full-field">शहर / इलाका / सेक्टर / गली / मेट्रो / PIN *<input required value={townOrMarket} onChange={e => setTownOrMarket(e.target.value)} placeholder="जैसे: द्वारका सेक्टर 12, उत्तम नगर, लेबर चौक, MIDC या गाँव का नाम" /><small>सही इलाका लिखें ताकि उम्मीदवार उसी जगह की नौकरी खोज सकें।</small></label>
               <label>मासिक वेतन / मजदूरी<input value={salary} onChange={e => setSalary(e.target.value)} placeholder="जैसे: ₹8,000–10,000" /></label>
               <label>कुल पद<input type="number" min="1" max="500" value={vacancies} onChange={e => setVacancies(e.target.value)} /></label>
               <label className="full-field">काम और योग्यता का विवरण<textarea rows={4} value={description} onChange={e => setDescription(e.target.value)} placeholder="काम क्या होगा? अनुभव या योग्यता चाहिए? खाना/रहना मिलेगा? काम के घंटे क्या होंगे?" /></label>
