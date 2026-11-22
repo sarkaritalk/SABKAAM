@@ -100,11 +100,11 @@ test.describe('SABKAAM desktop and mobile smoke tests', () => {
     await expect(page.getByText(/डेमो आवेदन तैयार हुआ/)).toBeVisible()
   })
 
-  test('safety report form can be completed and is labelled as a demo', async ({ page }) => {
+  test('safety report form supports demo fallback without backend credentials', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('button', { name: /सुरक्षा और शिकायत/ }).click()
     await page.getByLabel('क्या हुआ?').fill('यह ब्राउज़र परीक्षण की नमूना शिकायत है।')
-    await page.getByRole('button', { name: /डेमो शिकायत तैयार करें/ }).click()
+    await page.getByRole('button', { name: /शिकायत भेजें/ }).click()
     await expect(page.getByText(/डेमो शिकायत तैयार हुई/)).toBeVisible()
   })
 })
