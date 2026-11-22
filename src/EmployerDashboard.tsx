@@ -93,6 +93,14 @@ export default function EmployerDashboard({ onBack, language, onLanguageChange, 
           </form>
           <aside className="employer-aside"><div className="aside-card"><span className="aside-icon">✓</span><h3>अच्छी नौकरी पोस्ट कैसी हो?</h3><ul><li>वेतन साफ-साफ लिखें</li><li>काम के घंटे बताएँ</li><li>सही जगह और संपर्क दें</li><li>जरूरी योग्यता ही माँगें</li><li>कोई फीस या सिक्योरिटी जमा न माँगें</li></ul></div><div className="aside-note"><strong>उम्मीदवार का भरोसा जरूरी है</strong><p>SABKAAM पर संदिग्ध पोस्ट की रिपोर्ट और नियोक्ता सत्यापन की सुविधा उपलब्ध है।</p></div></aside>
         </div>
+        {session?.user.user_metadata?.account_type === 'employer' && backendConfigured && <section className="employer-applicants">
+          <div className="applicants-heading"><div><span className="employer-kicker">CANDIDATE PIPELINE</span><h2>आपके पास आए आवेदन</h2><p>उम्मीदवारों की जानकारी केवल आपके employer खाते में दिखाई जाती है।</p></div><span className="applicant-count">{applications.length} आवेदन</span></div>
+          {applicationsError && <p className="applicant-error" role="alert">{applicationsError}</p>}
+          {applications.length ? <div className="applicant-list">{applications.map(application => <article className="applicant-card" key={application.id}>
+            <div className="applicant-details"><strong>{application.full_name}</strong><span>{application.job_posts?.title || 'आपकी नौकरी'} · {new Date(application.created_at).toLocaleDateString()}</span><a href={`tel:${application.phone}`}>{application.phone}</a>{application.message && <p>{application.message}</p>}<small>Status: {application.status}</small></div>
+            <div className="applicant-actions"><button disabled={applicationBusy === application.id} onClick={() => void changeApplicationStatus(application.id, 'shortlisted')}>Shortlist</button><button disabled={applicationBusy === application.id} onClick={() => void changeApplicationStatus(application.id, 'interview')}>Interview</button><button className="reject" disabled={applicationBusy === application.id} onClick={() => void changeApplicationStatus(application.id, 'rejected')}>Reject</button></div>
+          </article>)}</div> : <p className="applicant-empty">अभी आपकी नौकरियों पर कोई आवेदन नहीं आया है।</p>}
+        </section>}
       </main>
     </div></Localized>
   )
