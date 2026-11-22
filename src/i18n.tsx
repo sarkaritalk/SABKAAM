@@ -139,6 +139,12 @@ const copy: Record<string, [string, string]> = {
   'English': ['English', 'English'],
   'Hinglish': ['Hinglish', 'Hinglish'],
 
+  'आपके पास आए आवेदन': ['Applications received', 'Aapke paas aaye applications'],
+  'उम्मीदवारों की जानकारी केवल आपके employer खाते में दिखाई जाती है।': ['Candidate details are visible only to your employer account.', 'Candidates ki details sirf aapke employer account mein dikhengi.'],
+  'अभी आपकी नौकरियों पर कोई आवेदन नहीं आया है।': ['No applications have arrived for your jobs yet.', 'Abhi aapki jobs par koi application nahi aaya.'],
+  'आपकी नौकरी': ['Your job', 'Aapki job'],
+  'आवेदन समीक्षा': ['Application review', 'Application review'],
+
   'नौकरी का विवरण': ['Job details', 'Job details'],
   'यह प्रकाशित नौकरी है। आवेदन भेजने के लिए candidate खाते से लॉगिन करें।': ['This is a published job. Sign in with a candidate account to apply.', 'Ye published job hai. Apply karne ke liye candidate account se login karein.'],
   'आपका आवेदन सफलतापूर्वक भेजा गया।': ['Your application was submitted successfully.', 'Aapka application successfully send ho gaya.'],
