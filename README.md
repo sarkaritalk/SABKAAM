@@ -61,7 +61,7 @@ Retail and shops, hotels and restaurants, hospitals and clinics, factories, offi
 
 ## Development status
 
-The UI includes a single persistent Hindi/English/Hinglish selector, India-wide dependent State/UT and district selectors, and browser voice search where supported. The Supabase schema, LGD code migration, and browser-safe data/auth adapter are included. Demo jobs remain fictional when Supabase is not configured. Before launch, configure staging/production Supabase projects, Auth/SMTP, provider secrets, admin/moderation workflows, HTTPS hosting, monitoring, and backups. See `docs/INDIA_LOCATION_DATA.md` and `docs/BACKEND_CONNECTION_AND_LAUNCH.md`.
+The UI includes a single persistent Hindi/English/Hinglish selector, India-wide dependent State/UT and district selectors, and browser voice search where supported. Candidate/employer email account flows, Supabase schema and LGD code migrations, authenticated candidate/employer actions, and a staff moderation dashboard are included. Demo jobs remain fictional when Supabase is not configured. Before launch, configure staging/production Supabase projects, Auth/SMTP, provider secrets, admin/moderation workflows, HTTPS hosting, monitoring, and backups. See `docs/INDIA_LOCATION_DATA.md` and `docs/BACKEND_CONNECTION_AND_LAUNCH.md`.
 
 ## Brand
 
