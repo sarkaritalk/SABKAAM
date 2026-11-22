@@ -7,11 +7,12 @@ type Props = {
   language: Language
   onClose: () => void
   onSuccess: (session: AuthSession) => void
+  defaultAccountType?: 'candidate' | 'employer'
 }
 
-export default function AuthPanel({ language, onClose, onSuccess }: Props) {
+export default function AuthPanel({ language, onClose, onSuccess, defaultAccountType = 'candidate' }: Props) {
   const [mode, setMode] = useState<'signin' | 'signup'>('signin')
-  const [accountType, setAccountType] = useState<'candidate' | 'employer'>('candidate')
+  const [accountType, setAccountType] = useState<'candidate' | 'employer'>(defaultAccountType)
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')

@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
 import './job-apply.css'
-import './premium-theme.css'
 import CandidateArea from './CandidateArea'
 import SafetyCenter from './safety-center'
 import EmployerDashboard from './EmployerDashboard'
@@ -8,11 +7,12 @@ import AuthPanel from './AuthPanel'
 import AdminDashboard from './AdminDashboard'
 import { LanguageSelect, Localized, type Language } from './i18n'
 
-import { stateNames, getStateLabel, getDistrictOptions, getStateCode, getDistrictCode, getDistrictNameByCode, type StateName } from './locations'
+import { stateNames, getStateLabel, getDistrictOptions, getStateCode, getDistrictCode, getDistrictNameByCode, getDistrictEnglishName, type StateName } from './locations'
+import { getWorkAreaSuggestions, normalizeWorkAreaQuery, type WorkAreaSuggestion } from './work-areas'
 import { backendConfigured, listPublishedJobs, readAuthSession, clearAuthSession, submitApplication, getMyProfile, type AuthSession, type PublishedJob } from './lib/backend'
 
 type Category = { name: string; icon: string; count: string }
-type JobListing = { id?: string; title: string; state: string; district?: string; company: string; place: string; pay: string; type: string; category: string; description?: string; isDemo?: boolean }
+type JobListing = { id?: string; title: string; state: string; district?: string; locality?: string; company: string; place: string; pay: string; type: string; category: string; description?: string; isDemo?: boolean }
 type SpeechRecognitionLike = { lang: string; interimResults: boolean; maxAlternatives: number; onresult: ((event: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null; onerror: (() => void) | null; onend: (() => void) | null; start: () => void }
 
 const categories: Category[] = [
@@ -46,6 +46,9 @@ function App() {
   const [language, setLanguage] = useState<Language>(() => { const saved = localStorage.getItem('sabkaam-language'); return saved === 'en' || saved === 'hinglish' ? saved : 'hi' })
   const [stateName, setStateName] = useState<StateName>('Bihar')
   const [district, setDistrict] = useState('सभी जिले')
+  const [areaQuery, setAreaQuery] = useState('')
+  const [appliedAreaQuery, setAppliedAreaQuery] = useState('')
+  const [showAreaSuggestions, setShowAreaSuggestions] = useState(false)
   const [voiceStatus, setVoiceStatus] = useState<'idle' | 'listening' | 'unsupported' | 'error'>('idle')
   const [query, setQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('')
@@ -59,14 +62,46 @@ function App() {
   const [applicationSent, setApplicationSent] = useState(false)
   const [showSafety, setShowSafety] = useState(false)
   const [showEmployer, setShowEmployer] = useState(false)
+  const [showBrandIntro, setShowBrandIntro] = useState(true)
+  const [showRolePicker, setShowRolePicker] = useState(false)
+  const [selectedRole, setSelectedRole] = useState<'candidate' | 'employer'>(() => {
+    const saved = localStorage.getItem('sabkaam-selected-role')
+    return saved === 'employer' ? 'employer' : 'candidate'
+  })
+
+  useEffect(() => {
+    const introTimer = window.setTimeout(() => {
+      setShowBrandIntro(false)
+      setShowRolePicker(true)
+    }, 1450)
+    return () => window.clearTimeout(introTimer)
+  }, [])
+
+  function chooseRole(role: 'candidate' | 'employer') {
+    localStorage.setItem('sabkaam-selected-role', role)
+    setSelectedRole(role)
+    setShowRolePicker(false)
+    setShowEmployer(role === 'employer')
+    setActiveTab('होम')
+  }
+
+  function openRolePicker() {
+    setShowEmployer(false)
+    setShowRolePicker(true)
+  }
+
+  const preferredDistrict = district === 'सभी जिले' ? undefined : getDistrictEnglishName(stateName, district, language)
+  const areaSuggestions = useMemo(() => getWorkAreaSuggestions(areaQuery, stateName, preferredDistrict, 8), [areaQuery, stateName, preferredDistrict])
 
   const visibleJobs = useMemo(() => (backendConfigured ? liveJobs : demoJobs).filter((job) => {
     const matchesQuery = !query || `${job.title} ${job.company} ${job.place} ${job.category}`.toLowerCase().includes(query.toLowerCase())
     const matchesCategory = !selectedCategory || job.category === selectedCategory
     const matchesState = job.state === stateName
     const matchesLocation = district === 'सभी जिले' || (job.district || job.place) === district
-    return matchesQuery && matchesCategory && matchesState && matchesLocation
-  }), [query, selectedCategory, stateName, district, liveJobs])
+    const normalizedArea = normalizeWorkAreaQuery(appliedAreaQuery)
+    const matchesArea = !normalizedArea || normalizeWorkAreaQuery([job.place, job.locality, job.district].filter(Boolean).join(' ')).includes(normalizedArea)
+    return matchesQuery && matchesCategory && matchesState && matchesLocation && matchesArea
+  }), [query, selectedCategory, stateName, district, appliedAreaQuery, liveJobs])
 
   useEffect(() => { if (!session) { setAccountRole(''); return } getMyProfile(session.access_token, session.user.id).then(profile => setAccountRole(profile?.role ?? '')).catch(() => setAccountRole('')) }, [session?.access_token])
   useEffect(() => {
@@ -74,7 +109,7 @@ function App() {
     let cancelled = false
     setJobsLoading(true)
     setJobsError('')
-    listPublishedJobs({ stateLgdCode: getStateCode(stateName), districtLgdCode: district === 'सभी जिले' ? undefined : getDistrictCode(stateName, district, language) })
+    listPublishedJobs({ stateLgdCode: getStateCode(stateName), districtLgdCode: district === 'सभी जिले' ? undefined : getDistrictCode(stateName, district, language), townOrMarket: appliedAreaQuery || undefined })
       .then((rows: PublishedJob[]) => {
         if (cancelled) return
         setLiveJobs(rows.map((job) => {
@@ -82,19 +117,49 @@ function App() {
           const salary = job.salary_min != null && job.salary_max != null ? '₹' + number.format(job.salary_min) + '–₹' + number.format(job.salary_max) + (job.salary_period ? ' / ' + job.salary_period : '') : job.salary_max != null ? 'Up to ₹' + number.format(job.salary_max) : 'वेतन विवरण उपलब्ध नहीं'
           const workTypes: Record<string, string> = { full_time: 'फुल टाइम', part_time: 'पार्ट टाइम', daily_wage: 'दैनिक मजदूरी', contract: 'कॉन्ट्रैक्ट', work_from_home: 'वर्क फ्रॉम होम', freelance: 'फ्रीलांस', internship: 'इंटर्नशिप' }
           const districtLabel = job.district_lgd_code ? getDistrictNameByCode(stateName, job.district_lgd_code, language) || job.district : job.district
-          return { id: job.id, title: job.title, state: stateName, district: districtLabel, company: job.employer_display_name || 'नियोक्ता विवरण', place: job.town_or_market || districtLabel, pay: salary, type: workTypes[job.work_type] || job.work_type, category: job.category, description: job.description, isDemo: false }
+          return { id: job.id, title: job.title, state: stateName, district: districtLabel, company: job.employer_display_name || 'नियोक्ता विवरण', place: job.town_or_market || job.locality || districtLabel, locality: job.locality || undefined, pay: salary, type: workTypes[job.work_type] || job.work_type, category: job.category, description: job.description, isDemo: false }
         }))
       })
       .catch((error: unknown) => { if (!cancelled) setJobsError(error instanceof Error ? error.message : 'Jobs could not be loaded') })
       .finally(() => { if (!cancelled) setJobsLoading(false) })
     return () => { cancelled = true }
-  }, [stateName, district, language])
+  }, [stateName, district, language, appliedAreaQuery])
 
   function changeLanguage(next: Language) { setLanguage(next); localStorage.setItem('sabkaam-language', next) }
 
+  if (showBrandIntro) return <div className="brand-intro-screen" role="status" aria-label="SABKAAM खुल रहा है">
+    <div className="brand-intro-glow brand-intro-glow-one" /><div className="brand-intro-glow brand-intro-glow-two" />
+    <div className="brand-intro-orbit brand-intro-orbit-one" /><div className="brand-intro-orbit brand-intro-orbit-two" />
+    <div className="brand-intro-lockup"><img src={`${import.meta.env.BASE_URL}sabkaam-mark.svg`} alt="" /><span><strong>SABKAAM</strong><small>हर काम, हर इंसान के लिए।</small></span></div>
+    <div className="brand-intro-progress"><span /></div>
+    <p>काम के नए अवसर खुल रहे हैं</p>
+    <small className="brand-intro-foot">JOBS · WORK · OPPORTUNITIES</small>
+  </div>
+
+  if (showRolePicker) return <div className="role-gateway">
+    <div className="gateway-glow gateway-glow-one" /><div className="gateway-glow gateway-glow-two" />
+    <header className="gateway-header"><div className="gateway-brand"><img src="/sabkaam-mark.svg" alt="" /><span><strong>SABKAAM</strong><small>हर काम, हर इंसान के लिए।</small></span></div><LanguageSelect language={language} onChange={changeLanguage} /></header>
+    <main className="gateway-content">
+      <span className="gateway-kicker"><i /> YOUR NEXT STEP STARTS HERE</span>
+      <h1>आप SABKAAM पर<br /><em>क्या करना चाहते हैं?</em></h1>
+      <p className="gateway-subtitle">अपनी ज़रूरत के अनुसार आगे बढ़ें। सही अनुभव आपका इंतज़ार कर रहा है।</p>
+      <div className="role-choice-grid">
+        <button className="role-choice role-choice-candidate" type="button" onClick={() => chooseRole('candidate')} aria-label="मुझे काम / नौकरी चाहिए">
+          <span className="role-choice-icon">⌕</span><span className="role-choice-label">FOR JOB SEEKERS</span><strong>मुझे काम / नौकरी चाहिए</strong><small>अपने आसपास नौकरी, रोज़गार और नए अवसर खोजें।</small><span className="role-choice-action">नौकरी खोजें <b>↗</b></span>
+        </button>
+        <button className="role-choice role-choice-employer" type="button" onClick={() => chooseRole('employer')} aria-label="मुझे कामगार / कर्मचारी चाहिए">
+          <span className="role-choice-icon">✦</span><span className="role-choice-label">FOR EMPLOYERS</span><strong>मुझे कामगार / कर्मचारी चाहिए</strong><small>अपनी टीम के लिए सही लोगों को खोजें और भर्ती करें।</small><span className="role-choice-action">हायरिंग शुरू करें <b>↗</b></span>
+        </button>
+      </div>
+      <div className="gateway-reassurance"><span>✓</span> आप बाद में भी अपना रोल बदल सकते हैं</div>
+      <div className="gateway-last-choice">आपकी पिछली पसंद: <strong>{selectedRole === 'employer' ? 'कामगार / कर्मचारी चाहिए' : 'काम / नौकरी चाहिए'}</strong></div>
+    </main>
+    <footer className="gateway-footer"><span>© SABKAAM</span><span>हर काम, हर इंसान के लिए।</span><span>MADE FOR INDIA</span></footer>
+  </div>
+
   if (showAdmin && session) return <AdminDashboard session={session} language={language} onBack={() => setShowAdmin(false)} onLanguageChange={changeLanguage} />
 
-  if (showEmployer) return <><EmployerDashboard onBack={() => setShowEmployer(false)} language={language} onLanguageChange={changeLanguage} session={session} onSignIn={() => setShowAuth(true)} onSignOut={() => { clearAuthSession(); setSession(null) }} />{showAuth && <AuthPanel language={language} onClose={() => setShowAuth(false)} onSuccess={(nextSession) => { setSession(nextSession); setShowAuth(false) }} />}</>
+  if (showEmployer) return <><EmployerDashboard onBack={openRolePicker} language={language} onLanguageChange={changeLanguage} session={session} onSignIn={() => setShowAuth(true)} onSignOut={() => { clearAuthSession(); setSession(null) }} />{showAuth && <AuthPanel language={language} defaultAccountType={selectedRole} onClose={() => setShowAuth(false)} onSuccess={(nextSession) => { setSession(nextSession); setShowAuth(false) }} />}</>
 
 
   function startVoiceSearch() {
@@ -118,9 +183,31 @@ function App() {
   function changeState(next: StateName) {
     setStateName(next)
     setDistrict('सभी जिले')
+    setAreaQuery('')
+    setAppliedAreaQuery('')
+  }
+
+  function chooseWorkArea(suggestion: WorkAreaSuggestion) {
+    setStateName(suggestion.state)
+    const localizedDistrict = suggestion.district === '*' ? 'सभी जिले' : getDistrictOptions(suggestion.state, language).find(label => getDistrictEnglishName(suggestion.state, label, language) === suggestion.district) ?? suggestion.district
+    setDistrict(localizedDistrict)
+    setAreaQuery(suggestion.area)
+    setShowAreaSuggestions(false)
+    setAppliedAreaQuery(suggestion.area === suggestion.city ? '' : suggestion.area)
   }
 
   function searchJobs() {
+    const normalized = normalizeWorkAreaQuery(areaQuery)
+    const exactCity = normalized ? areaSuggestions.find(item => normalizeWorkAreaQuery(item.area) === normalizeWorkAreaQuery(item.city)) : undefined
+    if (exactCity) {
+      setStateName(exactCity.state)
+      const localizedDistrict = exactCity.district === '*' ? 'सभी जिले' : getDistrictOptions(exactCity.state, language).find(label => getDistrictEnglishName(exactCity.state, label, language) === exactCity.district) ?? exactCity.district
+      setDistrict(localizedDistrict)
+      setAppliedAreaQuery('')
+    } else {
+      setAppliedAreaQuery(normalized)
+    }
+    setShowAreaSuggestions(false)
     setShowDemo(true)
     setActiveTab('होम')
   }
@@ -129,10 +216,10 @@ function App() {
     <Localized language={language}><div className="app-shell" data-active-tab={activeTab} data-safety-open={showSafety}>
       <header className="topbar">
         <a className="brand" href="#" aria-label="SABKAAM होम">
-          <span className="brand-mark">स</span>
+          <img className="brand-logo-image" src="/sabkaam-mark.svg" alt="" />
           <span><strong>SABKAAM</strong><small>हर काम, हर इंसान के लिए।</small></span>
         </a>
-        <div className="topbar-actions">{(accountRole === "moderator" || accountRole === "admin") && <button className="account-link" onClick={() => setShowAdmin(true)}>Admin</button>}{session ? <button className="account-link" onClick={() => { clearAuthSession(); setSession(null) }}>लॉगआउट</button> : backendConfigured ? <button className="account-link" onClick={() => setShowAuth(true)}>लॉगिन</button> : <span className="account-link">Preview mode</span>}<LanguageSelect language={language} onChange={changeLanguage} /><button className="safety-link" onClick={() => setShowSafety(!showSafety)}>{showSafety ? '← वापस' : '🛡️ सुरक्षा और शिकायत'}</button><button className="employer-link" onClick={() => setShowEmployer(true)}>नौकरी देने वाले? <span>यहाँ जाएँ ↗</span></button></div>
+        <div className="topbar-actions">{(accountRole === "moderator" || accountRole === "admin") && <button className="account-link" onClick={() => setShowAdmin(true)}>Admin</button>}{session ? <button className="account-link" onClick={() => { clearAuthSession(); setSession(null) }}>लॉगआउट</button> : backendConfigured ? <button className="account-link" onClick={() => setShowAuth(true)}>लॉगिन</button> : <span className="account-link">Preview mode</span>}<LanguageSelect language={language} onChange={changeLanguage} /><button className="safety-link" onClick={() => setShowSafety(!showSafety)}>{showSafety ? '← वापस' : '🛡️ सुरक्षा और शिकायत'}</button><button className="employer-link" onClick={openRolePicker}>रोल बदलें <span>↗</span></button></div>
       </header>
 
       <main>{showSafety && <SafetyCenter language={language} session={session} onSignIn={() => setShowAuth(true)} />}
@@ -159,6 +246,13 @@ function App() {
             <label className="select-field"><span>राज्य</span><select value={stateName} onChange={(event) => changeState(event.target.value as StateName)}>{stateNames.map((state) => <option key={state} value={state}>{getStateLabel(state, language)}</option>)}</select></label>
             <label className="select-field"><span>जिला</span><select value={district} onChange={(event) => setDistrict(event.target.value)}><option value="सभी जिले">सभी जिले</option>{getDistrictOptions(stateName, language).map((item) => <option key={item}>{item}</option>)}</select></label>
             <button className="search-button" onClick={searchJobs}>काम खोजें <span>→</span></button>
+          </div>
+          <div className="area-search-wrap">
+            <label className="area-query-field"><span aria-hidden="true">⌖</span><input aria-label="शहर, इलाका या सेक्टर" value={areaQuery} onFocus={() => setShowAreaSuggestions(true)} onChange={event => { setAreaQuery(event.target.value); setShowAreaSuggestions(true) }} onKeyDown={event => { if (event.key === "Enter") { event.preventDefault(); searchJobs() } if (event.key === "Escape") setShowAreaSuggestions(false) }} placeholder="शहर, कॉलोनी, सेक्टर, ब्लॉक, फेज़, मेट्रो, चौक या PIN कोड लिखें..." /><button type="button" aria-label="इलाका खोजें" onClick={searchJobs}>⌕</button></label>
+            {showAreaSuggestions && <div className="area-suggestions" role="listbox" aria-label="इलाके के सुझाव">
+              {areaSuggestions.length ? areaSuggestions.map((suggestion, index) => <button type="button" role="option" aria-selected="false" key={suggestion.state + suggestion.district + suggestion.city + suggestion.area + index} onClick={() => chooseWorkArea(suggestion)}><span>📍</span><strong>{suggestion.area}</strong><small>{suggestion.city} · {suggestion.district === '*' ? 'पूरी दिल्ली NCR' : suggestion.district}, {getStateLabel(suggestion.state, language)}</small></button>) : <p>यह इलाका सूची में नहीं है। अपना लिखा हुआ नाम वैसे ही खोज सकते हैं।</p>}
+              <div className="area-suggestion-hint">सूची के बाहर का इलाका भी लिखकर खोजें</div>
+            </div>}
           </div>
           <div className="search-foot"><span>⌖ {getStateLabel(stateName)} में अवसर खोजें</span><button onClick={startVoiceSearch} disabled={voiceStatus === 'listening'}>🎙️ {voiceStatus === 'listening' ? 'सुन रहा हूँ...' : 'बोलकर खोजें'} <small>{voiceStatus === 'unsupported' ? 'इस ब्राउज़र में उपलब्ध नहीं' : voiceStatus === 'error' ? 'माइक अनुमति जाँचें' : voiceStatus === 'listening' ? 'बोलिए' : 'हिंदी / English'}</small></button></div>
         </section>
@@ -234,7 +328,7 @@ function App() {
         </>}
       </main>
 
-      {showAuth && <AuthPanel language={language} onClose={() => setShowAuth(false)} onSuccess={(nextSession) => { setSession(nextSession); setShowAuth(false) }} />}
+      {showAuth && <AuthPanel language={language} defaultAccountType={selectedRole} onClose={() => setShowAuth(false)} onSuccess={(nextSession) => { setSession(nextSession); setShowAuth(false) }} />}
       <nav className="bottom-nav" aria-label="मुख्य नेविगेशन">
         {['होम', 'AI आवेदक', 'मेरे आवेदन', 'सूचनाएँ', 'प्रोफ़ाइल'].map((tab, index) => <button key={tab} className={activeTab === tab ? 'active' : ''} onClick={() => { setActiveTab(tab); setSelectedCategoryInfo(null) }}><span>{['⌂', '✦', '▤', '♧', '◉'][index]}</span>{tab}</button>)}
       </nav>

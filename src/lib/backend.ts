@@ -57,6 +57,7 @@ export type PublishedJob = {
   district: string
   district_lgd_code: number | null
   town_or_market: string | null
+  locality: string | null
   salary_min: number | null
   salary_max: number | null
   salary_period: string | null
@@ -66,15 +67,19 @@ export type PublishedJob = {
   expires_at: string | null
 }
 
-export async function listPublishedJobs(filters: { stateLgdCode?: number; districtLgdCode?: number } = {}) {
+export async function listPublishedJobs(filters: { stateLgdCode?: number; districtLgdCode?: number; townOrMarket?: string } = {}) {
   const params = new URLSearchParams({
-    select: 'id,title,employer_display_name,category,description,work_type,state_code,state_lgd_code,district,district_lgd_code,town_or_market,salary_min,salary_max,salary_period,vacancies,food_or_stay,created_at,expires_at',
+    select: 'id,title,employer_display_name,category,description,work_type,state_code,state_lgd_code,district,district_lgd_code,town_or_market,locality,salary_min,salary_max,salary_period,vacancies,food_or_stay,created_at,expires_at',
     status: 'eq.published',
     order: 'created_at.desc',
     limit: '100',
   })
   if (filters.stateLgdCode) params.set('state_lgd_code', `eq.${filters.stateLgdCode}`)
   if (filters.districtLgdCode) params.set('district_lgd_code', `eq.${filters.districtLgdCode}`)
+  if (filters.townOrMarket?.trim()) {
+    const area = filters.townOrMarket.trim().replace(/[,*()]/g, ' ')
+    params.set('and', `(or(town_or_market.ilike.*${area}*,locality.ilike.*${area}*))`)
+  }
   params.set('or', `(expires_at.is.null,expires_at.gt.${new Date().toISOString()})`)
   return request<PublishedJob[]>(`/rest/v1/job_posts?${params.toString()}`)
 }
@@ -167,7 +172,7 @@ export async function submitApplication(accessToken: string, payload: {
 
 export async function createJobDraft(accessToken: string, payload: {
   employer_id: string; employer_display_name: string; title: string; category: string; description: string; work_type: string
-  state_lgd_code: number; district_lgd_code: number; district: string; town_or_market?: string
+  state_lgd_code: number; district_lgd_code: number; district: string; town_or_market?: string; locality?: string
   salary_min?: number; salary_max?: number; salary_period?: string; vacancies: number
 }) {
   return request<Array<{ id: string; status: string }>>('/rest/v1/job_posts', {
