@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import './safety-center.css'
+import { Localized, type Language } from './i18n'
 import { stateNames, getStateLabel, getDistrictOptions, type StateName } from './locations'
 
 const warningSigns = [
@@ -9,7 +10,7 @@ const warningSigns = [
   'बिना पुष्टि के तुरंत पैसे भेजने का दबाव बनाना',
 ]
 
-export default function SafetyCenter() {
+export default function SafetyCenter({ language }: { language: Language }) {
   const [reason, setReason] = useState('नौकरी के नाम पर पैसे माँगे')
   const [details, setDetails] = useState('')
   const [contact, setContact] = useState('')
@@ -22,7 +23,7 @@ export default function SafetyCenter() {
   const [businessDistrict, setBusinessDistrict] = useState('मधुबनी')
   const [businessAddress, setBusinessAddress] = useState('')
 
-  return <section className="safety-center">
+  return <Localized language={language}><section className="safety-center">
     <div className="safety-heading">
       <span className="section-kicker">SABKAAM TRUST & SAFETY</span>
       <h1>सुरक्षित तरीके से काम खोजें</h1>
@@ -69,5 +70,5 @@ export default function SafetyCenter() {
       </form>}
     </section>
     <p className="safety-footnote">जरूरी: तत्काल खतरे या वित्तीय धोखाधड़ी की स्थिति में स्थानीय पुलिस / साइबर क्राइम सहायता से संपर्क करें। SABKAAM का यह प्रोटोटाइप आपातकालीन सेवा नहीं है।</p>
-  </section>
+  </section></Localized>
 }
