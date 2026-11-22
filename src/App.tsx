@@ -89,7 +89,6 @@ function App() {
             <span className="float-tag tag-three">🦺 कंस्ट्रक्शन / टेक्निकल</span>
             <div className="hero-photo-caption"><b>हर हुनर के लिए एक मौका</b><small>आपका अगला कदम यहीं से</small></div>
           </div>
-          </div>
         </section>
 
         <section className="search-panel" aria-label="काम खोजें">
