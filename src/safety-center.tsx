@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './safety-center.css'
 import { Localized, type Language } from './i18n'
 import { stateNames, getStateLabel, getDistrictOptions, type StateName } from './locations'
@@ -22,6 +22,7 @@ export default function SafetyCenter({ language }: { language: Language }) {
   const [businessState, setBusinessState] = useState<StateName>('Bihar')
   const [businessDistrict, setBusinessDistrict] = useState('मधुबनी')
   const [businessAddress, setBusinessAddress] = useState('')
+  useEffect(() => { const options = getDistrictOptions(businessState, language); if (!options.includes(businessDistrict)) setBusinessDistrict(options[0] ?? '') }, [businessState, language])
 
   return <Localized language={language}><section className="safety-center">
     <div className="safety-heading">
@@ -49,12 +50,12 @@ export default function SafetyCenter({ language }: { language: Language }) {
     <div className="safety-status"><strong>नियोक्ता सत्यापन</strong><span>नियोक्ता की पहचान और व्यवसाय की जानकारी जाँचने के बाद ही सत्यापित बैज दिया जाना चाहिए। नीचे अनुरोध प्रक्रिया का प्रोटोटाइप है; अभी कोई बैज जारी नहीं होता।</span></div>
     <section className="verification-card">
       <div><span className="section-kicker">EMPLOYER VERIFICATION</span><h2>नियोक्ता सत्यापन के लिए अनुरोध</h2><p>व्यवसाय की बुनियादी जानकारी दें। इस डेमो में कोई पहचान-पत्र, आधार, PAN, बैंक विवरण या दस्तावेज़ अपलोड न करें।</p></div>
-      {verificationSent ? <div className="verification-pending" role="status"><strong>अनुरोध का डेमो तैयार है · स्थिति: समीक्षा बाकी</strong><span>{businessName} · {businessDistrict}, {getStateLabel(businessState)}</span><small>यह अनुरोध सर्वर पर नहीं भेजा गया है। वास्तविक जाँच और सत्यापन बैज अभी सक्रिय नहीं हैं।</small><button type="button" onClick={() => setVerificationSent(false)}>जानकारी संपादित करें</button></div> : <form onSubmit={event => { event.preventDefault(); setVerificationSent(true) }}>
+      {verificationSent ? <div className="verification-pending" role="status"><strong>अनुरोध का डेमो तैयार है · स्थिति: समीक्षा बाकी</strong><span>{businessName} · {businessDistrict}, {getStateLabel(businessState, language)}</span><small>यह अनुरोध सर्वर पर नहीं भेजा गया है। वास्तविक जाँच और सत्यापन बैज अभी सक्रिय नहीं हैं।</small><button type="button" onClick={() => setVerificationSent(false)}>जानकारी संपादित करें</button></div> : <form onSubmit={event => { event.preventDefault(); setVerificationSent(true) }}>
         <label>व्यवसाय / कंपनी का नाम<input required value={businessName} onChange={event => setBusinessName(event.target.value)} placeholder="दुकान या कंपनी का नाम" /></label>
         <label>व्यवसाय का प्रकार<select value={businessType} onChange={event => setBusinessType(event.target.value)}><option>दुकान / रिटेल</option><option>होटल / रेस्टोरेंट</option><option>अस्पताल / क्लिनिक</option><option>फैक्ट्री / कंपनी</option><option>ऑफिस / अन्य</option></select></label>
         <label>संपर्क मोबाइल नंबर<input required type="tel" inputMode="numeric" pattern="[0-9]{10}" maxLength={10} value={businessPhone} onChange={event => setBusinessPhone(event.target.value)} placeholder="10 अंकों का नंबर" /></label>
-        <label>राज्य<select value={businessState} onChange={event => { const nextState = event.target.value as StateName; setBusinessState(nextState); setBusinessDistrict(getDistrictOptions(nextState)[0] ?? '') }}>{stateNames.map(state => <option key={state} value={state}>{getStateLabel(state)}</option>)}</select></label>
-        <label>जिला<select required value={businessDistrict} onChange={event => setBusinessDistrict(event.target.value)}>{getDistrictOptions(businessState).map(district => <option key={district}>{district}</option>)}</select></label>
+        <label>राज्य<select value={businessState} onChange={event => { const nextState = event.target.value as StateName; setBusinessState(nextState); setBusinessDistrict(getDistrictOptions(nextState, language)[0] ?? '') }}>{stateNames.map(state => <option key={state} value={state}>{getStateLabel(state)}</option>)}</select></label>
+        <label>जिला<select required value={businessDistrict} onChange={event => setBusinessDistrict(event.target.value)}>{getDistrictOptions(businessState, language).map(district => <option key={district}>{district}</option>)}</select></label>
         <label className="verification-address">व्यवसाय का पता<textarea required rows={2} value={businessAddress} onChange={event => setBusinessAddress(event.target.value)} placeholder="बाजार / मोहल्ला और पूरा पता" /></label>
         <button type="submit">डेमो सत्यापन अनुरोध बनाएँ →</button>
       </form>}
