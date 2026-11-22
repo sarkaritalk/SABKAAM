@@ -46,6 +46,17 @@ export function getDistrictOptions(state: StateName, language: 'hi' | 'en' | 'hi
   return records.map((district) => language === 'hi' && district.local && /[\u0900-\u097F]/.test(district.local) ? district.local : district.name)
 }
 
+
+export function getStateCode(state: StateName): number {
+  return locationData.states[state].code
+}
+
+export function getDistrictCode(state: StateName, districtLabel: string, language: 'hi' | 'en' | 'hinglish' = 'hi'): number | undefined {
+  const labels = getDistrictOptions(state, language)
+  const index = labels.indexOf(districtLabel)
+  return index >= 0 ? locationData.states[state].districts[index]?.code : undefined
+}
+
 export const locationSource = {
   description: locationData.source,
   url: locationData.sourceResource,
