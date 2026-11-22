@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import './employer-dashboard.css'
 import { LanguageSelect, Localized, type Language } from './i18n'
 import { stateNames, getStateLabel, getDistrictOptions, getStateCode, getDistrictCode, getDistrictEnglishName, type StateName } from './locations'
-import { backendConfigured, createEmployer, createJobDraft, getMyEmployer, submitJobForReview, type AuthSession } from './lib/backend'
+import { backendConfigured, createEmployer, createJobDraft, getMyEmployer, getEmployerApplications, updateApplicationStatus, submitJobForReview, type AuthSession, type EmployerApplication } from './lib/backend'
 
 type Props = { onBack: () => void; language: Language; onLanguageChange: (language: Language) => void; session: AuthSession | null; onSignIn: () => void; onSignOut: () => void }
 
@@ -21,7 +21,15 @@ export default function EmployerDashboard({ onBack, language, onLanguageChange, 
   const [description, setDescription] = useState('')
   const [success, setSuccess] = useState(false)
   const [submitMessage, setSubmitMessage] = useState('')
+  const [applications, setApplications] = useState<EmployerApplication[]>([])
+  const [applicationsError, setApplicationsError] = useState('')
+  const [applicationBusy, setApplicationBusy] = useState('')
+  const [refreshApplications, setRefreshApplications] = useState(0)
   useEffect(() => { const options = getDistrictOptions(stateName, language); if (!options.includes(district)) setDistrict(options[0] ?? '') }, [stateName, language])
+
+  useEffect(() => { if (!session || session.user.user_metadata?.account_type !== 'employer') { setApplications([]); return } getMyEmployer(session.access_token, session.user.id).then(employer => employer ? getEmployerApplications(session.access_token, employer.id) : []).then(setApplications).catch(error => setApplicationsError(error instanceof Error ? error.message : 'आवेदन लोड नहीं हुए')) }, [session?.access_token, refreshApplications])
+
+  async function changeApplicationStatus(applicationId: string, status: 'viewed' | 'shortlisted' | 'interview' | 'hired' | 'rejected') { setApplicationBusy(applicationId); setApplicationsError(''); try { await updateApplicationStatus(session!.access_token, applicationId, status); setRefreshApplications(value => value + 1) } catch (error) { setApplicationsError(error instanceof Error ? error.message : 'स्थिति अपडेट नहीं हुई') } finally { setApplicationBusy('') } }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -43,6 +51,7 @@ export default function EmployerDashboard({ onBack, language, onLanguageChange, 
       if (!draft[0]?.id) throw new Error('Job draft could not be created.')
       await submitJobForReview(session.access_token, draft[0].id)
       setSuccess(true)
+      setRefreshApplications(value => value + 1)
       setSubmitMessage('नौकरी समीक्षा के लिए भेज दी गई है। स्वीकृति से पहले यह सार्वजनिक नहीं होगी।')
     } catch (error) { setSubmitMessage(error instanceof Error ? error.message : 'नौकरी भेजी नहीं जा सकी।') }
   }
