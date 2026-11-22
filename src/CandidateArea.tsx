@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import './candidate-area.css'
 import { Localized, type Language } from './i18n'
 import { stateNames, getStateLabel, getDistrictOptions, getStateCode, getDistrictCode, type StateName } from './locations'
@@ -25,7 +25,7 @@ export default function CandidateArea({ mode, language, session, onSignIn }: { m
   useEffect(() => { const options = getDistrictOptions(stateName, language); if (!options.includes(district)) setDistrict(options[0] ?? '') }, [stateName, language])
   useEffect(() => { if (!session) return; if (mode === 'मेरे आवेदन') getMyApplications(session.access_token).then(setRealApplications).catch(error => setProfileMessage(error instanceof Error ? error.message : 'आवेदन लोड नहीं हुए')); if (mode === 'सूचनाएँ') getMyNotifications(session.access_token).then(setRealNotifications).catch(error => setProfileMessage(error instanceof Error ? error.message : 'सूचनाएँ लोड नहीं हुईं')) }, [mode, session?.access_token])
 
-  async function saveProfile(event: React.FormEvent<HTMLFormElement>) {
+  async function saveProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!session) { setSaved(true); setProfileMessage('यह डेमो प्रोफ़ाइल केवल इस स्क्रीन पर तैयार हुई। सेव करने के लिए लॉगिन करें।'); return }
     try {
