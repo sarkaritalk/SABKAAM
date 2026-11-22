@@ -49,6 +49,8 @@ Check that exactly one intended profile was updated. Never accept a user-supplie
 
 ## Authorization test matrix
 
+The automated pgTAP suite currently verifies the application tables, RLS enablement, helper-function security/privileges, required staff/admin policies, and trigger installation/event coverage. CI runs it against a fresh local Supabase database after replaying the migrations. This structural suite does not replace end-to-end role testing.
+
 Use separate disposable accounts and verify both allowed and denied cases:
 
 - Candidate A cannot read Candidate B's profile, applications, reports or notifications.
@@ -74,7 +76,7 @@ Keep these only in a local `.env.local` file (ignored by Git). A public anon/pub
 
 ## Important production work still required
 
-- Add automated SQL/RLS tests (for example, pgTAP) and run the authorization matrix above against the actual Supabase project.
+- The repository now includes pgTAP schema/security regression checks and a GitHub Actions workflow that starts a clean local Supabase stack, applies all migrations, runs `supabase test db`, and runs `supabase db lint`. Extend this suite with end-to-end role impersonation tests and run the full authorization matrix above against the actual Supabase project using separate disposable accounts.
 - Implement trusted server-side review actions and audit-log writes for privileged operations.
 - Ensure the service-role key is server-only; the trigger intentionally permits trusted SQL/service-role operations when `auth.uid()` is null.
 - Add phone authentication and OTP rate limits before collecting real candidate contact details.
