@@ -4,3 +4,23 @@
 .employer-applicants{margin:26px 0 60px;background:#fff;border:1px solid #e4ebe6;border-radius:16px;padding:22px}.applicants-heading{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:18px}.applicants-heading h2{font-size:22px;margin:5px 0}.applicants-heading p{font-size:12px;color:#75837a;margin:0}.applicant-count{font-size:11px;font-weight:800;background:#edf5ef;color:#276144;border-radius:18px;padding:7px 12px}.applicant-list{display:grid;gap:10px}.applicant-card{display:flex;justify-content:space-between;align-items:center;gap:18px;border:1px solid #e7eee9;border-radius:12px;padding:15px}.applicant-details{display:grid;gap:5px}.applicant-details strong{font-size:14px}.applicant-details span,.applicant-details small,.applicant-details p,.applicant-details a{font-size:11px;color:#6c7a71}.applicant-details a{color:#1e704a;font-weight:800}.applicant-details p{margin:0}.applicant-actions{display:flex;gap:7px;flex-wrap:wrap}.applicant-actions button{border:0;border-radius:8px;padding:9px 11px;background:#eaf4ed;color:#245c3f;font-size:10px;font-weight:800}.applicant-actions button.reject{background:#fff0ed;color:#a23b30}.applicant-actions button:disabled{opacity:.5}.applicant-empty,.applicant-error{padding:13px;background:#f2f6f3;border-radius:9px;color:#64746a;font-size:12px}.applicant-error{background:#fff0ed;color:#9d3e32}@media(max-width:620px){.employer-applicants{padding:16px}.applicant-card{align-items:flex-start;flex-direction:column}.applicants-heading h2{font-size:19px}}
 
 .employer-brand>img{width:38px;height:38px;display:block;filter:drop-shadow(0 5px 12px #17265a30)}
+
+
+/* Employer workspace follows the SABKAAM Deep Teal / Warm Gold identity */
+.employer-page{background:#f5f4ef;color:#183b35}
+.back-button{color:#39766b}
+.employer-brand>span{background:linear-gradient(135deg,#176b63,#b58a35)}
+.employer-brand small{color:#8b8067}
+.employer-welcome{background:linear-gradient(115deg,#e5eee7,#f3ead8)}
+.employer-kicker{color:#39766b}
+.employer-welcome h1 em{color:#287164}
+.employer-stat span{color:#b58a35}
+.form-section-title b{background:#e8f0e9;color:#28675c}
+.form-grid label{color:#53645a}
+.form-grid input:focus,.form-grid select:focus,.form-grid textarea:focus{border-color:#6a9a87;box-shadow:0 0 0 3px #e5eee7}
+.form-actions button{background:linear-gradient(110deg,#176b63,#b58a35)}
+.aside-icon{background:#e8f0e9;color:#28675c}
+.aside-note{background:#fbf5e8;border-color:#eadbb9}
+.aside-note strong{color:#85652a}
+.applicant-count{background:#e8f0e9;color:#28675c}
+.applicant-actions button{background:#e8f0e9;color:#245c4e}
