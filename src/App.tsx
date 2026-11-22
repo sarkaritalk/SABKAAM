@@ -84,10 +84,16 @@ function App() {
           <div className="hero-art" aria-label="SABKAAM पर उपलब्ध अलग-अलग कामों के लोगों का AI चित्र">
             <div className="hero-city-glow" />
             <img className="hero-ai-collage" src="/images/sabkaam-workers-ai.webp" alt="दुकान, डिलीवरी, ऑफिस, हेल्थकेयर और निर्माण क्षेत्र में काम करने वाले लोगों का AI चित्र" />
-            <span className="float-tag tag-one">🏪 दुकान / सेल्स</span>
-            <span className="float-tag tag-two">🩺 हेल्थकेयर</span>
-            <span className="float-tag tag-three">🦺 कंस्ट्रक्शन / टेक्निकल</span>
-            <div className="hero-photo-caption"><b>हर हुनर के लिए एक मौका</b><small>आपका अगला कदम यहीं से</small></div>
+            <div className="hero-category-cloud" aria-label="यहाँ मिलने वाले काम">
+              <span className="float-tag tag-one">🏨 होटल / रेस्टोरेंट</span>
+              <span className="float-tag tag-two">🩺 हेल्थकेयर</span>
+              <span className="float-tag tag-three">🦺 कंस्ट्रक्शन / वर्कर</span>
+              <span className="float-tag tag-four">🏪 रिटेल / सेल्स</span>
+              <span className="float-tag tag-five">🛵 डिलीवरी / लॉजिस्टिक्स</span>
+              <span className="float-tag tag-six">🎓 ट्रेनिंग / एजुकेशन</span>
+              <span className="float-tag tag-seven">💻 IT / कंप्यूटर</span>
+              <span className="float-tag tag-eight">💼 फाइनेंस / अकाउंट्स</span>
+            </div>
           </div>
         </section>
 
