@@ -51,7 +51,7 @@ export default function EmployerDashboard({ onBack, language, onLanguageChange, 
       <header className="employer-header">
         <button className="back-button" onClick={onBack}>← वापस होम पर</button>
         <div className="employer-brand"><span>स</span><strong>SABKAAM <small>EMPLOYER DESK</small></strong></div>
-        <LanguageSelect language={language} onChange={onLanguageChange} /><span className="preview-pill">प्रारंभिक संस्करण</span>
+        <LanguageSelect language={language} onChange={onLanguageChange} />{session ? <button className="back-button" onClick={onSignOut}>लॉगआउट</button> : <button className="back-button" onClick={onSignIn}>लॉगिन</button>}<span className="preview-pill">प्रारंभिक संस्करण</span>
       </header>
       <main className="employer-main">
         <section className="employer-welcome">
@@ -79,7 +79,7 @@ export default function EmployerDashboard({ onBack, language, onLanguageChange, 
               <label className="full-field">काम और योग्यता का विवरण<textarea rows={4} value={description} onChange={e => setDescription(e.target.value)} placeholder="काम क्या होगा? अनुभव या योग्यता चाहिए? खाना/रहना मिलेगा? काम के घंटे क्या होंगे?" /></label>
             </div>
             <div className="form-actions"><p>आगे चलकर पोस्ट करने से पहले मोबाइल सत्यापन और नौकरी की समीक्षा जोड़ी जाएगी।</p><button type="submit">डेमो पोस्ट का प्रीव्यू देखें <span>→</span></button></div>
-            {success && <div className="form-success" role="status"><strong>प्रीव्यू तैयार है — अभी प्रकाशित नहीं हुआ।</strong><p>{title || 'नया पद'} · {company || 'आपकी कंपनी'} · {district}, {getStateLabel(stateName, language)}</p><small>यह जानकारी केवल इस स्क्रीन पर दिखाई गई है; सर्वर पर सेव नहीं हुई।</small></div>}
+            {submitMessage && <div className="form-success" role="status"><strong>{submitMessage}</strong></div>}{success && <div className="form-success" role="status"><strong>प्रीव्यू तैयार है — अभी प्रकाशित नहीं हुआ।</strong><p>{title || 'नया पद'} · {company || 'आपकी कंपनी'} · {district}, {getStateLabel(stateName, language)}</p><small>यह जानकारी केवल इस स्क्रीन पर दिखाई गई है; सर्वर पर सेव नहीं हुई।</small></div>}
           </form>
           <aside className="employer-aside"><div className="aside-card"><span className="aside-icon">✓</span><h3>अच्छी नौकरी पोस्ट कैसी हो?</h3><ul><li>वेतन साफ-साफ लिखें</li><li>काम के घंटे बताएँ</li><li>सही जगह और संपर्क दें</li><li>जरूरी योग्यता ही माँगें</li><li>कोई फीस या सिक्योरिटी जमा न माँगें</li></ul></div><div className="aside-note"><strong>उम्मीदवार का भरोसा जरूरी है</strong><p>SABKAAM पर आगे चलकर संदिग्ध पोस्ट की रिपोर्ट और नियोक्ता सत्यापन की सुविधा बनाई जाएगी।</p></div></aside>
         </div>
