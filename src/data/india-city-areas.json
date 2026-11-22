@@ -8,6 +8,17 @@
   "cities": [
     {
       "state": "Delhi",
+      "district": "*",
+      "city": "Delhi",
+      "aliases": [
+        "Delhi NCR",
+        "New Delhi",
+        "National Capital Region"
+      ],
+      "areas": []
+    },
+    {
+      "state": "Delhi",
       "district": "South West",
       "city": "Dwarka",
       "aliases": [
