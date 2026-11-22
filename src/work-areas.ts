@@ -26,12 +26,9 @@ export function getWorkAreaSuggestions(query: string, preferredState?: string, p
   const results: WorkAreaSuggestion[] = []
 
   for (const record of cityAreas) {
-    const stateMatches = !preferredState || record.state === preferredState
-    const districtMatches = !preferredDistrict || record.district.toLocaleLowerCase('en-IN') === preferredDistrict.toLocaleLowerCase('en-IN')
-    const placeNames = [record.city, ...record.aliases, ...record.areas]
     const cityHaystack = normalizeWorkAreaQuery([record.city, ...record.aliases].join(' '))
     const cityMatch = !tokens.length || tokens.every(token => cityHaystack.includes(token))
-    if (cityMatch && (!preferredState || stateMatches) && (!preferredDistrict || districtMatches)) {
+    if (cityMatch) {
       results.push({ state: record.state as StateName, district: record.district, city: record.city, area: record.city, label: record.city + ' · ' + record.district + ', ' + record.state })
     }
     for (const area of record.areas) {
