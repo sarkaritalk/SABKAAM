@@ -6,7 +6,7 @@
 - It supports email signup/sign-in, public published-job discovery, candidate applications, employer draft creation and review submission, safety reports, candidate applications, and notifications.
 - It sends only the public Supabase publishable/anon key from the browser. It never uses a service-role key.
 - Requests that require a user identity need the signed-in user's access token and are expected to be enforced by Supabase RLS.
-- The adapter is not a substitute for configuring a real Supabase project, Auth providers, SMTP, moderation staff, or production secrets.
+- Candidate/employer email sign-up and sign-in UI is included. Employer signup is constrained to the employer role; moderator/admin roles cannot be self-selected. Session tokens are held in sessionStorage and expire with the access token (automatic refresh is not implemented yet).\n- Candidate profile, application history, notifications, employer job submission, verification requests, and safety reports use authenticated Supabase calls when configured.\n- A staff moderation dashboard can approve/reject jobs, verify/reject employers, and resolve/dismiss reports for moderator/admin accounts. Provision the first staff account out-of-band.\n- The adapter is not a substitute for configuring a real Supabase project, Auth providers, SMTP, moderation staff, or production secrets.
 
 ## Connect a Supabase project
 
@@ -39,4 +39,4 @@
 
 ## Important launch status
 
-This repository can build and run a frontend prototype, and the backend adapter/schema are prepared. A live service is **not** activated until real project credentials, Auth settings, moderation/admin provisioning, hosting, and provider accounts are configured and verified. Demo job data must never be presented as real vacancies.
+This repository includes a frontend prototype, account flows, a Supabase adapter, and staff moderation UI. A live service is **not** activated until real project credentials, Auth settings, moderation/admin provisioning, hosting, and provider accounts are configured and verified. Demo job data must never be presented as real vacancies.
