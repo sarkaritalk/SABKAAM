@@ -3,6 +3,7 @@ import './job-apply.css'
 import CandidateArea from './CandidateArea'
 import SafetyCenter from './safety-center'
 import EmployerDashboard from './EmployerDashboard'
+import { LanguageSelect, Localized, type Language } from './i18n'
 
 import { districts, stateNames, getStateLabel, type StateName } from './locations'
 
@@ -30,6 +31,7 @@ const demoJobs = [
 ]
 
 function App() {
+  const [language, setLanguage] = useState<Language>(() => { const saved = localStorage.getItem('sabkaam-language'); return saved === 'en' || saved === 'hinglish' ? saved : 'hi' })
   const [stateName, setStateName] = useState<StateName>('Bihar')
   const [district, setDistrict] = useState('मधुबनी')
   const [query, setQuery] = useState('')
@@ -49,7 +51,9 @@ function App() {
     return matchesQuery && matchesCategory && matchesState && matchesLocation
   }), [query, selectedCategory, stateName, district])
 
-  if (showEmployer) return <EmployerDashboard onBack={() => setShowEmployer(false)} />
+  function changeLanguage(next: Language) { setLanguage(next); localStorage.setItem('sabkaam-language', next) }
+
+  if (showEmployer) return <EmployerDashboard onBack={() => setShowEmployer(false)} language={language} onLanguageChange={changeLanguage} />
 
   function changeState(next: StateName) {
     setStateName(next)
@@ -62,17 +66,17 @@ function App() {
   }
 
   return (
-    <div className="app-shell" data-active-tab={activeTab} data-safety-open={showSafety}>
+    <Localized language={language}><div className="app-shell" data-active-tab={activeTab} data-safety-open={showSafety}>
       <header className="topbar">
         <a className="brand" href="#" aria-label="SABKAAM होम">
           <span className="brand-mark">स</span>
           <span><strong>SABKAAM</strong><small>हर काम, हर इंसान के लिए।</small></span>
         </a>
-        <div className="topbar-actions"><button className="safety-link" onClick={() => setShowSafety(!showSafety)}>{showSafety ? '← वापस' : '🛡️ सुरक्षा और शिकायत'}</button><button className="employer-link" onClick={() => setShowEmployer(true)}>नौकरी देने वाले? <span>यहाँ जाएँ ↗</span></button></div>
+        <div className="topbar-actions"><LanguageSelect language={language} onChange={changeLanguage} /><button className="safety-link" onClick={() => setShowSafety(!showSafety)}>{showSafety ? '← वापस' : '🛡️ सुरक्षा और शिकायत'}</button><button className="employer-link" onClick={() => setShowEmployer(true)}>नौकरी देने वाले? <span>यहाँ जाएँ ↗</span></button></div>
       </header>
 
-      <main>{showSafety && <SafetyCenter />}
-        {(activeTab === 'मेरे आवेदन' || activeTab === 'सूचनाएँ' || activeTab === 'प्रोफ़ाइल') && <CandidateArea mode={activeTab} />}
+      <main>{showSafety && <SafetyCenter language={language} />}
+        {(activeTab === 'मेरे आवेदन' || activeTab === 'सूचनाएँ' || activeTab === 'प्रोफ़ाइल') && <CandidateArea mode={activeTab} language={language} />}
         {activeTab === 'होम' && <>
         <section className="hero">
           <div className="hero-copy">
@@ -140,7 +144,7 @@ function App() {
         {['होम', 'मेरे आवेदन', 'सूचनाएँ', 'प्रोफ़ाइल'].map((tab, index) => <button key={tab} className={activeTab === tab ? 'active' : ''} onClick={() => setActiveTab(tab)}><span>{['⌂', '▤', '♧', '◉'][index]}</span>{tab}</button>)}
       </nav>
       <footer><span>© SABKAAM · Jobs, Work & Opportunities</span><span>भारत · शुरुआती संस्करण</span></footer>
-    </div>
+    </div></Localized>
   )
 }
 
