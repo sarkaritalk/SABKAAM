@@ -50,13 +50,33 @@ function App() {
   const [showSafety, setShowSafety] = useState(false)
   const [showEmployer, setShowEmployer] = useState(false)
 
-  const visibleJobs = useMemo(() => demoJobs.filter((job) => {
+  const visibleJobs = useMemo(() => (backendConfigured ? liveJobs : demoJobs).filter((job) => {
     const matchesQuery = !query || `${job.title} ${job.company} ${job.place} ${job.category}`.toLowerCase().includes(query.toLowerCase())
     const matchesCategory = !selectedCategory || job.category === selectedCategory
     const matchesState = job.state === stateName
     const matchesLocation = district === 'सभी जिले' || job.place === district
     return matchesQuery && matchesCategory && matchesState && matchesLocation
-  }), [query, selectedCategory, stateName, district])
+  }), [query, selectedCategory, stateName, district, liveJobs])
+
+  useEffect(() => {
+    if (!backendConfigured) { setLiveJobs([]); return }
+    let cancelled = false
+    setJobsLoading(true)
+    setJobsError('')
+    listPublishedJobs({ stateLgdCode: getStateCode(stateName), districtLgdCode: district === 'सभी जिले' ? undefined : getDistrictCode(stateName, district, language) })
+      .then((rows: PublishedJob[]) => {
+        if (cancelled) return
+        setLiveJobs(rows.map((job) => {
+          const number = new Intl.NumberFormat('en-IN')
+          const salary = job.salary_min != null && job.salary_max != null ? '₹' + number.format(job.salary_min) + '–₹' + number.format(job.salary_max) + (job.salary_period ? ' / ' + job.salary_period : '') : job.salary_max != null ? 'Up to ₹' + number.format(job.salary_max) : 'वेतन विवरण उपलब्ध नहीं'
+          const workTypes: Record<string, string> = { full_time: 'फुल टाइम', part_time: 'पार्ट टाइम', daily_wage: 'दैनिक मजदूरी', contract: 'कॉन्ट्रैक्ट', work_from_home: 'वर्क फ्रॉम होम', freelance: 'फ्रीलांस', internship: 'इंटर्नशिप' }
+          return { id: job.id, title: job.title, state: stateName, company: 'नियोक्ता विवरण', place: job.town_or_market || job.district, pay: salary, type: workTypes[job.work_type] || job.work_type, category: job.category, description: job.description, isDemo: false }
+        }))
+      })
+      .catch((error: unknown) => { if (!cancelled) setJobsError(error instanceof Error ? error.message : 'Jobs could not be loaded') })
+      .finally(() => { if (!cancelled) setJobsLoading(false) })
+    return () => { cancelled = true }
+  }, [stateName, district, language])
 
   function changeLanguage(next: Language) { setLanguage(next); localStorage.setItem('sabkaam-language', next) }
 
