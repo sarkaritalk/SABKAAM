@@ -121,6 +121,9 @@ test.describe('SABKAAM desktop and mobile smoke tests', () => {
     await page.getByRole('option', { name: /Uttam Nagar/ }).first().click()
     await expect(page.getByLabel('राज्य')).toHaveValue('Delhi')
     await expect(area).toHaveValue('Uttam Nagar')
+    await area.fill('महावीर एन्क्लेव')
+    await expect(page.getByRole('option', { name: /Mahavir Enclave/ }).first()).toBeVisible()
+    await area.fill('मेट्रो उत्तम नगर')
     await page.getByRole('button', { name: /काम खोजें/ }).click()
     await expect(page.getByRole('heading', { name: /उपलब्ध नौकरियाँ|काम के नमूने/ })).toBeVisible()
 
