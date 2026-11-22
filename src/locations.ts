@@ -30,8 +30,8 @@ const hindiStateLabels: Record<string, string> = {
   Uttarakhand: 'उत्तराखंड', 'West Bengal': 'पश्चिम बंगाल',
 }
 
-export function getStateLabel(state: string): string {
-  return hindiStateLabels[state] ?? state
+export function getStateLabel(state: string, language: 'hi' | 'en' | 'hinglish' = 'hi'): string {
+  return language === 'hi' ? (hindiStateLabels[state] ?? state) : state
 }
 
 export const districts = Object.fromEntries(
@@ -41,8 +41,9 @@ export const districts = Object.fromEntries(
   ]),
 ) as Record<StateName, string[]>
 
-export function getDistrictOptions(state: StateName): string[] {
-  return districts[state].slice(1)
+export function getDistrictOptions(state: StateName, language: 'hi' | 'en' | 'hinglish' = 'hi'): string[] {
+  const records = locationData.states[state].districts
+  return records.map((district) => language === 'hi' && district.local && /[\\u0900-\\u097F]/.test(district.local) ? district.local : district.name)
 }
 
 export const locationSource = {
