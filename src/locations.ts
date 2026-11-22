@@ -57,6 +57,16 @@ export function getDistrictCode(state: StateName, districtLabel: string, languag
   return index >= 0 ? locationData.states[state].districts[index]?.code : undefined
 }
 
+
+export function getStateNameByCode(code: number): StateName | undefined {
+  return Object.entries(locationData.states).find(([, value]) => value.code === code)?.[0] as StateName | undefined
+}
+
+export function getDistrictNameByCode(state: StateName, code: number, language: 'hi' | 'en' | 'hinglish' = 'hi'): string | undefined {
+  const index = locationData.states[state].districts.findIndex((district) => district.code === code)
+  return index >= 0 ? getDistrictOptions(state, language)[index] : undefined
+}
+
 export const locationSource = {
   description: locationData.source,
   url: locationData.sourceResource,
