@@ -113,7 +113,6 @@ const copy: Record<string, [string, string]> = {
   'डेमो प्रोफ़ाइल इस स्क्रीन पर तैयार हुई। जानकारी सर्वर पर सेव नहीं हुई है।': ['Demo profile prepared on this screen. Details were not saved to a server.', 'Demo profile is screen par ready hui. Details server par save nahi hui.'],
   'आपका नाम': ['Your name', 'Aapka naam'],
   'अपना नाम लिखें': ['Enter your name', 'Apna naam likhein'],
-  '10 अंकों का नंबर': ['10-digit number', '10 digit number'],
   'जैसे: दुकान संभालना, ड्राइविंग, सिलाई...': ['e.g. shop work, driving, tailoring...', 'Jaise: shop sambhalna, driving, silai...'],
   'आपकी स्किल यहाँ दिखाई देंगी।': ['Your skills will appear here.', 'Aapki skills yahan dikhenge.'],
   'प्रोफ़ाइल प्रीव्यू · केवल इसी स्क्रीन पर': ['Profile preview · This screen only', 'Profile preview · Sirf isi screen par'],
