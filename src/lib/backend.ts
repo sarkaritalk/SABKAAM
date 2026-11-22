@@ -1,0 +1,147 @@
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.replace(/\/$/, '')
+const publishableKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+
+export const backendConfigured = Boolean(supabaseUrl && publishableKey)
+
+export class BackendError extends Error {
+  constructor(message: string, readonly status?: number) {
+    super(message)
+    this.name = 'BackendError'
+  }
+}
+
+type RequestOptions = {
+  method?: 'GET' | 'POST' | 'PATCH' | 'DELETE'
+  body?: unknown
+  accessToken?: string
+  prefer?: string
+}
+
+async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  if (!backendConfigured || !supabaseUrl || !publishableKey) {
+    throw new BackendError('SABKAAM backend is not configured. Add the Supabase URL and publishable key.')
+  }
+
+  const response = await fetch(`${supabaseUrl}${path}`, {
+    method: options.method ?? 'GET',
+    headers: {
+      apikey: publishableKey,
+      Authorization: `Bearer ${options.accessToken ?? publishableKey}`,
+      'Content-Type': 'application/json',
+      ...(options.prefer ? { Prefer: options.prefer } : {}),
+    },
+    ...(options.body === undefined ? {} : { body: JSON.stringify(options.body) }),
+  })
+
+  const text = await response.text()
+  if (!response.ok) {
+    let message = text || `Supabase request failed (${response.status})`
+    try {
+      const payload = JSON.parse(text) as { message?: string; msg?: string; error_description?: string }
+      message = payload.message ?? payload.msg ?? payload.error_description ?? message
+    } catch { /* Keep the original response text. */ }
+    throw new BackendError(message, response.status)
+  }
+  return (text ? JSON.parse(text) : null) as T
+}
+
+export type PublishedJob = {
+  id: string
+  title: string
+  category: string
+  description: string
+  work_type: string
+  state_code: string | null
+  state_lgd_code: number | null
+  district: string
+  district_lgd_code: number | null
+  town_or_market: string | null
+  salary_min: number | null
+  salary_max: number | null
+  salary_period: string | null
+  vacancies: number
+  food_or_stay: string | null
+  created_at: string
+  expires_at: string | null
+}
+
+export async function listPublishedJobs(filters: { stateLgdCode?: number; districtLgdCode?: number } = {}) {
+  const params = new URLSearchParams({
+    select: 'id,title,category,description,work_type,state_code,state_lgd_code,district,district_lgd_code,town_or_market,salary_min,salary_max,salary_period,vacancies,food_or_stay,created_at,expires_at',
+    status: 'eq.published',
+    order: 'created_at.desc',
+    limit: '100',
+  })
+  if (filters.stateLgdCode) params.set('state_lgd_code', `eq.${filters.stateLgdCode}`)
+  if (filters.districtLgdCode) params.set('district_lgd_code', `eq.${filters.districtLgdCode}`)
+  params.set('or', `(expires_at.is.null,expires_at.gt.${new Date().toISOString()})`)
+  return request<PublishedJob[]>(`/rest/v1/job_posts?${params.toString()}`)
+}
+
+export type AuthSession = {
+  access_token: string
+  refresh_token: string
+  expires_in: number
+  token_type: string
+  user: { id: string; email?: string; phone?: string }
+}
+
+export async function signUpWithEmail(email: string, password: string, fullName: string) {
+  return request<AuthSession | { id: string; email: string; confirmation_sent_at?: string }>('/auth/v1/signup', {
+    method: 'POST',
+    body: { email, password, data: { full_name: fullName } },
+  })
+}
+
+export async function signInWithEmail(email: string, password: string) {
+  return request<AuthSession>('/auth/v1/token?grant_type=password', {
+    method: 'POST',
+    body: { email, password },
+  })
+}
+
+export async function submitApplication(accessToken: string, payload: {
+  job_id: string; candidate_id: string; full_name: string; phone: string; experience?: string; message?: string
+}) {
+  return request<Array<{ id: string; status: string }>>('/rest/v1/applications', {
+    method: 'POST', accessToken, prefer: 'return=representation', body: payload,
+  })
+}
+
+export async function createJobDraft(accessToken: string, payload: {
+  employer_id: string; title: string; category: string; description: string; work_type: string
+  state_lgd_code: number; district_lgd_code: number; district: string; town_or_market?: string
+  salary_min?: number; salary_max?: number; salary_period?: string; vacancies: number
+}) {
+  return request<Array<{ id: string; status: string }>>('/rest/v1/job_posts', {
+    method: 'POST', accessToken, prefer: 'return=representation', body: { ...payload, status: 'draft' },
+  })
+}
+
+export async function submitJobForReview(accessToken: string, jobId: string) {
+  return request<Array<{ id: string; status: string }>>(`/rest/v1/job_posts?id=eq.${encodeURIComponent(jobId)}`, {
+    method: 'PATCH', accessToken, prefer: 'return=representation', body: { status: 'pending_review' },
+  })
+}
+
+export async function submitSafetyReport(accessToken: string, payload: {
+  reporter_id: string; reason: string; details?: string; contact_phone?: string; job_id?: string; employer_id?: string
+}) {
+  return request<Array<{ id: string; status: string }>>('/rest/v1/reports', {
+    method: 'POST', accessToken, prefer: 'return=representation', body: payload,
+  })
+}
+
+export async function getMyApplications(accessToken: string) {
+  return request<Array<{ id: string; job_id: string; status: string; created_at: string }>>(
+    '/rest/v1/applications?select=id,job_id,status,created_at&order=created_at.desc',
+    { accessToken },
+  )
+}
+
+export async function getMyNotifications(accessToken: string) {
+  return request<Array<{ id: string; title: string; body: string; kind: string; read_at: string | null; created_at: string }>>(
+    '/rest/v1/notifications?select=id,title,body,kind,read_at,created_at&order=created_at.desc',
+    { accessToken },
+  )
+}
