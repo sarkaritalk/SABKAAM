@@ -75,6 +75,14 @@ select is((select count(*)::int from public.notifications), 1, 'candidate reads 
 select is((select count(*)::int from public.job_posts), 2, 'candidate sees published jobs but not drafts');
 select ok(not public.is_sabkaam_staff(), 'candidate is not staff');
 select ok(not public.is_sabkaam_admin(), 'candidate is not admin');
+
+select throws_ok(
+  $ insert into public.employers (id, owner_id, business_name, verification_status)
+     values ('10000000-0000-0000-0000-000000000099', '00000000-0000-0000-0000-000000000001', 'Candidate Fake Ltd', 'pending') $,
+  '42501',
+  'new row violates row-level security policy for table "employers"',
+  'candidate cannot create an employer record'
+);
 select throws_ok(
   $$ update public.profiles set role = 'admin' where id = '00000000-0000-0000-0000-000000000001' $$,
   'P0001',
@@ -100,6 +108,12 @@ select is((select count(*)::int from public.employers), 1, 'employer reads only 
 select is((select count(*)::int from public.job_posts), 3, 'employer reads their own jobs plus public published jobs');
 select is((select count(*)::int from public.applications), 1, 'employer reads applications to their own jobs');
 select ok(not public.is_sabkaam_staff(), 'employer is not staff');
+
+select lives_ok(
+  $ insert into public.employers (id, owner_id, business_name, verification_status)
+     values ('10000000-0000-0000-0000-000000000098', '00000000-0000-0000-0000-000000000003', 'Employer A Second Entity', 'pending') $,
+  'employer-role account can create its own employer record'
+);
 select throws_ok(
   $$ update public.job_posts set status = 'published' where id = '30000000-0000-0000-0000-000000000002' $$,
   'P0001',
