@@ -6,10 +6,6 @@ import { getMyApplications, getMyNotifications, updateMyProfile, type AuthSessio
 
 type Mode = 'मेरे आवेदन' | 'सूचनाएँ' | 'प्रोफ़ाइल'
 
-const sampleApplications = [
-  { role: 'दुकान में सेल्स हेल्पर', employer: 'डेमो किराना स्टोर', place: 'मधुबनी', status: 'डेमो: आवेदन देखा गया', tone: 'review' },
-  { role: 'रेस्टोरेंट में किचन हेल्पर', employer: 'डेमो फूड कॉर्नर', place: 'दरभंगा', status: 'डेमो: जवाब का इंतज़ार', tone: 'pending' },
-]
 
 export default function CandidateArea({ mode, language, session, onSignIn }: { mode: Mode; language: Language; session: AuthSession | null; onSignIn: () => void }) {
   const [name, setName] = useState('')
@@ -18,7 +14,6 @@ export default function CandidateArea({ mode, language, session, onSignIn }: { m
   const [district, setDistrict] = useState('मधुबनी')
   const [skills, setSkills] = useState('')
   const [workType, setWorkType] = useState('फुल टाइम')
-  const [saved, setSaved] = useState(false)
   const [profileMessage, setProfileMessage] = useState('')
   const [realApplications, setRealApplications] = useState<Array<{ id: string; job_id: string; status: string; created_at: string; job_posts?: { title: string; district: string } | null }>>([])
   const [realNotifications, setRealNotifications] = useState<Array<{ id: string; title: string; body: string; kind: string; read_at: string | null; created_at: string }>>([])
@@ -27,10 +22,10 @@ export default function CandidateArea({ mode, language, session, onSignIn }: { m
 
   async function saveProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (!session) { setSaved(true); setProfileMessage('यह डेमो प्रोफ़ाइल केवल इस स्क्रीन पर तैयार हुई। सेव करने के लिए लॉगिन करें।'); return }
+    if (!session) { setProfileMessage('यह डेमो प्रोफ़ाइल केवल इस स्क्रीन पर तैयार हुई। सेव करने के लिए लॉगिन करें।'); return }
     try {
       await updateMyProfile(session.access_token, session.user.id, { full_name: name, phone, district, state_code: String(getStateCode(stateName)), state_lgd_code: getStateCode(stateName), district_lgd_code: getDistrictCode(stateName, district, language) ?? 0, preferred_language: language })
-      setSaved(true); setProfileMessage('आपकी प्रोफ़ाइल सुरक्षित रूप से सेव हो गई।')
+       setProfileMessage('आपकी प्रोफ़ाइल सुरक्षित रूप से सेव हो गई।')
     } catch (error) { setProfileMessage(error instanceof Error ? error.message : 'प्रोफ़ाइल सेव नहीं हुई।') }
   }
 
@@ -53,7 +48,7 @@ export default function CandidateArea({ mode, language, session, onSignIn }: { m
     <div className="candidate-heading"><span className="section-kicker">आपकी पहचान, आपकी पसंद</span><h1>मेरी प्रोफ़ाइल</h1><p>बिना रिज़्यूमे के भी अपनी बुनियादी जानकारी तैयार रखें।</p></div>
     <div className="profile-layout">
       <form className="candidate-profile-form" onSubmit={saveProfile}>
-        <label>आपका नाम<input required value={name} onChange={event => { setName(event.target.value); setSaved(false) }} placeholder="अपना नाम लिखें" /></label>
+        <label>आपका नाम<input required value={name} onChange={event => { setName(event.target.value); setProfileMessage('') }} placeholder="अपना नाम लिखें" /></label>
         <label>मोबाइल नंबर<input required type="tel" inputMode="numeric" pattern="[0-9]{10}" maxLength={10} value={phone} onChange={event => { setPhone(event.target.value); setSaved(false) }} placeholder="10 अंकों का नंबर" /></label>
         <label>राज्य<select value={stateName} onChange={event => { const nextState = event.target.value as StateName; setStateName(nextState); setDistrict(getDistrictOptions(nextState, language)[0] ?? ''); setSaved(false) }}>{stateNames.map(state => <option key={state} value={state}>{getStateLabel(state, language)}</option>)}</select></label>
         <label>आपका जिला<select value={district} onChange={event => { setDistrict(event.target.value); setSaved(false) }}>{getDistrictOptions(stateName, language).map(item => <option key={item}>{item}</option>)}</select></label>
