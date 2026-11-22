@@ -30,7 +30,7 @@ For a brand-new empty project, apply migrations in filename order.
 | --- | --- |
 | Candidate | Read/update own profile; read published jobs; submit and read own applications; withdraw own applications; submit/read own reports; read and mark own notifications as read. |
 | Employer | Own employer record and jobs; submit verification request; read applications for own jobs; update application workflow status for own jobs. Employers cannot approve their own verification or publish jobs directly. |
-| Moderator | Review employers, verification requests, jobs, applications and reports through authenticated staff policies. Cannot change account roles or read audit logs. |
+| Moderator | Review employers, verification requests, jobs, applications and reports through authenticated staff policies. Cannot change account roles, read the full profiles table, or read audit logs. Applicant/reporter contact details needed for case review remain in the relevant operational records. |
 | Admin | Moderator permissions plus profile/role administration and audit-log read access. |
 
 Staff identity is resolved from the protected `profiles.role` value by `SECURITY DEFINER` helper functions with a fixed empty `search_path`. Public signup always creates a candidate. Only a trusted project operator may provision the first admin; never expose role assignment in public signup or client UI.
