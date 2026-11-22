@@ -3,7 +3,7 @@
 ## What is included
 
 - The State/UT and district master remains sourced from the monthly Local Government Directory (LGD) catalogue maintained by the Ministry of Panchayati Raj and published through data.gov.in.
-- `src/data/india-city-areas.json` adds a curated suggestion layer for 61 city/district entries and more than 1,200 locality, sector, industrial estate, phase, metro-station and neighbourhood names.
+- `src/data/india-city-areas.json` adds a curated suggestion layer for 85 city/district entries across all 36 States/UTs and more than 1,400 locality, sector, industrial estate, phase, metro-station and neighbourhood names.
 - The priority city list is informed by public hiring-trend reports, not by population alone. Naukri JobSpeak's October 2026 geography table highlighted strong year-on-year hiring growth in Gandhinagar (+48%), Surat (+36%), Raipur (+34%), Vadodara (+30%), Ranchi (+29%), Jaipur (+26%), Ahmedabad (+23%), Indore (+22%) and Bhopal (+21%). Its August 2026 report also highlighted Hyderabad, Kolkata and Chennai among leading metros, and Bhubaneswar, Raipur, Surat and Ranchi among emerging-city hiring markets.
 - Candidate search supports a searchable suggestion list and free text. People can enter an unlisted village, ward, colony, sector, block, phase, metro station, chowk, street or PIN code without waiting for the catalogue to contain it.
 - Employer job posting requires a specific city/market/locality field. It is saved in `town_or_market` and `locality`, so the same value can be searched by candidates.
