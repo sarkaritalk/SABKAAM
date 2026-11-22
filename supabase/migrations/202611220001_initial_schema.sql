@@ -348,7 +348,7 @@ begin
 
   return new;
 end;
-$;
+$$;
 
 create trigger protect_profile_role
 before insert or update on public.profiles
