@@ -1,22 +1,67 @@
 # Supabase setup for SABKAAM
 
-This repository keeps database changes in version control. The initial migration is in `supabase/migrations/`.
+This repository keeps database changes in version control. Database changes are ordered SQL migrations in `supabase/migrations/`.
 
 ## Current state
 
-- The SQL migration defines the first data model for profiles, employers, verification requests, jobs, applications, reports, notifications and audit logs.
+- The initial migration defines profiles, employers, verification requests, jobs, applications, reports, notifications and audit logs.
 - Row Level Security (RLS) is enabled on every application table.
-- Client-side policies intentionally do not allow users to assign their own privileged roles or approve their own verification/job review.
-- No Supabase project is connected by this file. No credentials are stored in Git.
+- The authorization-hardening migration adds role-aware staff policies and stricter workflow guards.
+- No Supabase project credentials are stored in Git. A repository migration is not applied to a Supabase project until an operator runs it.
 
-## Before applying the migration
+## Applying migrations
 
-1. Create a Supabase project for SABKAAM. Select a region appropriate for users in Bihar/Jharkhand (choose India if offered).
-2. Open the project's SQL Editor, or use the Supabase CLI after linking the project.
-3. Review `supabase/migrations/202611220001_initial_schema.sql` and apply it once to the new, empty project.
-4. Confirm the tables and RLS policies exist in the Supabase dashboard.
+For the already-created SABKAAM Supabase project:
 
-Do not run this initial migration on a database that already contains production data without a database review and backup.
+1. Take a database backup before applying schema/security changes.
+2. Confirm `202611220001_initial_schema.sql` has already been applied.
+3. Review `supabase/migrations/202611220002_authorization_hardening.sql`.
+4. Apply **only** `202611220002_authorization_hardening.sql` once in the Supabase SQL Editor (or through the Supabase CLI migration workflow).
+5. Verify the new helper functions, policies and trigger definition in the dashboard.
+6. Run the authorization test matrix below using separate test accounts before connecting the public frontend.
+
+Do not rerun the initial migration on an existing project. Do not apply the hardening migration until it has been reviewed and backed up. If it fails partway through, stop and inspect the database before retrying.
+
+For a brand-new empty project, apply migrations in filename order.
+
+## Authorization model
+
+| Role | Intended access |
+| --- | --- |
+| Candidate | Read/update own profile; read published jobs; submit and read own applications; withdraw own applications; submit/read own reports; read and mark own notifications as read. |
+| Employer | Own employer record and jobs; submit verification request; read applications for own jobs; update application workflow status for own jobs. Employers cannot approve their own verification or publish jobs directly. |
+| Moderator | Review employers, verification requests, jobs, applications and reports through authenticated staff policies. Cannot change account roles, read the full profiles table, or read audit logs. Applicant/reporter contact details needed for case review remain in the relevant operational records. |
+| Admin | Moderator permissions plus profile/role administration and audit-log read access. |
+
+Staff identity is resolved from the protected `profiles.role` value by `SECURITY DEFINER` helper functions with a fixed empty `search_path`. Public signup always creates a candidate. Only a trusted project operator may provision the first admin; never expose role assignment in public signup or client UI.
+
+## First-admin provisioning
+
+Do not promote a user until that person has signed in and their Auth user UUID has been independently verified in Supabase Authentication. A trusted project owner may then run the following in the Supabase SQL Editor, replacing the placeholder with that verified UUID:
+
+```sql
+UPDATE public.profiles
+SET role = 'admin', updated_at = now()
+WHERE id = 'REPLACE_WITH_VERIFIED_AUTH_USER_UUID'::uuid;
+```
+
+Check that exactly one intended profile was updated. Never accept a user-supplied UUID or email as proof of administrator identity. Keep the number of admins minimal. Promote moderators only through an equally trusted operator-controlled process.
+
+## Authorization test matrix
+
+The automated pgTAP suite currently verifies the application tables, RLS enablement, helper-function security/privileges, required staff/admin policies, and trigger installation/event coverage. CI runs it against a fresh local Supabase database after replaying the migrations. This structural suite does not replace end-to-end role testing.
+
+Use separate disposable accounts and verify both allowed and denied cases:
+
+- Candidate A cannot read Candidate B's profile, applications, reports or notifications.
+- Candidate A cannot set their own application to hired/rejected or edit submitted application details.
+- An employer can read applications only for that employer's jobs and can update only the application status workflow.
+- An employer cannot publish a job, approve its own verification, or read another employer's applications.
+- A moderator can review reports, verification requests and job status, but cannot change profile roles or read audit logs.
+- An admin can perform moderator actions, change profile roles and read audit logs.
+- Anonymous users can read only published jobs; they cannot read profiles, applications, reports or notifications.
+
+Do not use real candidate phone numbers or production personal data in these tests.
 
 ## Frontend environment
 
@@ -31,24 +76,12 @@ Keep these only in a local `.env.local` file (ignored by Git). A public anon/pub
 
 ## Important production work still required
 
-- Add automated SQL/RLS tests and validate every policy using separate candidate, employer and reviewer accounts.
-- Implement trusted server-side review actions for job publication, employer verification and moderation.
+- The repository now includes pgTAP schema/security regression checks and a GitHub Actions workflow that starts a clean local Supabase stack, applies all migrations, runs `supabase test db`, and runs `supabase db lint`. Extend this suite with end-to-end role impersonation tests and run the full authorization matrix above against the actual Supabase project using separate disposable accounts.
+- Implement trusted server-side review actions and audit-log writes for privileged operations.
+- Ensure the service-role key is server-only; the trigger intentionally permits trusted SQL/service-role operations when `auth.uid()` is null.
 - Add phone authentication and OTP rate limits before collecting real candidate contact details.
-- Add data retention/deletion workflows, audit logging for privileged actions, backups and monitoring.
+- Add data retention/deletion workflows, backups, monitoring and an incident-response process.
 - Review privacy notices, consent, grievance handling and applicable Indian data-protection requirements.
-- Decide how moderators/admins are securely provisioned; never let a public signup choose those roles.
+- Confirm that status changes and employer verification updates are performed transactionally by trusted workflows where multiple tables must stay in sync.
 
-This migration is a reviewed starting point, not a production-ready launch by itself.
-
-## Additional privilege-boundary protections
-
-The initial migration now also checks privileged fields on first insert, not only later updates:
-
-- New profiles must start with the `candidate` role.
-- New employer records must start with `pending` verification.
-- New verification requests must start pending and cannot include reviewer fields.
-- New job posts must start as drafts; client-side status changes are blocked.
-- Candidates may withdraw their own applications, but cannot set employer/reviewer outcomes.
-- New reports start open; users can only mark their own notification as read without editing its content.
-
-These database triggers are defense-in-depth. They do not replace trusted server-side moderation endpoints, automated SQL/RLS tests, or a full security review. Privileged service-role operations bypass the client-authenticated guard and must remain server-only.
+These migrations are a security-conscious starting point, not a production-ready launch by themselves. A full review and live authorization tests are required before collecting real user data.
