@@ -1,11 +1,12 @@
 import { useState, type FormEvent } from 'react'
 import './employer-dashboard.css'
+import { LanguageSelect, Localized, type Language } from './i18n'
 import { stateNames, getStateLabel, getDistrictOptions, type StateName } from './locations'
 
-type Props = { onBack: () => void }
+type Props = { onBack: () => void; language: Language; onLanguageChange: (language: Language) => void }
 
 
-export default function EmployerDashboard({ onBack }: Props) {
+export default function EmployerDashboard({ onBack, language, onLanguageChange }: Props) {
   const [company, setCompany] = useState('')
   const [contact, setContact] = useState('')
   const [phone, setPhone] = useState('')
@@ -25,11 +26,11 @@ export default function EmployerDashboard({ onBack }: Props) {
   }
 
   return (
-    <div className="employer-page">
+    <Localized language={language}><div className="employer-page">
       <header className="employer-header">
         <button className="back-button" onClick={onBack}>← वापस होम पर</button>
         <div className="employer-brand"><span>स</span><strong>SABKAAM <small>EMPLOYER DESK</small></strong></div>
-        <span className="preview-pill">प्रारंभिक संस्करण</span>
+        <LanguageSelect language={language} onChange={onLanguageChange} /><span className="preview-pill">प्रारंभिक संस्करण</span>
       </header>
       <main className="employer-main">
         <section className="employer-welcome">
@@ -62,6 +63,6 @@ export default function EmployerDashboard({ onBack }: Props) {
           <aside className="employer-aside"><div className="aside-card"><span className="aside-icon">✓</span><h3>अच्छी नौकरी पोस्ट कैसी हो?</h3><ul><li>वेतन साफ-साफ लिखें</li><li>काम के घंटे बताएँ</li><li>सही जगह और संपर्क दें</li><li>जरूरी योग्यता ही माँगें</li><li>कोई फीस या सिक्योरिटी जमा न माँगें</li></ul></div><div className="aside-note"><strong>उम्मीदवार का भरोसा जरूरी है</strong><p>SABKAAM पर आगे चलकर संदिग्ध पोस्ट की रिपोर्ट और नियोक्ता सत्यापन की सुविधा बनाई जाएगी।</p></div></aside>
         </div>
       </main>
-    </div>
+    </div></Localized>
   )
 }
