@@ -278,7 +278,7 @@ create or replace function public.protect_reviewed_fields()
 returns trigger
 language plpgsql
 set search_path = ''
-as $
+as $$
 begin
   if auth.uid() is null then
     return new;
