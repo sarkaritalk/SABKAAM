@@ -162,6 +162,8 @@ begin
       if new.role <> 'candidate' then
         raise exception 'New accounts must start as candidates';
       end if;
+    elsif new.id is distinct from old.id then
+      raise exception 'Profile identity cannot be changed';
     elsif new.role is distinct from old.role and not v_is_admin then
       raise exception 'Only an administrator can change account roles';
     end if;
@@ -171,9 +173,26 @@ begin
       if new.verification_status <> 'pending' then
         raise exception 'New employers must start pending verification';
       end if;
-    elsif new.verification_status is distinct from old.verification_status
-      and not v_is_staff then
-      raise exception 'Only reviewers can change employer verification status';
+    else
+      select (old.owner_id = (select auth.uid())) into v_is_job_owner;
+
+      if new.verification_status is distinct from old.verification_status
+        and not v_is_staff then
+        raise exception 'Only reviewers can change employer verification status';
+      end if;
+
+      if v_is_staff and not v_is_job_owner and (
+        new.owner_id is distinct from old.owner_id
+        or new.business_name is distinct from old.business_name
+        or new.business_type is distinct from old.business_type
+        or new.contact_phone is distinct from old.contact_phone
+        or new.district is distinct from old.district
+        or new.state_code is distinct from old.state_code
+        or new.address is distinct from old.address
+        or new.created_at is distinct from old.created_at
+      ) then
+        raise exception 'Reviewers may change employer verification status, not employer ownership or submitted business details';
+      end if;
     end if;
 
   elsif tg_table_name = 'verification_requests' then
@@ -191,6 +210,17 @@ begin
       or new.reviewed_at is distinct from old.reviewed_at
     ) and not v_is_staff then
       raise exception 'Verification review fields are managed by reviewers';
+    elsif tg_op = 'UPDATE' and v_is_staff and (
+      new.employer_id is distinct from old.employer_id
+      or new.business_name is distinct from old.business_name
+      or new.business_type is distinct from old.business_type
+      or new.contact_phone is distinct from old.contact_phone
+      or new.district is distinct from old.district
+      or new.state_code is distinct from old.state_code
+      or new.address is distinct from old.address
+      or new.created_at is distinct from old.created_at
+    ) then
+      raise exception 'Reviewers may change review fields, not submitted verification details';
     end if;
 
   elsif tg_table_name = 'job_posts' then
@@ -199,18 +229,44 @@ begin
         raise exception 'New jobs must start as unpublished drafts';
       end if;
     else
+      if new.employer_id is distinct from old.employer_id
+        or new.created_at is distinct from old.created_at then
+        raise exception 'Job ownership and creation time cannot be changed';
+      end if;
+
+      select exists (
+        select 1
+        from public.employers e
+        where e.id = old.employer_id
+          and e.owner_id = (select auth.uid())
+      ) into v_is_job_owner;
+
+      if v_is_staff and not v_is_job_owner and (
+        new.title is distinct from old.title
+        or new.category is distinct from old.category
+        or new.description is distinct from old.description
+        or new.work_type is distinct from old.work_type
+        or new.state_code is distinct from old.state_code
+        or new.district is distinct from old.district
+        or new.town_or_market is distinct from old.town_or_market
+        or new.locality is distinct from old.locality
+        or new.salary_min is distinct from old.salary_min
+        or new.salary_max is distinct from old.salary_max
+        or new.salary_period is distinct from old.salary_period
+        or new.vacancies is distinct from old.vacancies
+        or new.qualification is distinct from old.qualification
+        or new.experience is distinct from old.experience
+        or new.food_or_stay is distinct from old.food_or_stay
+        or new.expires_at is distinct from old.expires_at
+      ) then
+        raise exception 'Reviewers may change job review fields, not employer-submitted job details';
+      end if;
+
       if new.published_at is distinct from old.published_at and not v_is_staff then
         raise exception 'Only reviewers can set the publication timestamp';
       end if;
 
       if new.status is distinct from old.status then
-        select exists (
-          select 1
-          from public.employers e
-          where e.id = old.employer_id
-            and e.owner_id = (select auth.uid())
-        ) into v_is_job_owner;
-
         if v_is_staff then
           null;
         elsif v_is_job_owner
