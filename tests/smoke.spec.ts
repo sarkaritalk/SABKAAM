@@ -37,7 +37,16 @@ test.describe('SABKAAM desktop and mobile smoke tests', () => {
     expect(width).toBeLessThanOrEqual(390)
   })
 
-  test('all 36 States/UTs are available and Karnataka includes Bengaluru Urban', async ({ page }) => {\n    await page.goto('/')\n    const state = page.getByLabel('राज्य')\n    await expect(state.locator('option')).toHaveCount(36)\n    await state.selectOption('Karnataka')\n    await page.getByRole('button', { name: /काम खोजें/ }).click()\n    await expect(page.getByLabel('जिला').locator('option')).toContainText('Bengaluru Urban')\n  })\n\n  test('candidate profile form validates and updates its preview', async ({ page }) => {
+  test('all 36 States/UTs are available and Karnataka includes Bengaluru Urban', async ({ page }) => {
+    await page.goto('/')
+    const state = page.getByLabel('राज्य')
+    await expect(state.locator('option')).toHaveCount(36)
+    await state.selectOption('Karnataka')
+    await page.getByRole('button', { name: /काम खोजें/ }).click()
+    await expect(page.getByLabel('जिला').locator('option')).toContainText('Bengaluru Urban')
+  })
+
+  test('candidate profile form validates and updates its preview', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('button', { name: 'प्रोफ़ाइल' }).click()
     await page.getByLabel('आपका नाम').fill('सीमा देवी')
