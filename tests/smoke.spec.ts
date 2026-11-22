@@ -19,13 +19,13 @@ test.describe('SABKAAM desktop and mobile smoke tests', () => {
     await expect(page.getByText(/इस फ़िल्टर के लिए अभी कोई डेमो उदाहरण नहीं है/)).toBeVisible()
   })
 
-  test('employer form exposes all Bihar and Jharkhand districts and validates required fields', async ({ page }) => {
+  test('employer form exposes India-wide state and district options and validates required fields', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 })
     await page.goto('/')
     await page.getByRole('button', { name: /नौकरी देने वाले/ }).click()
     const district = page.getByLabel('जिला')
     await expect(district.locator('option')).toHaveCount(38)
-    await page.getByLabel('राज्य').selectOption('झारखंड')
+    await page.getByLabel('राज्य').selectOption('Jharkhand')
     await expect(district.locator('option')).toHaveCount(24)
     await page.getByLabel('दुकान / कंपनी का नाम').fill('टेस्ट स्टोर')
     await page.getByLabel('संपर्क व्यक्ति का नाम').fill('टेस्ट यूजर')
@@ -37,7 +37,7 @@ test.describe('SABKAAM desktop and mobile smoke tests', () => {
     expect(width).toBeLessThanOrEqual(390)
   })
 
-  test('candidate profile form validates and updates its preview', async ({ page }) => {
+  test('all 36 States/UTs are available and Karnataka includes Bengaluru Urban', async ({ page }) => {\n    await page.goto('/')\n    const state = page.getByLabel('राज्य')\n    await expect(state.locator('option')).toHaveCount(36)\n    await state.selectOption('Karnataka')\n    await page.getByRole('button', { name: /काम खोजें/ }).click()\n    await expect(page.getByLabel('जिला').locator('option')).toContainText('Bengaluru Urban')\n  })\n\n  test('candidate profile form validates and updates its preview', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('button', { name: 'प्रोफ़ाइल' }).click()
     await page.getByLabel('आपका नाम').fill('सीमा देवी')
