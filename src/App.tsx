@@ -68,11 +68,12 @@ function App() {
           <span className="brand-mark">स</span>
           <span><strong>SABKAAM</strong><small>हर काम, हर इंसान के लिए।</small></span>
         </a>
-        <div className="topbar-actions"><button className="safety-link" onClick={() => setShowSafety(!showSafety)}>{showSafety ? '← वापस' : '🛡️ सुरक्षा और शिकायत'}</button><button className="employer-link" onClick={() => setShowEmployer(true)}>नौकरी देने वाले? <span>यहाँ जाएँ ↗</span></button></div>
+        <div className="topbar-actions"><button className="safety-link" onClick={() => setShowSafety(!showSafety)}>{showSafety ? '← वापस' : '🛡️ सुरक्षा'}</button><button className="employer-link" onClick={() => setShowEmployer(true)}>नौकरी देने वाले? <span>यहाँ जाएँ ↗</span></button><span className="topbar-avatar">S</span></div>
       </header>
 
       <main>{showSafety && <SafetyCenter />}
         {(activeTab === 'मेरे आवेदन' || activeTab === 'सूचनाएँ' || activeTab === 'प्रोफ़ाइल') && <CandidateArea mode={activeTab} />}
+        {activeTab === 'AI आवेद' && <section className="ai-screen"><div className="ai-orb">✦</div><span className="section-kicker">SABKAAM SMART ASSISTANT</span><h1>आपके लिए सही काम<br/><em>ढूँढने में मदद करें?</em></h1><p>अपनी पसंद, अनुभव और जगह बताइए। AI सहायक आपको सही काम के विकल्प समझने में मदद करेगा।</p><div className="ai-suggestions"><button onClick={() => {setQuery('सेल्स');setActiveTab('होम')}}>🛍️ दुकान में काम खोजें</button><button onClick={() => {setQuery('डिलीवरी');setActiveTab('होम')}}>🛵 डिलीवरी का काम</button><button onClick={() => {setQuery('ऑफिस');setActiveTab('होम')}}>💼 ऑफिस जॉब</button></div><small>AI सुविधा का यह शुरुआती डिज़ाइन है। लाइव AI सेवा अभी कनेक्ट नहीं है।</small></section>}
         {activeTab === 'होम' && <>
         <section className="hero">
           <div className="hero-copy">
@@ -80,11 +81,7 @@ function App() {
             <h1>काम की तलाश अब<br /><em>आसान होगी।</em></h1>
             <p>अपने आसपास नौकरी, रोज़गार और काम के मौके खोजें। छोटी दुकान से लेकर बड़ी कंपनी तक — सब एक जगह।</p>
           </div>
-          <div className="hero-art" aria-hidden="true">
-            <div className="art-orbit orbit-one" /><div className="art-orbit orbit-two" />
-            <div className="art-card"><span>✦</span><strong>आपका अगला<br />मौका यहीं है</strong><small>काम खोजें · आगे बढ़ें</small></div>
-            <div className="art-bubble bubble-one">💼</div><div className="art-bubble bubble-two">📍</div>
-          </div>
+          <div className="hero-art" aria-label="अलग-अलग क्षेत्रों में काम करने वाले लोग"><div className="hero-photo"></div><span className="float-tag tag-one">💼 ऑफिस जॉब</span><span className="float-tag tag-two">🛍️ दुकान / सेल्स</span><span className="float-tag tag-three">🛠️ टेक्निकल काम</span><div className="hero-photo-caption"><b>हर हुनर के लिए एक मौका</b><small>आपका अगला कदम यहीं से</small></div></div>
         </section>
 
         <section className="search-panel" aria-label="काम खोजें">
@@ -137,7 +134,7 @@ function App() {
       </main>
 
       <nav className="bottom-nav" aria-label="मुख्य नेविगेशन">
-        {['होम', 'मेरे आवेदन', 'सूचनाएँ', 'प्रोफ़ाइल'].map((tab, index) => <button key={tab} className={activeTab === tab ? 'active' : ''} onClick={() => setActiveTab(tab)}><span>{['⌂', '▤', '♧', '◉'][index]}</span>{tab}</button>)}
+        {['होम', 'AI आवेद', 'मेरे आवेदन', 'सूचनाएँ', 'प्रोफ़ाइल'].map((tab, index) => <button key={tab} className={activeTab === tab ? 'active' : ''} onClick={() => setActiveTab(tab)}><span>{['⌂', '✦', '▤', '♧', '◉'][index]}</span>{tab}</button>)}
       </nav>
       <footer><span>© SABKAAM · Jobs, Work & Opportunities</span><span>बिहार + झारखंड · शुरुआती संस्करण</span></footer>
     </div>
