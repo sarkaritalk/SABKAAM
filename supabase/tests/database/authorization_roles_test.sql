@@ -111,11 +111,16 @@ select is((select count(*)::int from public.job_posts), 3, 'employer reads their
 select is((select count(*)::int from public.applications), 1, 'employer reads applications to their own jobs');
 select ok(not public.is_sabkaam_staff(), 'employer is not staff');
 
+-- Switch to the new employer account: the insert policy requires the
+-- authenticated owner_id to match auth.uid(), not merely an employer role.
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000007', true);
 select lives_ok(
-  $$ insert into public.employers (id, owner_id, business_name, verification_status)
-     values ('10000000-0000-0000-0000-000000000098', '00000000-0000-0000-0000-000000000007', 'Employer New Ltd', 'pending') $$,
+  $ insert into public.employers (id, owner_id, business_name, verification_status)
+     values ('10000000-0000-0000-0000-000000000098', '00000000-0000-0000-0000-000000000007', 'Employer New Ltd', 'pending') $,
   'employer-role account can create its own employer record'
 );
+-- Restore Employer A for the remaining employer-owned workflow checks.
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000003', true);
 select throws_ok(
   $$ update public.job_posts set status = 'published' where id = '30000000-0000-0000-0000-000000000002' $$,
   'P0001',
