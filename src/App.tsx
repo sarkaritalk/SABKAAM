@@ -4,10 +4,11 @@ import CandidateArea from './CandidateArea'
 import SafetyCenter from './safety-center'
 import EmployerDashboard from './EmployerDashboard'
 import AuthPanel from './AuthPanel'
+import AdminDashboard from './AdminDashboard'
 import { LanguageSelect, Localized, type Language } from './i18n'
 
 import { stateNames, getStateLabel, getDistrictOptions, getStateCode, getDistrictCode, type StateName } from './locations'
-import { backendConfigured, listPublishedJobs, readAuthSession, clearAuthSession, submitApplication, type AuthSession, type PublishedJob } from './lib/backend'
+import { backendConfigured, listPublishedJobs, readAuthSession, clearAuthSession, submitApplication, getMyProfile, type AuthSession, type PublishedJob } from './lib/backend'
 
 type Category = { name: string; icon: string; count: string }
 type JobListing = { id?: string; title: string; state: string; district?: string; company: string; place: string; pay: string; type: string; category: string; description?: string; isDemo?: boolean }
@@ -37,6 +38,8 @@ const demoJobs: JobListing[] = [
 function App() {
   const [session, setSession] = useState<AuthSession | null>(() => readAuthSession())
   const [showAuth, setShowAuth] = useState(false)
+  const [accountRole, setAccountRole] = useState('')
+  const [showAdmin, setShowAdmin] = useState(false)
   const [liveApplyBusy, setLiveApplyBusy] = useState(false)
   const [liveApplyMessage, setLiveApplyMessage] = useState('')
   const [language, setLanguage] = useState<Language>(() => { const saved = localStorage.getItem('sabkaam-language'); return saved === 'en' || saved === 'hinglish' ? saved : 'hi' })
@@ -63,6 +66,7 @@ function App() {
     return matchesQuery && matchesCategory && matchesState && matchesLocation
   }), [query, selectedCategory, stateName, district, liveJobs])
 
+  useEffect(() => { if (!session) { setAccountRole(''); return } getMyProfile(session.access_token, session.user.id).then(profile => setAccountRole(profile?.role ?? '')).catch(() => setAccountRole('')) }, [session?.access_token])
   useEffect(() => {
     if (!backendConfigured) { setLiveJobs([]); return }
     let cancelled = false
@@ -84,6 +88,8 @@ function App() {
   }, [stateName, district, language])
 
   function changeLanguage(next: Language) { setLanguage(next); localStorage.setItem('sabkaam-language', next) }
+
+  if (showAdmin && session) return <AdminDashboard session={session} language={language} onBack={() => setShowAdmin(false)} />
 
   if (showEmployer) return <><EmployerDashboard onBack={() => setShowEmployer(false)} language={language} onLanguageChange={changeLanguage} session={session} onSignIn={() => setShowAuth(true)} onSignOut={() => { clearAuthSession(); setSession(null) }} />{showAuth && <AuthPanel language={language} onClose={() => setShowAuth(false)} onSuccess={(nextSession) => { setSession(nextSession); setShowAuth(false) }} />}</>
 
