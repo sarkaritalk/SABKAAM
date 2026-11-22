@@ -23,9 +23,27 @@ export default function EmployerDashboard({ onBack, language, onLanguageChange, 
   const [submitMessage, setSubmitMessage] = useState('')
   useEffect(() => { const options = getDistrictOptions(stateName, language); if (!options.includes(district)) setDistrict(options[0] ?? '') }, [stateName, language])
 
-  function submit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    setSuccess(true)
+    setSuccess(false)
+    setSubmitMessage('')
+    if (!session) { setSubmitMessage('पोस्ट भेजने के लिए employer account से लॉगिन करें।'); onSignIn(); return }
+    if (session.user.user_metadata?.account_type !== 'employer') { setSubmitMessage('इस खाते का प्रकार candidate है। Employer खाता बनाकर लॉगिन करें।'); return }
+    try {
+      let employer = await getMyEmployer(session.access_token, session.user.id)
+      if (!employer) {
+        const created = await createEmployer(session.access_token, { owner_id: session.user.id, business_name: company, business_type: category, contact_phone: phone, state_lgd_code: getStateCode(stateName), district_lgd_code: getDistrictCode(stateName, district, language) ?? 0, district })
+        employer = created[0]
+      }
+      if (!employer?.id) throw new Error('Employer profile could not be created.')
+      const numbers = salary.match(/[0-9]+/g)?.map(Number) ?? []
+      const workTypes: Record<string, string> = { 'फुल टाइम': 'full_time', 'पार्ट टाइम': 'part_time', 'दैनिक मजदूरी': 'daily_wage', 'वर्क फ्रॉम होम': 'work_from_home', 'कॉन्ट्रैक्ट': 'contract' }
+      const draft = await createJobDraft(session.access_token, { employer_id: employer.id, title, category, description: description || title, work_type: workTypes[workType] ?? 'full_time', state_lgd_code: getStateCode(stateName), district_lgd_code: getDistrictCode(stateName, district, language) ?? 0, district, salary_min: numbers[0], salary_max: numbers[1] ?? numbers[0], salary_period: 'month', vacancies: Number(vacancies) || 1 })
+      if (!draft[0]?.id) throw new Error('Job draft could not be created.')
+      await submitJobForReview(session.access_token, draft[0].id)
+      setSuccess(true)
+      setSubmitMessage('नौकरी समीक्षा के लिए भेज दी गई है। स्वीकृति से पहले यह सार्वजनिक नहीं होगी।')
+    } catch (error) { setSubmitMessage(error instanceof Error ? error.message : 'नौकरी भेजी नहीं जा सकी।') }
   }
 
   return (
