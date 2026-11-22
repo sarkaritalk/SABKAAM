@@ -100,6 +100,17 @@ test.describe('SABKAAM desktop and mobile smoke tests', () => {
     await expect(page.getByText(/डेमो आवेदन तैयार हुआ/)).toBeVisible()
   })
 
+
+  test('premium category cards open a detail popup and AI applicant tab is available', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('button', { name: /दुकान और रिटेल/ }).click()
+    await expect(page.getByRole('dialog')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'दुकान और रिटेल' })).toBeVisible()
+    await page.getByRole('button', { name: /इस क्षेत्र के काम देखें/ }).click()
+    await page.getByRole('button', { name: 'AI आवेदक' }).click()
+    await expect(page.getByRole('heading', { name: /आपके लिए सही काम/ })).toBeVisible()
+  })
+
   test('safety report form supports demo fallback without backend credentials', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('button', { name: /सुरक्षा और शिकायत/ }).click()
