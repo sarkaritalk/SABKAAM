@@ -586,3 +586,56 @@ footer{color:#a7beb5}
 .gateway-reassurance{color:#d0dfd8}.gateway-reassurance span{background:#34775f}
 .gateway-last-choice{color:#a7beb5}.gateway-last-choice strong{color:#f0d58e}
 .gateway-footer{color:#9db7ad}
+
+
+/* SABKAAM accessibility polish — preserve the established Deep Teal / Gold / Ivory design */
+.hero h1 {
+  color: #f8f7f1;
+  font-weight: 900;
+  text-shadow: 0 2px 12px #082b27a8;
+}
+.hero h1 em {
+  font-weight: 900;
+  text-shadow: 0 1px 8px #082b2766;
+}
+.area-query-field input {
+  color: #172f2b;
+  font-weight: 700;
+}
+.area-query-field input::placeholder {
+  color: #394d45;
+  opacity: 1;
+  font-weight: 700;
+}
+.category-card strong {
+  color: #fffdf5;
+  font-weight: 800;
+  line-height: 1.45;
+}
+.category-card small {
+  color: #e0e8df;
+  font-weight: 600;
+}
+@media (max-width: 560px) {
+  .category-card strong { font-size: 11px; font-weight: 800; }
+  .category-card small { font-size: 9px; color: #e0e8df; }
+}
+.safety-link {
+  color: #fffdf5;
+  font-weight: 800;
+}
+.app-shell[data-safety-open="true"] .safety-link {
+  background: #d5a84b;
+  color: #102f2b;
+  border-color: #f0d58e;
+  box-shadow: 0 4px 14px #061e1b55;
+}
+.gateway-brand small,
+.brand-intro-lockup small {
+  color: #f1ead7;
+  font-weight: 700;
+}
+.gateway-footer {
+  color: #c5d4cb;
+  font-weight: 600;
+}
