@@ -58,7 +58,7 @@ export default function CandidateArea({ mode, language, session, onSignIn }: { m
         <button type="submit">प्रोफ़ाइल सेव करें →</button>
         {profileMessage && <p className="profile-saved" role="status">{profileMessage}</p>}
       </form>
-      <aside className="profile-side"><div className="profile-avatar">👤</div><strong>{name || 'आपका नाम'}</strong><span>{district} · {getStateLabel(stateName, language)} · {workType}</span><p>{skills || 'आपकी स्किल यहाँ दिखाई देंगी।'}</p><small>प्रोफ़ाइल प्रीव्यू · केवल इसी स्क्रीन पर</small></aside>
+      <aside className="profile-side"><div className="profile-avatar">👤</div><strong>{name || 'आपका नाम'}</strong><span>{district} · {getStateLabel(stateName, language)} · {workType}</span><p>{skills || 'आपकी स्किल यहाँ दिखाई देंगी।'}</p><small>{session ? 'प्रोफ़ाइल आपके खाते में सुरक्षित है।' : 'प्रोफ़ाइल प्रीव्यू · केवल इसी स्क्रीन पर'}</small></aside>
     </div>
     <p className="candidate-privacy">आपकी सहमति के बिना मोबाइल नंबर या निजी जानकारी किसी नियोक्ता के साथ साझा नहीं की जानी चाहिए।</p>
   </section></Localized>
