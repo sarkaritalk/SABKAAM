@@ -189,9 +189,26 @@ export async function submitSafetyReport(accessToken: string, payload: {
 }
 
 export async function getMyApplications(accessToken: string) {
-  return request<Array<{ id: string; job_id: string; status: string; created_at: string }>>(
-    '/rest/v1/applications?select=id,job_id,status,created_at&order=created_at.desc',
+  return request<Array<{ id: string; job_id: string; status: string; created_at: string; job_posts?: { title: string; district: string } | null }>>(
+    '/rest/v1/applications?select=id,job_id,status,created_at,job_posts(title,district)&order=created_at.desc',
     { accessToken },
+  )
+}
+
+
+export async function updateMyProfile(accessToken: string, userId: string, payload: {
+  full_name: string; phone: string; district: string; state_code: string
+  state_lgd_code: number; district_lgd_code: number; preferred_language: string
+}) {
+  return request<Array<{ id: string }>>(`/rest/v1/profiles?id=eq.${encodeURIComponent(userId)}`, {
+    method: 'PATCH', accessToken, prefer: 'return=representation', body: payload,
+  })
+}
+
+export async function markNotificationRead(accessToken: string, notificationId: string) {
+  return request<Array<{ id: string; read_at: string | null }>>(
+    `/rest/v1/notifications?id=eq.${encodeURIComponent(notificationId)}`,
+    { method: 'PATCH', accessToken, prefer: 'return=representation', body: { read_at: new Date().toISOString() } },
   )
 }
 
