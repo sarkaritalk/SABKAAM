@@ -1,76 +1,47 @@
-# India location catalogue — source and validation plan
+# India location catalogue
 
-## Scope
+## Implemented catalogue
 
-SABKAAM location search is intended to cover all Indian States and Union Territories, with a dependent district selector. Bengaluru is a city in Karnataka, not a State; city/locality must remain a separate location level from State and district.
+SABKAAM now ships a static, client-side State/UT → District catalogue in `src/data/india-locations.json`.
 
-## Source of truth
+- State/Union Territory entries: **36**
+- District records: **785**
+- Each district record retains its LGD district code, English name, and local-language name when the source provides one.
+- State records retain their LGD state code.
+- The data is used by the job-search filters, employer job-post form, candidate profile, and employer-verification request form.
+- Bengaluru is correctly treated as a city in Karnataka, not as a State/UT or district.
 
-- Primary authority: Government of India, Ministry of Panchayati Raj, Local Government Directory (LGD): https://www.data.gov.in/catalog/local-government-directory-lgd
-- Snapshot cross-check used for this implementation plan: 30 October 2026 LGD snapshot presented at https://guessthedistrict.in/en/states
-- The cross-check page reports 790 districts across 36 States/UTs. It identifies LGD as its district-list source. Use the LGD export itself for production ingestion where available; do not treat third-party boundary files as the legal source of administrative names.
+## Source and snapshot caveat
 
-## Snapshot manifest (30 October 2026)
+The authoritative source is the Government of India Ministry of Panchayati Raj Local Government Directory (LGD), published through the Open Government Data platform:
 
-| State / Union Territory | Districts |
-|---|---:|
-| Andaman and Nicobar Islands | 3 |
-| Andhra Pradesh | 28 |
-| Arunachal Pradesh | 27 |
-| Assam | 35 |
-| Bihar | 38 |
-| Chandigarh | 1 |
-| Chhattisgarh | 33 |
-| Dadra and Nagar Haveli and Daman and Diu | 3 |
-| Delhi | 13 |
-| Goa | 3 |
-| Gujarat | 34 |
-| Haryana | 23 |
-| Himachal Pradesh | 12 |
-| Jammu and Kashmir | 20 |
-| Jharkhand | 24 |
-| Karnataka | 31 |
-| Kerala | 14 |
-| Ladakh | 8 |
-| Lakshadweep | 1 |
-| Madhya Pradesh | 55 |
-| Maharashtra | 36 |
-| Manipur | 16 |
-| Meghalaya | 12 |
-| Mizoram | 11 |
-| Nagaland | 17 |
-| Odisha | 30 |
-| Puducherry | 2 |
-| Punjab | 23 |
-| Rajasthan | 41 |
-| Sikkim | 6 |
-| Tamil Nadu | 38 |
-| Telangana | 33 |
-| Tripura | 8 |
-| Uttar Pradesh | 75 |
-| Uttarakhand | 13 |
-| West Bengal | 23 |
-| **Total** | **790** |
+- LGD catalogue: https://www.data.gov.in/catalog/local-government-directory-lgd
+- District resource: https://www.data.gov.in/resource/local-government-directory-lgd-districts
+- Ministry description of LGD and its location-code hierarchy: https://panchayat.gov.in/lgd/
 
-## Data quality rules
+The imported rows came from a CSV mirror of the OGD district resource, whose columns include `state_code`, `state_name_english`, `district_code`, `district_name_english`, and `district_name_local`. The mirror file does not expose a reliable publication timestamp, so **785 is the count of the imported snapshot, not a guarantee of the live LGD count on every future date**. The OGD catalogue says the state and district resources are updated monthly. Before production launch, refresh from the latest official LGD/OGD export and compare the resulting codes and counts.
 
-1. Keep stable machine identifiers separate from localized display names.
-2. Store English and Hindi district labels; do not infer Hindi spellings from transliteration at runtime.
-3. Preserve the LGD State/UT and district identifiers in the imported catalogue.
-4. Validate that all 36 State/UT entries exist, each district belongs to exactly one parent State/UT, and the imported snapshot total is 790.
-5. Treat a newly announced district as unavailable until it appears in the chosen LGD snapshot; record the snapshot date.
-6. Do not infer district boundaries from a district name. City/locality (for example Bengaluru) is a separate optional field.
-7. Search should match district name in English and Hindi and should be scoped by the selected State/UT.
+## Data quality and product rules
 
-## Product integration checklist
+1. Preserve LGD codes as stable identifiers; never use translated display names as database keys.
+2. Use the provided local-language name when available; otherwise show the official English name rather than inventing a translation.
+3. A district belongs to the State/UT recorded in the same LGD row.
+4. Keep city/locality separate from State/UT and district. Example: Bengaluru is a city in Karnataka.
+5. Search and employer forms must use the same catalogue so locations stay consistent.
+6. When LGD adds, renames, merges, or retires a district, update the bundled snapshot and record the new source date.
 
-- [ ] Replace the Bihar/Jharkhand-only catalogue with a verified LGD export.
-- [ ] Add a single State/UT selector and a dependent, searchable district selector.
-- [ ] Apply the same location catalogue to job search, candidate profile, employer posting, and safety/report forms.
-- [ ] Keep city/locality as a separate optional field.
-- [ ] Add automated checks for 36 State/UTs, 790 districts, unique LGD IDs, and representative searches (Madhubani, Mumbai, Chennai, Bengaluru).
-- [ ] Display the catalogue snapshot date in internal admin/data documentation.
+## Implemented UI coverage
 
-## Important status note
+- [x] State/UT selector covering all 36 entries.
+- [x] Dependent district selector covering all 785 imported records.
+- [x] Job search filters use the selected State/UT and district.
+- [x] Employer job-post form uses the same State/UT and district catalogue.
+- [x] Candidate profile uses the same State/UT and district catalogue.
+- [x] Employer verification request uses the same State/UT and district catalogue.
+- [ ] Add a searchable type-ahead district control for very long lists.
+- [ ] Add an automated data-integrity test for unique LGD codes and parent relationships.
+- [ ] Refresh from the latest official OGD export immediately before production launch.
 
-This document records the source, snapshot manifest, and acceptance checks. It does not itself import the 790 district records or activate live job search. The current UI remains a prototype until the catalogue and application data are connected.
+## Runtime status
+
+The catalogue and selectors work in the frontend prototype. This does not make job publishing, applications, employer verification, or complaint submission live; those workflows still require the production backend and admin review process.
