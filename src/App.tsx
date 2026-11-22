@@ -133,7 +133,7 @@ function App() {
 
   function chooseWorkArea(suggestion: WorkAreaSuggestion) {
     setStateName(suggestion.state)
-    const localizedDistrict = getDistrictOptions(suggestion.state, language).find(label => getDistrictEnglishName(suggestion.state, label, language) === suggestion.district) ?? suggestion.district
+    const localizedDistrict = suggestion.district === '*' ? 'सभी जिले' : getDistrictOptions(suggestion.state, language).find(label => getDistrictEnglishName(suggestion.state, label, language) === suggestion.district) ?? suggestion.district
     setDistrict(localizedDistrict)
     setAreaQuery(suggestion.area)
     setShowAreaSuggestions(false)
@@ -145,7 +145,7 @@ function App() {
     const exactCity = areaSuggestions.find(item => normalizeWorkAreaQuery(item.city) === normalized && normalizeWorkAreaQuery(item.area) === normalized)
     if (exactCity) {
       setStateName(exactCity.state)
-      const localizedDistrict = getDistrictOptions(exactCity.state, language).find(label => getDistrictEnglishName(exactCity.state, label, language) === exactCity.district) ?? exactCity.district
+      const localizedDistrict = exactCity.district === '*' ? 'सभी जिले' : getDistrictOptions(exactCity.state, language).find(label => getDistrictEnglishName(exactCity.state, label, language) === exactCity.district) ?? exactCity.district
       setDistrict(localizedDistrict)
       setAppliedAreaQuery('')
     } else {
