@@ -64,6 +64,20 @@ test.describe('SABKAAM desktop and mobile smoke tests', () => {
     await expect(page.getByLabel('जिला').locator('option', { hasText: 'Bengaluru Urban' })).toHaveCount(1)
   })
 
+  test('all State/UT district dropdowns sum to the imported LGD snapshot', async ({ page }) => {
+    await page.goto('/')
+    const state = page.getByLabel('राज्य')
+    const district = page.getByLabel('जिला')
+    const values = await state.locator('option').evaluateAll(options => options.map(option => (option as HTMLOptionElement).value))
+    expect(values).toHaveLength(36)
+    let totalDistricts = 0
+    for (const value of values) {
+      await state.selectOption(value)
+      totalDistricts += (await district.locator('option').count()) - 1
+    }
+    expect(totalDistricts).toBe(785)
+  })
+
   test('candidate profile form validates and updates its preview', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('button', { name: 'प्रोफ़ाइल' }).click()
