@@ -170,7 +170,7 @@ export async function createJobDraft(accessToken: string, payload: {
   salary_min?: number; salary_max?: number; salary_period?: string; vacancies: number
 }) {
   return request<Array<{ id: string; status: string }>>('/rest/v1/job_posts', {
-    method: 'POST', accessToken, prefer: 'return=representation', body: { ...payload, status: 'draft' },
+    method: 'POST', accessToken, prefer: 'return=representation', body: { ...payload, state_code: String(payload.state_lgd_code), status: 'draft' },
   })
 }
 
