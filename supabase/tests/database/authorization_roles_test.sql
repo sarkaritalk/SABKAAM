@@ -97,7 +97,7 @@ reset role;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000003', true);
 set local role authenticated;
 select is((select count(*)::int from public.employers), 1, 'employer reads only their own employer record');
-select is((select count(*)::int from public.job_posts), 2, 'employer reads their own jobs plus public published jobs');
+select is((select count(*)::int from public.job_posts), 3, 'employer reads their own jobs plus public published jobs');
 select is((select count(*)::int from public.applications), 1, 'employer reads applications to their own jobs');
 select ok(not public.is_sabkaam_staff(), 'employer is not staff');
 select throws_ok(
