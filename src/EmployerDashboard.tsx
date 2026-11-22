@@ -33,13 +33,13 @@ export default function EmployerDashboard({ onBack, language, onLanguageChange, 
     try {
       let employer = await getMyEmployer(session.access_token, session.user.id)
       if (!employer) {
-        const created = await createEmployer(session.access_token, { owner_id: session.user.id, business_name: company, business_type: category, contact_phone: phone, state_lgd_code: getStateCode(stateName), district_lgd_code: getDistrictCode(stateName, district, language) ?? 0, district })
+        const created = await createEmployer(session.access_token, { owner_id: session.user.id, business_name: company, business_type: category, contact_person: contact, contact_phone: phone, state_lgd_code: getStateCode(stateName), district_lgd_code: getDistrictCode(stateName, district, language) ?? 0, district })
         employer = created[0]
       }
       if (!employer?.id) throw new Error('Employer profile could not be created.')
-      const numbers = salary.match(/[0-9]+/g)?.map(Number) ?? []
+      const numbers = salary.replace(/,/g, '').match(/[0-9]+/g)?.map(Number) ?? []
       const workTypes: Record<string, string> = { 'फुल टाइम': 'full_time', 'पार्ट टाइम': 'part_time', 'दैनिक मजदूरी': 'daily_wage', 'वर्क फ्रॉम होम': 'work_from_home', 'कॉन्ट्रैक्ट': 'contract' }
-      const draft = await createJobDraft(session.access_token, { employer_id: employer.id, title, category, description: description || title, work_type: workTypes[workType] ?? 'full_time', state_lgd_code: getStateCode(stateName), district_lgd_code: getDistrictCode(stateName, district, language) ?? 0, district, salary_min: numbers[0], salary_max: numbers[1] ?? numbers[0], salary_period: 'month', vacancies: Number(vacancies) || 1 })
+      const draft = await createJobDraft(session.access_token, { employer_id: employer.id, title, category, description: description || title, work_type: workTypes[workType] ?? 'full_time', state_lgd_code: getStateCode(stateName), district_lgd_code: getDistrictCode(stateName, district, language) ?? 0, district, salary_min: numbers[0], salary_max: numbers[1] ?? numbers[0], salary_period: workType === 'दैनिक मजदूरी' ? 'day' : 'month', vacancies: Number(vacancies) || 1 })
       if (!draft[0]?.id) throw new Error('Job draft could not be created.')
       await submitJobForReview(session.access_token, draft[0].id)
       setSuccess(true)
@@ -56,7 +56,7 @@ export default function EmployerDashboard({ onBack, language, onLanguageChange, 
       </header>
       <main className="employer-main">
         <section className="employer-welcome">
-          <div><span className="employer-kicker">नियोक्ता डैशबोर्ड</span><h1>अपनी टीम के लिए<br /><em>सही लोग खोजें।</em></h1><p>अपने यहाँ खाली पद की जानकारी भरें। अभी यह केवल फॉर्म का डेमो है; नौकरी ऑनलाइन प्रकाशित नहीं होगी।</p></div>
+          <div><span className="employer-kicker">नियोक्ता डैशबोर्ड</span><h1>अपनी टीम के लिए<br /><em>सही लोग खोजें।</em></h1><p>{backendConfigured ? 'खाली पद की जानकारी भरें। पोस्ट समीक्षा के लिए जाएगी और स्वीकृति के बाद ही प्रकाशित होगी।' : 'अपने यहाँ खाली पद की जानकारी भरें। यह फॉर्म अभी preview mode में है; नौकरी ऑनलाइन प्रकाशित नहीं होगी।'}</p></div>
           <div className="employer-stat"><span>✦</span><strong>आसान भर्ती</strong><small>स्थानीय लोगों तक पहुँचने का लक्ष्य</small></div>
         </section>
         <div className="employer-layout">
@@ -79,10 +79,10 @@ export default function EmployerDashboard({ onBack, language, onLanguageChange, 
               <label>कुल पद<input type="number" min="1" max="500" value={vacancies} onChange={e => setVacancies(e.target.value)} /></label>
               <label className="full-field">काम और योग्यता का विवरण<textarea rows={4} value={description} onChange={e => setDescription(e.target.value)} placeholder="काम क्या होगा? अनुभव या योग्यता चाहिए? खाना/रहना मिलेगा? काम के घंटे क्या होंगे?" /></label>
             </div>
-            <div className="form-actions"><p>आगे चलकर पोस्ट करने से पहले मोबाइल सत्यापन और नौकरी की समीक्षा जोड़ी जाएगी।</p><button type="submit">डेमो पोस्ट का प्रीव्यू देखें <span>→</span></button></div>
-            {submitMessage && <div className="form-success" role="status"><strong>{submitMessage}</strong></div>}{success && <div className="form-success" role="status"><strong>प्रीव्यू तैयार है — अभी प्रकाशित नहीं हुआ।</strong><p>{title || 'नया पद'} · {company || 'आपकी कंपनी'} · {district}, {getStateLabel(stateName, language)}</p><small>{backendConfigured ? 'यह जानकारी सुरक्षित रूप से सेव हुई है और समीक्षा के बाद ही प्रकाशित होगी।' : 'यह जानकारी केवल preview में दिखाई गई है; सेव नहीं हुई।'}</small></div>}
+            <div className="form-actions"><p>{backendConfigured ? 'पोस्ट पहले समीक्षा कतार में जाएगी। स्वीकृति के बाद ही उम्मीदवार इसे देख पाएँगे।' : 'यह preview mode है। Backend connect होने पर वास्तविक पोस्टिंग शुरू होगी।'}</p><button type="submit">{backendConfigured ? 'नौकरी समीक्षा के लिए भेजें' : 'डेमो पोस्ट का प्रीव्यू देखें'} <span>→</span></button></div>
+            {submitMessage && <div className="form-success" role="status"><strong>{submitMessage}</strong></div>}{success && <div className="form-success" role="status"><strong>{backendConfigured ? 'पोस्ट समीक्षा के लिए भेजी गई — अभी प्रकाशित नहीं हुई।' : 'प्रीव्यू तैयार है — अभी प्रकाशित नहीं हुआ।'}</strong><p>{title || 'नया पद'} · {company || 'आपकी कंपनी'} · {district}, {getStateLabel(stateName, language)}</p><small>{backendConfigured ? 'यह जानकारी सुरक्षित रूप से सेव हुई है और समीक्षा के बाद ही प्रकाशित होगी।' : 'यह जानकारी केवल preview में दिखाई गई है; सेव नहीं हुई।'}</small></div>}
           </form>
-          <aside className="employer-aside"><div className="aside-card"><span className="aside-icon">✓</span><h3>अच्छी नौकरी पोस्ट कैसी हो?</h3><ul><li>वेतन साफ-साफ लिखें</li><li>काम के घंटे बताएँ</li><li>सही जगह और संपर्क दें</li><li>जरूरी योग्यता ही माँगें</li><li>कोई फीस या सिक्योरिटी जमा न माँगें</li></ul></div><div className="aside-note"><strong>उम्मीदवार का भरोसा जरूरी है</strong><p>SABKAAM पर आगे चलकर संदिग्ध पोस्ट की रिपोर्ट और नियोक्ता सत्यापन की सुविधा बनाई जाएगी।</p></div></aside>
+          <aside className="employer-aside"><div className="aside-card"><span className="aside-icon">✓</span><h3>अच्छी नौकरी पोस्ट कैसी हो?</h3><ul><li>वेतन साफ-साफ लिखें</li><li>काम के घंटे बताएँ</li><li>सही जगह और संपर्क दें</li><li>जरूरी योग्यता ही माँगें</li><li>कोई फीस या सिक्योरिटी जमा न माँगें</li></ul></div><div className="aside-note"><strong>उम्मीदवार का भरोसा जरूरी है</strong><p>SABKAAM पर संदिग्ध पोस्ट की रिपोर्ट और नियोक्ता सत्यापन की सुविधा उपलब्ध है।</p></div></aside>
         </div>
       </main>
     </div></Localized>
