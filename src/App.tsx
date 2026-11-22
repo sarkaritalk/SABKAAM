@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
 import './job-apply.css'
-import './premium-theme.css'
 import CandidateArea from './CandidateArea'
 import SafetyCenter from './safety-center'
 import EmployerDashboard from './EmployerDashboard'
@@ -131,7 +130,7 @@ function App() {
   if (showBrandIntro) return <div className="brand-intro-screen" role="status" aria-label="SABKAAM खुल रहा है">
     <div className="brand-intro-glow brand-intro-glow-one" /><div className="brand-intro-glow brand-intro-glow-two" />
     <div className="brand-intro-orbit brand-intro-orbit-one" /><div className="brand-intro-orbit brand-intro-orbit-two" />
-    <div className="brand-intro-lockup"><img src="/sabkaam-mark.svg" alt="" /><span><strong>SABKAAM</strong><small>हर काम, हर इंसान के लिए।</small></span></div>
+    <div className="brand-intro-lockup"><img src={`${import.meta.env.BASE_URL}sabkaam-mark.svg`} alt="" /><span><strong>SABKAAM</strong><small>हर काम, हर इंसान के लिए।</small></span></div>
     <div className="brand-intro-progress"><span /></div>
     <p>काम के नए अवसर खुल रहे हैं</p>
     <small className="brand-intro-foot">JOBS · WORK · OPPORTUNITIES</small>
