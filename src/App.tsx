@@ -48,6 +48,7 @@ function App() {
   const [voiceStatus, setVoiceStatus] = useState<'idle' | 'listening' | 'unsupported' | 'error'>('idle')
   const [query, setQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('')
+  const [selectedCategoryInfo, setSelectedCategoryInfo] = useState<Category | null>(null)
   const [activeTab, setActiveTab] = useState('होम')
   const [showDemo, setShowDemo] = useState(false)
   const [selectedJob, setSelectedJob] = useState<JobListing | null>(null)
@@ -135,6 +136,7 @@ function App() {
 
       <main>{showSafety && <SafetyCenter language={language} session={session} onSignIn={() => setShowAuth(true)} />}
         {(activeTab === 'मेरे आवेदन' || activeTab === 'सूचनाएँ' || activeTab === 'प्रोफ़ाइल') && <CandidateArea mode={activeTab} language={language} session={session} onSignIn={() => setShowAuth(true)} />}
+        {activeTab === 'AI आवेदक' && <section className="ai-screen"><div className="ai-orb">✦</div><span className="section-kicker">SABKAAM SMART ASSISTANT</span><h1>आपके लिए सही काम<br/><em>ढूँढने में मदद करें?</em></h1><p>अपनी पसंद, अनुभव और जगह बताइए। AI सहायक आपको सही काम के विकल्प समझने में मदद करेगा।</p><div className="ai-suggestions"><button onClick={() => { setQuery('सेल्स'); setActiveTab('होम'); setShowDemo(true) }}>🛍️ दुकान में काम खोजें</button><button onClick={() => { setQuery('डिलीवरी'); setActiveTab('होम'); setShowDemo(true) }}>🛵 डिलीवरी का काम</button><button onClick={() => { setQuery('ऑफिस'); setActiveTab('होम'); setShowDemo(true) }}>💼 ऑफिस जॉब</button></div><small>AI सुविधा का यह शुरुआती डिज़ाइन है। लाइव AI सेवा अभी कनेक्ट नहीं है।</small></section>}
         {activeTab === 'होम' && <>
         <section className="hero">
           <div className="hero-copy">
@@ -164,12 +166,27 @@ function App() {
           <div className="section-heading"><div><span className="section-kicker">हर तरह के काम</span><h2>आप किस क्षेत्र में काम चाहते हैं?</h2></div><button className="text-link" onClick={() => { setSelectedCategory(''); setShowDemo(true); }}>सभी श्रेणियाँ <span>→</span></button></div>
           <div className="category-grid">
             {categories.map((category, index) => (
-              <button className={`category-card ${selectedCategory === category.name ? 'selected' : ''}`} key={category.name} onClick={() => { setSelectedCategory(selectedCategory === category.name ? '' : category.name); setShowDemo(true); }} aria-pressed={selectedCategory === category.name}>
+              <button className={`category-card ${selectedCategory === category.name ? 'selected' : ''}`} key={category.name} onClick={() => { setSelectedCategory(category.name); setShowDemo(true); setSelectedCategoryInfo(category) }} aria-pressed={selectedCategory === category.name}>
                 <span className={`category-icon tone-${index % 4}`}>{category.icon}</span><strong>{category.name}</strong><small>{category.count}</small><span className="card-arrow">↗</span>
               </button>
             ))}
           </div>
+
         </section>
+
+        {selectedCategoryInfo && <div className="category-overlay" role="presentation" onClick={() => setSelectedCategoryInfo(null)}>
+          <section className="category-modal" role="dialog" aria-modal="true" aria-labelledby="category-modal-title" onClick={event => event.stopPropagation()}>
+            <button className="modal-close" onClick={() => setSelectedCategoryInfo(null)} aria-label="बंद करें">×</button>
+            <div className="category-modal-icon">{selectedCategoryInfo.icon}</div>
+            <span className="section-kicker">SABKAAM · काम की श्रेणी</span>
+            <h2 id="category-modal-title">{selectedCategoryInfo.name}</h2>
+            <p>{selectedCategoryInfo.count} से जुड़े अवसर इस श्रेणी में मिलेंगे। अपना राज्य और जिला चुनकर नज़दीकी काम खोजें।</p>
+            <div className="category-modal-actions">
+              <button className="category-modal-primary" onClick={() => { setSelectedCategoryInfo(null); setActiveTab('होम'); setShowDemo(true) }}>इस क्षेत्र के काम देखें <span>→</span></button>
+              <button className="category-modal-secondary" onClick={() => { setSelectedCategory(''); setSelectedCategoryInfo(null) }}>दूसरी श्रेणी चुनें</button>
+            </div>
+          </section>
+        </div>}
 
         {showDemo && <section className="jobs-section">
           <div className="section-heading"><div><span className="section-kicker">{backendConfigured ? "Live listings" : "उदाहरण के लिए"}</span><h2>{backendConfigured ? "उपलब्ध नौकरियाँ" : "काम के नमूने"}</h2></div><span className="demo-label">{backendConfigured ? "प्रकाशित नौकरी" : "डेमो डेटा · असली नौकरी नहीं"}</span></div>
@@ -218,7 +235,7 @@ function App() {
 
       {showAuth && <AuthPanel language={language} onClose={() => setShowAuth(false)} onSuccess={(nextSession) => { setSession(nextSession); setShowAuth(false) }} />}
       <nav className="bottom-nav" aria-label="मुख्य नेविगेशन">
-        {['होम', 'मेरे आवेदन', 'सूचनाएँ', 'प्रोफ़ाइल'].map((tab, index) => <button key={tab} className={activeTab === tab ? 'active' : ''} onClick={() => setActiveTab(tab)}><span>{['⌂', '▤', '♧', '◉'][index]}</span>{tab}</button>)}
+        {['होम', 'AI आवेदक', 'मेरे आवेदन', 'सूचनाएँ', 'प्रोफ़ाइल'].map((tab, index) => <button key={tab} className={activeTab === tab ? 'active' : ''} onClick={() => { setActiveTab(tab); setSelectedCategoryInfo(null) }}><span>{['⌂', '✦', '▤', '♧', '◉'][index]}</span>{tab}</button>)}
       </nav>
       <footer><span>© SABKAAM · Jobs, Work & Opportunities</span><span>भारत · शुरुआती संस्करण</span></footer>
     </div></Localized>
