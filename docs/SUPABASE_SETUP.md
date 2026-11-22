@@ -39,3 +39,16 @@ Keep these only in a local `.env.local` file (ignored by Git). A public anon/pub
 - Decide how moderators/admins are securely provisioned; never let a public signup choose those roles.
 
 This migration is a reviewed starting point, not a production-ready launch by itself.
+
+## Additional privilege-boundary protections
+
+The initial migration now also checks privileged fields on first insert, not only later updates:
+
+- New profiles must start with the `candidate` role.
+- New employer records must start with `pending` verification.
+- New verification requests must start pending and cannot include reviewer fields.
+- New job posts must start as drafts; client-side status changes are blocked.
+- Candidates may withdraw their own applications, but cannot set employer/reviewer outcomes.
+- New reports start open; users can only mark their own notification as read without editing its content.
+
+These database triggers are defense-in-depth. They do not replace trusted server-side moderation endpoints, automated SQL/RLS tests, or a full security review. Privileged service-role operations bypass the client-authenticated guard and must remain server-only.
