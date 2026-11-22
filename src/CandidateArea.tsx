@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import './candidate-area.css'
+import { stateNames, getStateLabel, getDistrictOptions, type StateName } from './locations'
 
 type Mode = 'मेरे आवेदन' | 'सूचनाएँ' | 'प्रोफ़ाइल'
 
@@ -11,6 +12,7 @@ const sampleApplications = [
 export default function CandidateArea({ mode }: { mode: Mode }) {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
+  const [stateName, setStateName] = useState<StateName>('Bihar')
   const [district, setDistrict] = useState('मधुबनी')
   const [skills, setSkills] = useState('')
   const [workType, setWorkType] = useState('फुल टाइम')
@@ -40,13 +42,14 @@ export default function CandidateArea({ mode }: { mode: Mode }) {
       <form className="candidate-profile-form" onSubmit={(event) => { event.preventDefault(); setSaved(true) }}>
         <label>आपका नाम<input required value={name} onChange={event => { setName(event.target.value); setSaved(false) }} placeholder="अपना नाम लिखें" /></label>
         <label>मोबाइल नंबर<input required type="tel" inputMode="numeric" pattern="[0-9]{10}" maxLength={10} value={phone} onChange={event => { setPhone(event.target.value); setSaved(false) }} placeholder="10 अंकों का नंबर" /></label>
-        <label>आपका जिला<select value={district} onChange={event => { setDistrict(event.target.value); setSaved(false) }}><option>मधुबनी</option><option>दरभंगा</option><option>पटना</option><option>मुजफ्फरपुर</option><option>रांची</option><option>धनबाद</option><option>बोकारो</option></select></label>
+        <label>राज्य<select value={stateName} onChange={event => { const nextState = event.target.value as StateName; setStateName(nextState); setDistrict(getDistrictOptions(nextState)[0] ?? ''); setSaved(false) }}>{stateNames.map(state => <option key={state} value={state}>{getStateLabel(state)}</option>)}</select></label>
+        <label>आपका जिला<select value={district} onChange={event => { setDistrict(event.target.value); setSaved(false) }}>{getDistrictOptions(stateName).map(item => <option key={item}>{item}</option>)}</select></label>
         <label>आपको कौन-सा काम आता है?<textarea rows={3} value={skills} onChange={event => { setSkills(event.target.value); setSaved(false) }} placeholder="जैसे: दुकान संभालना, ड्राइविंग, सिलाई..." /></label>
         <label>काम का प्रकार<select value={workType} onChange={event => { setWorkType(event.target.value); setSaved(false) }}><option>फुल टाइम</option><option>पार्ट टाइम</option><option>दैनिक मजदूरी</option><option>घर से काम</option><option>फ्रीलांस</option></select></label>
         <button type="submit">प्रोफ़ाइल सेव करें →</button>
         {saved && <p className="profile-saved" role="status">डेमो प्रोफ़ाइल इस स्क्रीन पर तैयार हुई। जानकारी सर्वर पर सेव नहीं हुई है।</p>}
       </form>
-      <aside className="profile-side"><div className="profile-avatar">👤</div><strong>{name || 'आपका नाम'}</strong><span>{district} · {workType}</span><p>{skills || 'आपकी स्किल यहाँ दिखाई देंगी।'}</p><small>प्रोफ़ाइल प्रीव्यू · केवल इसी स्क्रीन पर</small></aside>
+      <aside className="profile-side"><div className="profile-avatar">👤</div><strong>{name || 'आपका नाम'}</strong><span>{district} · {getStateLabel(stateName)} · {workType}</span><p>{skills || 'आपकी स्किल यहाँ दिखाई देंगी।'}</p><small>प्रोफ़ाइल प्रीव्यू · केवल इसी स्क्रीन पर</small></aside>
     </div>
     <p className="candidate-privacy">आपकी सहमति के बिना मोबाइल नंबर या निजी जानकारी किसी नियोक्ता के साथ साझा नहीं की जानी चाहिए।</p>
   </section>
