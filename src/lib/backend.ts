@@ -198,7 +198,7 @@ export async function getMyApplications(accessToken: string) {
 
 
 export async function getMyProfile(accessToken: string, userId: string) {
-  const rows = await request<Array<{ id: string; full_name: string | null; phone: string | null; skills: string | null; preferred_work_type: string | null; district: string | null; state_lgd_code: number | null; district_lgd_code: number | null; preferred_language: string }>>(
+  const rows = await request<Array<{ id: string; role: 'candidate' | 'employer' | 'moderator' | 'admin'; full_name: string | null; phone: string | null; skills: string | null; preferred_work_type: string | null; district: string | null; state_lgd_code: number | null; district_lgd_code: number | null; preferred_language: string }>>(
     `/rest/v1/profiles?select=id,full_name,phone,skills,preferred_work_type,district,state_lgd_code,district_lgd_code,preferred_language&id=eq.${encodeURIComponent(userId)}&limit=1`,
     { accessToken },
   )
@@ -219,6 +219,47 @@ export async function markNotificationRead(accessToken: string, notificationId: 
     `/rest/v1/notifications?id=eq.${encodeURIComponent(notificationId)}`,
     { method: 'PATCH', accessToken, prefer: 'return=representation', body: { read_at: new Date().toISOString() } },
   )
+}
+
+
+export type ReviewJob = { id: string; title: string; description: string; district: string; created_at: string; employers?: { business_name: string; contact_phone: string | null } | null }
+export type ReviewRequest = { id: string; employer_id: string; business_name: string; business_type: string | null; contact_phone: string | null; district: string; address: string | null; created_at: string; status: string }
+export type OpenReport = { id: string; reason: string; details: string | null; contact_phone: string | null; created_at: string; status: string }
+
+export async function getPendingJobs(accessToken: string) {
+  return request<ReviewJob[]>('/rest/v1/job_posts?select=id,title,description,district,created_at,employers(business_name,contact_phone)&status=eq.pending_review&order=created_at.asc', { accessToken })
+}
+
+export async function reviewJob(accessToken: string, jobId: string, approved: boolean) {
+  return request<Array<{ id: string; status: string }>>(`/rest/v1/job_posts?id=eq.${encodeURIComponent(jobId)}`, {
+    method: 'PATCH', accessToken, prefer: 'return=representation',
+    body: approved ? { status: 'published', published_at: new Date().toISOString() } : { status: 'rejected' },
+  })
+}
+
+export async function getPendingVerifications(accessToken: string) {
+  return request<ReviewRequest[]>('/rest/v1/verification_requests?select=id,employer_id,business_name,business_type,contact_phone,district,address,created_at,status&status=in.(pending,in_review,needs_information)&order=created_at.asc', { accessToken })
+}
+
+export async function reviewVerification(accessToken: string, reviewerId: string, requestId: string, employerId: string, approved: boolean) {
+  const status = approved ? 'approved' : 'rejected'
+  await request(`/rest/v1/verification_requests?id=eq.${encodeURIComponent(requestId)}`, {
+    method: 'PATCH', accessToken, prefer: 'return=minimal',
+    body: { status, reviewed_by: reviewerId, reviewed_at: new Date().toISOString() },
+  })
+  return request(`/rest/v1/employers?id=eq.${encodeURIComponent(employerId)}`, {
+    method: 'PATCH', accessToken, prefer: 'return=minimal', body: { verification_status: status },
+  })
+}
+
+export async function getOpenReports(accessToken: string) {
+  return request<OpenReport[]>('/rest/v1/reports?select=id,reason,details,contact_phone,created_at,status&status=in.(open,reviewing)&order=created_at.asc', { accessToken })
+}
+
+export async function reviewReport(accessToken: string, reportId: string, resolved: boolean) {
+  return request<Array<{ id: string; status: string }>>(`/rest/v1/reports?id=eq.${encodeURIComponent(reportId)}`, {
+    method: 'PATCH', accessToken, prefer: 'return=representation', body: { status: resolved ? 'resolved' : 'dismissed' },
+  })
 }
 
 export async function getMyNotifications(accessToken: string) {
