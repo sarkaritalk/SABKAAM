@@ -178,8 +178,8 @@ begin
 
   if tg_table_name = 'profiles' then
     if tg_op = 'INSERT' then
-      if new.role <> 'candidate' then
-        raise exception 'New accounts must start as candidates';
+      if new.role not in ('candidate'::public.account_role, 'employer'::public.account_role) then
+        raise exception 'New accounts may only start as candidates or employers';
       end if;
     elsif new.id is distinct from old.id then
       raise exception 'Profile identity cannot be changed';
