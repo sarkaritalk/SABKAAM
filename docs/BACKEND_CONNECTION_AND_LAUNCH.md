@@ -24,7 +24,7 @@
 ## Location data and database
 
 - The frontend includes 36 State/UT entries and 785 district records from the imported LGD snapshot.
-- The migration `202611220003_india_location_codes.sql` removes the former Bihar/Jharkhand-only state-code restrictions and adds LGD state/district code columns to profiles, employers, verification requests, and jobs.
+- The migration `202611220003_india_location_codes.sql` removes the former Bihar/Jharkhand-only state-code restrictions and adds LGD state/district code columns to profiles, employers, verification requests, and jobs. Migrations `202611220005_candidate_profile_fields.sql` and `202611220006_employer_contact_person.sql` add candidate skills/work preferences and employer contact-person data.
 - Old `state_code` text values are retained for compatibility. Do not bulk-convert old values without a reviewed mapping.
 - The LGD snapshot is not live-synced. Refresh it from the latest official Government of India LGD/OGD export before production and on a monthly maintenance schedule.
 
