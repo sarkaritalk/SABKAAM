@@ -1,4 +1,4 @@
-import React, { cloneElement, isValidElement, type ReactNode } from 'react'
+import { cloneElement, isValidElement, type ReactNode } from 'react'
 
 export type Language = 'hi' | 'en' | 'hinglish'
 
