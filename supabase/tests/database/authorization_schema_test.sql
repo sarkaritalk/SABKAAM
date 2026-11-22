@@ -39,7 +39,7 @@ select ok(
   'admin helper is SECURITY DEFINER'
 );
 select ok(
-  (select p.proconfig @> array['search_path=']::text[]
+  (select p.proconfig @> array['search_path=""']::text[]
    from pg_proc p
    where p.oid = to_regprocedure('public.is_sabkaam_staff()')),
   'staff helper pins an empty search_path'
@@ -152,6 +152,7 @@ select ok(exists (
     and not tgisinternal
     and (tgtype & 4) = 4
     and (tgtype & 2) = 2
+    and (tgtype & 16) = 16
 ), 'application guard runs before both INSERT and UPDATE');
 select ok(exists (
   select 1 from pg_trigger
