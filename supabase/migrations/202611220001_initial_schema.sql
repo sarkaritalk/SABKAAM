@@ -270,3 +270,46 @@ using (user_id = (select auth.uid()))
 with check (user_id = (select auth.uid()));
 
 -- audit_logs intentionally has no client policies: server-side trusted writes only.
+
+-- Prevent client-side privilege escalation and self-approval.
+create or replace function public.protect_reviewed_fields()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+begin
+  if auth.uid() is not null then
+    if tg_table_name = 'profiles' and new.role is distinct from old.role then
+      raise exception 'Account role changes require an authorized administrator';
+    elsif tg_table_name = 'employers' and new.verification_status is distinct from old.verification_status then
+      raise exception 'Employer verification status is managed by reviewers';
+    elsif tg_table_name = 'verification_requests' and (
+      new.status is distinct from old.status
+      or new.reviewer_notes is distinct from old.reviewer_notes
+      or new.reviewed_by is distinct from old.reviewed_by
+      or new.reviewed_at is distinct from old.reviewed_at
+    ) then
+      raise exception 'Verification review fields are managed by reviewers';
+    elsif tg_table_name = 'job_posts' and new.status in ('published', 'rejected') then
+      raise exception 'Only an authorized reviewer can publish or reject a job';
+    end if;
+  end if;
+  return new;
+end;
+$$;
+
+create trigger protect_profile_role
+before update on public.profiles
+for each row execute function public.protect_reviewed_fields();
+
+create trigger protect_employer_verification
+before update on public.employers
+for each row execute function public.protect_reviewed_fields();
+
+create trigger protect_verification_review
+before update on public.verification_requests
+for each row execute function public.protect_reviewed_fields();
+
+create trigger protect_job_publication
+before update on public.job_posts
+for each row execute function public.protect_reviewed_fields();
