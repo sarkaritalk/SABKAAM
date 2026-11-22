@@ -1,13 +1,15 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import './job-apply.css'
 import CandidateArea from './CandidateArea'
 import SafetyCenter from './safety-center'
 import EmployerDashboard from './EmployerDashboard'
 import { LanguageSelect, Localized, type Language } from './i18n'
 
-import { stateNames, getStateLabel, getDistrictOptions, type StateName } from './locations'
+import { stateNames, getStateLabel, getDistrictOptions, getStateCode, getDistrictCode, type StateName } from './locations'
+import { backendConfigured, listPublishedJobs, type PublishedJob } from './lib/backend'
 
 type Category = { name: string; icon: string; count: string }
+type JobListing = { id?: string; title: string; state: string; company: string; place: string; pay: string; type: string; category: string; description?: string; isDemo?: boolean }
 type SpeechRecognitionLike = { lang: string; interimResults: boolean; maxAlternatives: number; onresult: ((event: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null; onerror: (() => void) | null; onend: (() => void) | null; start: () => void }
 
 const categories: Category[] = [
@@ -25,7 +27,7 @@ const categories: Category[] = [
   { name: 'ऑनलाइन और फ्रीलांस', icon: '💻', count: 'रिमोट, ऑनलाइन काम' },
 ]
 
-const demoJobs = [
+const demoJobs: JobListing[] = [
   { title: 'दुकान में सेल्स हेल्पर', state: 'Bihar', company: 'डेमो किराना स्टोर', place: 'मधुबनी', pay: '₹8,000–₹10,000 / माह', type: 'फुल टाइम', category: 'दुकान और रिटेल' },
   { title: 'रेस्टोरेंट में किचन हेल्पर', state: 'Bihar', company: 'डेमो फूड कॉर्नर', place: 'दरभंगा', pay: '₹9,000–₹12,000 / माह', type: 'फुल टाइम', category: 'होटल और रेस्टोरेंट' },
   { title: 'डिलीवरी पार्टनर', state: 'Bihar', company: 'डेमो लोकल सर्विस', place: 'पटना', pay: 'काम के अनुसार', type: 'पार्ट टाइम', category: 'ड्राइवर और डिलीवरी' },
@@ -40,7 +42,10 @@ function App() {
   const [selectedCategory, setSelectedCategory] = useState('')
   const [activeTab, setActiveTab] = useState('होम')
   const [showDemo, setShowDemo] = useState(false)
-  const [selectedJob, setSelectedJob] = useState<(typeof demoJobs)[number] | null>(null)
+  const [selectedJob, setSelectedJob] = useState<JobListing | null>(null)
+  const [liveJobs, setLiveJobs] = useState<JobListing[]>([])
+  const [jobsLoading, setJobsLoading] = useState(false)
+  const [jobsError, setJobsError] = useState('')
   const [applicationSent, setApplicationSent] = useState(false)
   const [showSafety, setShowSafety] = useState(false)
   const [showEmployer, setShowEmployer] = useState(false)
