@@ -37,8 +37,7 @@ export default function CandidateArea({ mode, language, session, onSignIn }: { m
   if (mode === 'मेरे आवेदन') {
     return <Localized language={language}><section className="candidate-area">
       <div className="candidate-heading"><span className="section-kicker">आपकी नौकरी की यात्रा</span><h1>मेरे आवेदन</h1><p>आपने जिन नौकरियों के लिए आवेदन किया है, उनकी स्थिति यहाँ देख सकेंगे।</p></div>
-      <div className="candidate-notice">यह केवल UI डेमो है। नीचे दिए गए आवेदन काल्पनिक हैं; किसी वास्तविक नियोक्ता को नहीं भेजे गए।</div>
-      <div className="application-list">{sampleApplications.map((item) => <article className="candidate-application" key={item.role}><div className="application-symbol">▤</div><div className="application-info"><strong>{item.role}</strong><span>{item.employer} · {item.place}</span><small className={item.tone}>{item.status}</small></div><span className="application-arrow">→</span></article>)}</div>
+      {session ? <div className="application-list">{realApplications.length ? realApplications.map(item => <article className="candidate-application" key={item.id}><div className="application-symbol">▤</div><div className="application-info"><strong>{item.job_posts?.title || "नौकरी आवेदन"}</strong><span>{item.job_posts?.district || "भारत"} · {new Date(item.created_at).toLocaleDateString()}</span><small className="pending">{item.status}</small></div></article>) : <div className="candidate-notice">अभी आपके खाते में कोई आवेदन नहीं है।</div>}</div> : <div className="candidate-notice">अपने वास्तविक आवेदन देखने के लिए लॉगिन करें। <button type="button" onClick={onSignIn}>लॉगिन करें</button></div>}</div>
       <div className="candidate-empty-tip"><strong>अगला कदम</strong><p>नौकरी खोजें और आवेदन करें। वास्तविक आवेदन सुविधा लाइव जॉब सिस्टम बनने के बाद जोड़ी जाएगी।</p></div>
     </section></Localized>
   }
