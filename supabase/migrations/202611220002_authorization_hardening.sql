@@ -42,6 +42,21 @@ revoke all on function public.is_sabkaam_admin() from public, anon;
 grant execute on function public.is_sabkaam_staff() to authenticated;
 grant execute on function public.is_sabkaam_admin() to authenticated;
 
+-- Employer records may only be created by accounts whose protected profile
+-- is already assigned the employer role. Ownership alone is not sufficient.
+drop policy if exists "users can create their own employer record" on public.employers;
+create policy "employers can create their own employer record"
+on public.employers for insert to authenticated
+with check (
+  owner_id = (select auth.uid())
+  and exists (
+    select 1
+    from public.profiles p
+    where p.id = (select auth.uid())
+      and p.role = 'employer'::public.account_role
+  )
+);
+
 -- Staff can review operational records. Only admins can inspect audit logs
 -- or change account roles.
 -- Moderators do not need unrestricted access to every user's profile/phone.
