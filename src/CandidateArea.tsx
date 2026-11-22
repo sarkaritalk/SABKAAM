@@ -38,7 +38,7 @@ export default function CandidateArea({ mode, language }: { mode: Mode; language
     </section></Localized>
   }
 
-  return <section className="candidate-area">
+  return <Localized language={language}><section className="candidate-area">
     <div className="candidate-heading"><span className="section-kicker">आपकी पहचान, आपकी पसंद</span><h1>मेरी प्रोफ़ाइल</h1><p>बिना रिज़्यूमे के भी अपनी बुनियादी जानकारी तैयार रखें।</p></div>
     <div className="profile-layout">
       <form className="candidate-profile-form" onSubmit={(event) => { event.preventDefault(); setSaved(true) }}>
