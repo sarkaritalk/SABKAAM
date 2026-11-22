@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import './safety-center.css'
 import { Localized, type Language } from './i18n'
-import { stateNames, getStateLabel, getDistrictOptions, getStateCode, getDistrictCode, type StateName } from './locations'
+import { stateNames, getStateLabel, getDistrictOptions, getStateCode, getDistrictCode, getDistrictEnglishName, type StateName } from './locations'
 import { backendConfigured, createEmployer, createVerificationRequest, getMyEmployer, submitSafetyReport, type AuthSession } from './lib/backend'
 
 const warningSigns = [
@@ -46,7 +46,7 @@ export default function SafetyCenter({ language, session, onSignIn }: { language
     try {
       let employer = await getMyEmployer(session.access_token, session.user.id)
       if (!employer) {
-        const created = await createEmployer(session.access_token, { owner_id: session.user.id, business_name: businessName, business_type: businessType, contact_phone: businessPhone, state_lgd_code: getStateCode(businessState), district_lgd_code: getDistrictCode(businessState, businessDistrict, language) ?? 0, district: businessDistrict, address: businessAddress })
+        const created = await createEmployer(session.access_token, { owner_id: session.user.id, business_name: businessName, business_type: businessType, contact_phone: businessPhone, state_lgd_code: getStateCode(businessState), district_lgd_code: getDistrictCode(businessState, businessDistrict, language) ?? 0, district: getDistrictEnglishName(businessState, businessDistrict, language) ?? businessDistrict, address: businessAddress })
         employer = created[0]
       }
       if (!employer?.id) throw new Error('Employer profile could not be created.')
