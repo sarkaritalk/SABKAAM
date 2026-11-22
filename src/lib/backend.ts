@@ -76,7 +76,10 @@ export async function listPublishedJobs(filters: { stateLgdCode?: number; distri
   })
   if (filters.stateLgdCode) params.set('state_lgd_code', `eq.${filters.stateLgdCode}`)
   if (filters.districtLgdCode) params.set('district_lgd_code', `eq.${filters.districtLgdCode}`)
-  if (filters.townOrMarket?.trim()) params.set('town_or_market', `ilike.*${filters.townOrMarket.trim().replace(/[,*()]/g, ' ')}*`)
+  if (filters.townOrMarket?.trim()) {
+    const area = filters.townOrMarket.trim().replace(/[,*()]/g, ' ')
+    params.set('and', `(or(town_or_market.ilike.*${area}*,locality.ilike.*${area}*))`)
+  }
   params.set('or', `(expires_at.is.null,expires_at.gt.${new Date().toISOString()})`)
   return request<PublishedJob[]>(`/rest/v1/job_posts?${params.toString()}`)
 }
