@@ -9,6 +9,23 @@ test.describe('SABKAAM desktop and mobile smoke tests', () => {
     expect(width).toBeLessThanOrEqual(390)
   })
 
+  test('language selector translates home, candidate, employer, and safety screens', async ({ page }) => {
+    await page.goto('/')
+    const language = page.getByLabel('Website language')
+    await language.selectOption('en')
+    await expect(page.getByRole('heading', { name: /Finding work is now/ })).toBeVisible()
+    await expect(page.getByRole('button', { name: /Search jobs/ })).toBeVisible()
+    await page.getByRole('button', { name: /Hiring/ }).click()
+    await expect(page.getByRole('heading', { name: /Find the right people/ })).toBeVisible()
+    await page.getByLabel('Website language').selectOption('hinglish')
+    await expect(page.getByRole('heading', { name: /Sahi log dhoondhein/ })).toBeVisible()
+    await page.getByLabel('Website language').selectOption('en')
+    await page.getByRole('button', { name: 'Profile' }).click()
+    await expect(page.getByRole('heading', { name: 'My profile' })).toBeVisible()
+    await page.getByRole('button', { name: /Safety & reports/ }).click()
+    await expect(page.getByRole('heading', { name: 'Find work safely' })).toBeVisible()
+  })
+
   test('desktop home can filter sample jobs by state and district', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 })
     await page.goto('/')
