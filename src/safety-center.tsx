@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import './safety-center.css'
 import { Localized, type Language } from './i18n'
-import { stateNames, getStateLabel, getDistrictOptions, type StateName } from './locations'
+import { stateNames, getStateLabel, getDistrictOptions, getStateCode, getDistrictCode, type StateName } from './locations'
+import { createEmployer, createVerificationRequest, getMyEmployer, submitSafetyReport, type AuthSession } from './lib/backend'
 
 const warningSigns = [
   'नौकरी देने से पहले रजिस्ट्रेशन, सिक्योरिटी या ट्रेनिंग फीस माँगना',
@@ -10,7 +11,7 @@ const warningSigns = [
   'बिना पुष्टि के तुरंत पैसे भेजने का दबाव बनाना',
 ]
 
-export default function SafetyCenter({ language }: { language: Language }) {
+export default function SafetyCenter({ language, session, onSignIn }: { language: Language; session: AuthSession | null; onSignIn: () => void }) {
   const [reason, setReason] = useState('नौकरी के नाम पर पैसे माँगे')
   const [details, setDetails] = useState('')
   const [contact, setContact] = useState('')
@@ -22,6 +23,8 @@ export default function SafetyCenter({ language }: { language: Language }) {
   const [businessState, setBusinessState] = useState<StateName>('Bihar')
   const [businessDistrict, setBusinessDistrict] = useState('मधुबनी')
   const [businessAddress, setBusinessAddress] = useState('')
+  const [reportMessage, setReportMessage] = useState('')
+  const [verificationMessage, setVerificationMessage] = useState('')
   useEffect(() => { const options = getDistrictOptions(businessState, language); if (!options.includes(businessDistrict)) setBusinessDistrict(options[0] ?? '') }, [businessState, language])
 
   return <Localized language={language}><section className="safety-center">
