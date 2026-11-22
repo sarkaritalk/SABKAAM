@@ -7,6 +7,7 @@ on:
     branches:
       - main
       - "feature/**"
+      - "preview-sabkaam"
   workflow_dispatch:
 
 permissions:
