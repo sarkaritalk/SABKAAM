@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import './employer-dashboard.css'
 import { LanguageSelect, Localized, type Language } from './i18n'
 import { stateNames, getStateLabel, getDistrictOptions, getStateCode, getDistrictCode, type StateName } from './locations'
-import { createEmployer, createJobDraft, getMyEmployer, submitJobForReview, type AuthSession } from './lib/backend'
+import { backendConfigured, createEmployer, createJobDraft, getMyEmployer, submitJobForReview, type AuthSession } from './lib/backend'
 
 type Props = { onBack: () => void; language: Language; onLanguageChange: (language: Language) => void; session: AuthSession | null; onSignIn: () => void; onSignOut: () => void }
 
@@ -27,6 +27,7 @@ export default function EmployerDashboard({ onBack, language, onLanguageChange, 
     event.preventDefault()
     setSuccess(false)
     setSubmitMessage('')
+    if (!backendConfigured) { setSuccess(true); setSubmitMessage('Backend अभी connect नहीं है। यह केवल preview है; जानकारी सेव या प्रकाशित नहीं हुई।'); return }
     if (!session) { setSubmitMessage('पोस्ट भेजने के लिए employer account से लॉगिन करें।'); onSignIn(); return }
     if (session.user.user_metadata?.account_type !== 'employer') { setSubmitMessage('इस खाते का प्रकार candidate है। Employer खाता बनाकर लॉगिन करें।'); return }
     try {
