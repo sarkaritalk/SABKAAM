@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import './job-apply.css'
+import './premium-theme.css'
 import CandidateArea from './CandidateArea'
 import SafetyCenter from './safety-center'
 import EmployerDashboard from './EmployerDashboard'
