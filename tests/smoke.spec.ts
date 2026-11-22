@@ -9,6 +9,24 @@ test.describe('SABKAAM desktop and mobile smoke tests', () => {
     expect(width).toBeLessThanOrEqual(390)
   })
 
+  test('language selector translates home, candidate, employer, and safety screens', async ({ page }) => {
+    await page.goto('/')
+    const language = page.getByLabel('Website language')
+    await language.selectOption('en')
+    await expect(page.getByRole('heading', { name: /Finding work is now/ })).toBeVisible()
+    await expect(page.getByRole('button', { name: /Search jobs/ })).toBeVisible()
+    await page.getByRole('button', { name: /Hiring/ }).click()
+    await expect(page.getByRole('heading', { name: /Find the right people/ })).toBeVisible()
+    await page.getByLabel('Website language').selectOption('hinglish')
+    await expect(page.getByRole('heading', { name: /Sahi log dhoondhein/ })).toBeVisible()
+    await page.getByLabel('Website language').selectOption('en')
+    await page.getByRole('button', { name: /Back to home/ }).click()
+    await page.getByRole('button', { name: 'Profile' }).click()
+    await expect(page.getByRole('heading', { name: 'My profile' })).toBeVisible()
+    await page.getByRole('button', { name: /Safety & reports/ }).click()
+    await expect(page.getByRole('heading', { name: 'Find work safely' })).toBeVisible()
+  })
+
   test('desktop home can filter sample jobs by state and district', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 })
     await page.goto('/')
@@ -19,13 +37,13 @@ test.describe('SABKAAM desktop and mobile smoke tests', () => {
     await expect(page.getByText(/इस फ़िल्टर के लिए अभी कोई डेमो उदाहरण नहीं है/)).toBeVisible()
   })
 
-  test('employer form exposes all Bihar and Jharkhand districts and validates required fields', async ({ page }) => {
+  test('employer form exposes India-wide state and district options and validates required fields', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 })
     await page.goto('/')
     await page.getByRole('button', { name: /नौकरी देने वाले/ }).click()
     const district = page.getByLabel('जिला')
     await expect(district.locator('option')).toHaveCount(38)
-    await page.getByLabel('राज्य').selectOption('झारखंड')
+    await page.getByLabel('राज्य').selectOption('Jharkhand')
     await expect(district.locator('option')).toHaveCount(24)
     await page.getByLabel('दुकान / कंपनी का नाम').fill('टेस्ट स्टोर')
     await page.getByLabel('संपर्क व्यक्ति का नाम').fill('टेस्ट यूजर')
@@ -35,6 +53,29 @@ test.describe('SABKAAM desktop and mobile smoke tests', () => {
     await expect(page.getByText(/प्रीव्यू तैयार है/)).toBeVisible()
     const width = await page.evaluate(() => document.documentElement.scrollWidth)
     expect(width).toBeLessThanOrEqual(390)
+  })
+
+  test('all 36 States/UTs are available and Karnataka includes Bengaluru Urban', async ({ page }) => {
+    await page.goto('/')
+    const state = page.getByLabel('राज्य')
+    await expect(state.locator('option')).toHaveCount(36)
+    await state.selectOption('Karnataka')
+    await page.getByRole('button', { name: /काम खोजें/ }).click()
+    await expect(page.getByLabel('जिला').locator('option', { hasText: 'Bengaluru Urban' })).toHaveCount(1)
+  })
+
+  test('all State/UT district dropdowns sum to the imported LGD snapshot', async ({ page }) => {
+    await page.goto('/')
+    const state = page.getByLabel('राज्य')
+    const district = page.getByLabel('जिला')
+    const values = await state.locator('option').evaluateAll(options => options.map(option => (option as HTMLOptionElement).value))
+    expect(values).toHaveLength(36)
+    let totalDistricts = 0
+    for (const value of values) {
+      await state.selectOption(value)
+      totalDistricts += (await district.locator('option').count()) - 1
+    }
+    expect(totalDistricts).toBe(785)
   })
 
   test('candidate profile form validates and updates its preview', async ({ page }) => {
@@ -59,11 +100,11 @@ test.describe('SABKAAM desktop and mobile smoke tests', () => {
     await expect(page.getByText(/डेमो आवेदन तैयार हुआ/)).toBeVisible()
   })
 
-  test('safety report form can be completed and is labelled as a demo', async ({ page }) => {
+  test('safety report form supports demo fallback without backend credentials', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('button', { name: /सुरक्षा और शिकायत/ }).click()
     await page.getByLabel('क्या हुआ?').fill('यह ब्राउज़र परीक्षण की नमूना शिकायत है।')
-    await page.getByRole('button', { name: /डेमो शिकायत तैयार करें/ }).click()
+    await page.getByRole('button', { name: /शिकायत भेजें/ }).click()
     await expect(page.getByText(/डेमो शिकायत तैयार हुई/)).toBeVisible()
   })
 })
