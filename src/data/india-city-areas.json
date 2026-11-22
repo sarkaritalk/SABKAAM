@@ -2291,6 +2291,27 @@
         "Chatham",
         "Bambooflat"
       ]
+    },
+    {
+      "state": "Puducherry",
+      "district": "Puducherry",
+      "city": "Puducherry",
+      "aliases": [
+        "Pondicherry",
+        "Pondy"
+      ],
+      "areas": [
+        "White Town",
+        "Lawspet",
+        "Muthialpet",
+        "Thattanchavady Industrial Estate",
+        "Ariyankuppam",
+        "Reddiarpalayam",
+        "Mettupalayam Industrial Estate",
+        "Oulgaret",
+        "Kalapet",
+        "Villianur"
+      ]
     }
   ]
 }
