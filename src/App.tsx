@@ -160,9 +160,9 @@ function App() {
         </section>
 
         {showDemo && <section className="jobs-section">
-          <div className="section-heading"><div><span className="section-kicker">उदाहरण के लिए</span><h2>काम के नमूने</h2></div><span className="demo-label">डेमो डेटा · असली नौकरी नहीं</span></div>
-          {visibleJobs.length ? <div className="job-list">{visibleJobs.map((job) => <article className="job-card" key={job.title} onClick={() => { setSelectedJob(job); setApplicationSent(false) }}><div><span className="job-type">{job.type}</span><h3>{job.title}</h3><p>{job.company} · 📍 {job.place}</p></div><div className="job-pay">{job.pay}<small>वेतन का डेमो उदाहरण</small><button type="button" className="job-detail-button">विवरण देखें →</button></div></article>)}</div> : <p className="empty-state">इस फ़िल्टर के लिए अभी कोई डेमो उदाहरण नहीं है। फ़िल्टर बदलकर देखें।</p>}
-          <p className="demo-note">ये केवल स्क्रीन समझाने के लिए काल्पनिक उदाहरण हैं। SABKAAM पर अभी वास्तविक नौकरी की लिस्टिंग उपलब्ध नहीं है।</p>
+          <div className="section-heading"><div><span className="section-kicker">{backendConfigured ? "Live listings" : "उदाहरण के लिए"}</span><h2>{backendConfigured ? "उपलब्ध नौकरियाँ" : "काम के नमूने"}</h2></div><span className="demo-label">{backendConfigured ? "प्रकाशित नौकरी" : "डेमो डेटा · असली नौकरी नहीं"}</span></div>
+          {jobsLoading && <p className="empty-state">नौकरियाँ लोड हो रही हैं...</p>}{jobsError && <p className="empty-state">नौकरी लोड नहीं हुई: {jobsError}</p>}{visibleJobs.length ? <div className="job-list">{visibleJobs.map((job) => <article className="job-card" key={job.title} onClick={() => { setSelectedJob(job); setApplicationSent(false) }}><div><span className="job-type">{job.type}</span><h3>{job.title}</h3><p>{job.company} · 📍 {job.place}</p></div><div className="job-pay">{job.pay}<small>वेतन का डेमो उदाहरण</small><button type="button" className="job-detail-button">विवरण देखें →</button></div></article>)}</div> : <p className="empty-state">इस फ़िल्टर के लिए अभी कोई डेमो उदाहरण नहीं है। फ़िल्टर बदलकर देखें।</p>}
+          {!backendConfigured && <p className="demo-note">ये केवल स्क्रीन समझाने के लिए काल्पनिक उदाहरण हैं। SABKAAM पर अभी वास्तविक नौकरी की लिस्टिंग उपलब्ध नहीं है।</p>}
         </section>}
 
         {selectedJob && <div className="apply-overlay" role="presentation" onClick={() => setSelectedJob(null)}>
@@ -173,7 +173,7 @@ function App() {
             <p className="modal-company">{selectedJob.company} · {selectedJob.place}</p>
             <div className="modal-facts"><span>वेतन <b>{selectedJob.pay}</b></span><span>काम <b>{selectedJob.type}</b></span><span>श्रेणी <b>{selectedJob.category}</b></span></div>
             <p className="modal-disclaimer">यह एक काल्पनिक उदाहरण है, वास्तविक नौकरी या नियोक्ता नहीं। यहाँ आवेदन भेजने से किसी कंपनी को जानकारी नहीं जाएगी।</p>
-            {applicationSent ? <div className="application-confirm"><strong>डेमो आवेदन तैयार हुआ।</strong><p>आपका विवरण केवल इस स्क्रीन पर दिखाया गया है; कहीं सेव या भेजा नहीं गया।</p></div> : <form className="apply-form" onSubmit={event => { event.preventDefault(); setApplicationSent(true) }}>
+            {selectedJob.isDemo === false ? <div className="application-confirm"><strong>वास्तविक नौकरी चुनी गई है।</strong><p>आवेदन भेजने से पहले उम्मीदवार का सुरक्षित sign-in और profile consent जोड़ना जरूरी है। अभी कोई आवेदन नहीं भेजा जाएगा।</p></div> : applicationSent ? <div className="application-confirm"><strong>डेमो आवेदन तैयार हुआ।</strong><p>आपका विवरण केवल इस स्क्रीन पर दिखाया गया है; कहीं सेव या भेजा नहीं गया।</p></div> : <form className="apply-form" onSubmit={event => { event.preventDefault(); setApplicationSent(true) }}>
               <h3>आवेदन का नमूना</h3>
               <label>आपका नाम *<input required placeholder="पूरा नाम" /></label>
               <label>मोबाइल नंबर *<input required type="tel" inputMode="numeric" pattern="[0-9]{10}" maxLength={10} placeholder="10 अंकों का नंबर" /></label>
