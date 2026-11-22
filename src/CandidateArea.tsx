@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import './candidate-area.css'
+import { Localized, type Language } from './i18n'
 import { stateNames, getStateLabel, getDistrictOptions, type StateName } from './locations'
 
 type Mode = 'मेरे आवेदन' | 'सूचनाएँ' | 'प्रोफ़ाइल'
@@ -9,7 +10,7 @@ const sampleApplications = [
   { role: 'रेस्टोरेंट में किचन हेल्पर', employer: 'डेमो फूड कॉर्नर', place: 'दरभंगा', status: 'डेमो: जवाब का इंतज़ार', tone: 'pending' },
 ]
 
-export default function CandidateArea({ mode }: { mode: Mode }) {
+export default function CandidateArea({ mode, language }: { mode: Mode; language: Language }) {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [stateName, setStateName] = useState<StateName>('Bihar')
@@ -19,12 +20,12 @@ export default function CandidateArea({ mode }: { mode: Mode }) {
   const [saved, setSaved] = useState(false)
 
   if (mode === 'मेरे आवेदन') {
-    return <section className="candidate-area">
+    return <Localized language={language}><section className="candidate-area">
       <div className="candidate-heading"><span className="section-kicker">आपकी नौकरी की यात्रा</span><h1>मेरे आवेदन</h1><p>आपने जिन नौकरियों के लिए आवेदन किया है, उनकी स्थिति यहाँ देख सकेंगे।</p></div>
       <div className="candidate-notice">यह केवल UI डेमो है। नीचे दिए गए आवेदन काल्पनिक हैं; किसी वास्तविक नियोक्ता को नहीं भेजे गए।</div>
       <div className="application-list">{sampleApplications.map((item) => <article className="candidate-application" key={item.role}><div className="application-symbol">▤</div><div className="application-info"><strong>{item.role}</strong><span>{item.employer} · {item.place}</span><small className={item.tone}>{item.status}</small></div><span className="application-arrow">→</span></article>)}</div>
       <div className="candidate-empty-tip"><strong>अगला कदम</strong><p>नौकरी खोजें और आवेदन करें। वास्तविक आवेदन सुविधा लाइव जॉब सिस्टम बनने के बाद जोड़ी जाएगी।</p></div>
-    </section>
+    </section></Localized>
   }
 
   if (mode === 'सूचनाएँ') {
@@ -33,7 +34,7 @@ export default function CandidateArea({ mode }: { mode: Mode }) {
       <div className="candidate-notice">अभी नोटिफिकेशन सेवा कनेक्ट नहीं है। ये उदाहरण सिर्फ स्क्रीन का नमूना हैं।</div>
       <article className="candidate-application"><div className="application-symbol">✦</div><div className="application-info"><strong>अपनी प्रोफ़ाइल पूरी करें</strong><span>अपनी स्किल और पसंदीदा काम जोड़ें ताकि सही अवसर ढूँढना आसान हो।</span><small className="pending">डेमो सूचना</small></div></article>
       <article className="candidate-application"><div className="application-symbol">⌖</div><div className="application-info"><strong>अपना जिला चुनें</strong><span>स्थानीय अवसरों के लिए अपना जिला और क्षेत्र सही रखें।</span><small className="pending">डेमो सूचना</small></div></article>
-    </section>
+    </section></Localized>
   }
 
   return <section className="candidate-area">
@@ -52,5 +53,5 @@ export default function CandidateArea({ mode }: { mode: Mode }) {
       <aside className="profile-side"><div className="profile-avatar">👤</div><strong>{name || 'आपका नाम'}</strong><span>{district} · {getStateLabel(stateName)} · {workType}</span><p>{skills || 'आपकी स्किल यहाँ दिखाई देंगी।'}</p><small>प्रोफ़ाइल प्रीव्यू · केवल इसी स्क्रीन पर</small></aside>
     </div>
     <p className="candidate-privacy">आपकी सहमति के बिना मोबाइल नंबर या निजी जानकारी किसी नियोक्ता के साथ साझा नहीं की जानी चाहिए।</p>
-  </section>
+  </section></Localized>
 }
