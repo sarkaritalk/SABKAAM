@@ -14,11 +14,13 @@ insert into auth.users (
   ('00000000-0000-0000-0000-000000000003', 'authenticated', 'authenticated', 'employer-a@test.invalid', '', now(), '{}'::jsonb, '{"full_name":"Employer A"}'::jsonb, now(), now()),
   ('00000000-0000-0000-0000-000000000004', 'authenticated', 'authenticated', 'employer-b@test.invalid', '', now(), '{}'::jsonb, '{"full_name":"Employer B"}'::jsonb, now(), now()),
   ('00000000-0000-0000-0000-000000000005', 'authenticated', 'authenticated', 'moderator@test.invalid', '', now(), '{}'::jsonb, '{"full_name":"Moderator"}'::jsonb, now(), now()),
-  ('00000000-0000-0000-0000-000000000006', 'authenticated', 'authenticated', 'admin@test.invalid', '', now(), '{}'::jsonb, '{"full_name":"Admin"}'::jsonb, now(), now());
+  ('00000000-0000-0000-0000-000000000006', 'authenticated', 'authenticated', 'admin@test.invalid', '', now(), '{}'::jsonb, '{"full_name":"Admin"}'::jsonb, now(), now()),
+  ('00000000-0000-0000-0000-000000000007', 'authenticated', 'authenticated', 'employer-new@test.invalid', '', now(), '{}'::jsonb, '{"full_name":"Employer New"}'::jsonb, now(), now());
 
 update public.profiles set role = 'employer' where id in (
   '00000000-0000-0000-0000-000000000003',
-  '00000000-0000-0000-0000-000000000004'
+  '00000000-0000-0000-0000-000000000004',
+  '00000000-0000-0000-0000-000000000007'
 );
 update public.profiles set role = 'moderator' where id = '00000000-0000-0000-0000-000000000005';
 update public.profiles set role = 'admin' where id = '00000000-0000-0000-0000-000000000006';
@@ -111,7 +113,7 @@ select ok(not public.is_sabkaam_staff(), 'employer is not staff');
 
 select lives_ok(
   $$ insert into public.employers (id, owner_id, business_name, verification_status)
-     values ('10000000-0000-0000-0000-000000000098', '00000000-0000-0000-0000-000000000003', 'Employer A Second Entity', 'pending') $$,
+     values ('10000000-0000-0000-0000-000000000098', '00000000-0000-0000-0000-000000000007', 'Employer New Ltd', 'pending') $$,
   'employer-role account can create its own employer record'
 );
 select throws_ok(
@@ -142,7 +144,7 @@ set local role authenticated;
 select ok(public.is_sabkaam_staff(), 'moderator is staff');
 select ok(not public.is_sabkaam_admin(), 'moderator is not admin');
 select is((select count(*)::int from public.profiles), 1, 'moderator cannot browse all profiles');
-select is((select count(*)::int from public.employers), 2, 'moderator can review all employer records');
+select is((select count(*)::int from public.employers), 3, 'moderator can review all employer records');
 select is((select count(*)::int from public.verification_requests), 1, 'moderator can review verification requests');
 select is((select count(*)::int from public.applications), 2, 'moderator can review all applications');
 select is((select count(*)::int from public.reports), 1, 'moderator can review reports');
@@ -162,7 +164,7 @@ select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000006
 set local role authenticated;
 select ok(public.is_sabkaam_staff(), 'admin is staff');
 select ok(public.is_sabkaam_admin(), 'admin helper identifies admin');
-select is((select count(*)::int from public.profiles), 6, 'admin can read all profiles');
+select is((select count(*)::int from public.profiles), 7, 'admin can read all profiles');
 select is((select count(*)::int from public.audit_logs), 1, 'admin can read audit logs');
 select lives_ok(
   $$ update public.profiles set role = 'moderator' where id = '00000000-0000-0000-0000-000000000002' $$,
