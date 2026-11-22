@@ -107,4 +107,22 @@ test.describe('SABKAAM desktop and mobile smoke tests', () => {
     await page.getByRole('button', { name: /शिकायत भेजें/ }).click()
     await expect(page.getByText(/डेमो शिकायत तैयार हुई/)).toBeVisible()
   })
+
+  test('restores a valid tab session and clears it on sign-out', async ({ page }) => {
+    await page.addInitScript(() => {
+      sessionStorage.setItem('sabkaam-auth-session', JSON.stringify({
+        access_token: 'test-access-token',
+        refresh_token: 'test-refresh-token',
+        expires_in: 3600,
+        expires_at: Date.now() + 3_600_000,
+        token_type: 'bearer',
+        user: { id: '00000000-0000-0000-0000-000000000001', user_metadata: { account_type: 'candidate' } },
+      }))
+    })
+    await page.goto('/')
+    await expect(page.getByRole('button', { name: 'लॉगआउट' })).toBeVisible()
+    await page.getByRole('button', { name: 'लॉगआउट' }).click()
+    await expect.poll(() => page.evaluate(() => sessionStorage.getItem('sabkaam-auth-session'))).toBeNull()
+  })
+
 })
