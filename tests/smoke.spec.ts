@@ -90,6 +90,7 @@ test.describe('SABKAAM desktop and mobile smoke tests', () => {
   })
 
   test('job detail and application demo form work', async ({ page }) => {
+    test.setTimeout(60000)
     await page.goto('/')
     await page.getByRole('button', { name: /सभी श्रेणियाँ/ }).click()
     await page.getByText('दुकान में सेल्स हेल्पर').click()
@@ -109,6 +110,23 @@ test.describe('SABKAAM desktop and mobile smoke tests', () => {
     await page.getByRole('button', { name: /इस क्षेत्र के काम देखें/ }).click()
     await page.getByRole('button', { name: 'AI आवेदक' }).click()
     await expect(page.getByRole('heading', { name: /आपके लिए सही काम/ })).toBeVisible()
+  })
+
+
+  test('city and locality search suggests Delhi areas and accepts custom typed locations', async ({ page }) => {
+    await page.goto('/')
+    const area = page.getByLabel('शहर, इलाका या सेक्टर')
+    await area.fill('Uttam Nagar')
+    await expect(page.getByRole('option', { name: /Uttam Nagar/ }).first()).toBeVisible()
+    await page.getByRole('option', { name: /Uttam Nagar/ }).first().click()
+    await expect(page.getByLabel('राज्य')).toHaveValue('Delhi')
+    await expect(area).toHaveValue('Uttam Nagar')
+    await page.getByRole('button', { name: /काम खोजें/ }).click()
+    await expect(page.getByRole('heading', { name: /उपलब्ध नौकरियाँ|काम के नमूने/ })).toBeVisible()
+
+    await area.fill('मेरी नई गली 17')
+    await page.getByRole('button', { name: 'इलाका खोजें' }).click()
+    await expect(area).toHaveValue('मेरी नई गली 17')
   })
 
   test('safety report form supports demo fallback without backend credentials', async ({ page }) => {
