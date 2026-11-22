@@ -486,3 +486,103 @@ footer { color: #8793bd; }
  .gateway-footer{padding:15px 18px;font-size:8px}.gateway-footer span:nth-child(2){display:none}
 }
 @media(prefers-reduced-motion:reduce){.brand-intro-orbit,.brand-intro-glow-one,.brand-intro-lockup,.brand-intro-progress span{animation:none!important}.role-choice{transition:none}}
+
+
+/* SABKAAM refined professional palette: Deep Teal / Warm Gold / Soft Ivory */
+:root {
+  --sabkaam-navy: #123b3a;
+  --sabkaam-deep: #0b2929;
+  --sabkaam-blue: #176b63;
+  --sabkaam-purple: #b58a35;
+  --sabkaam-cyan: #d5a84b;
+  --sabkaam-muted: #b7cbc5;
+}
+body {
+  background: radial-gradient(ellipse at 50% -20%, #285b55 0, #123b3a 55%, #0b2929 100%);
+  color: #f8f7f1;
+}
+.brand-mark { background: linear-gradient(135deg,#176b63,#d5a84b); box-shadow:0 7px 25px #0b292955; }
+.brand small { color:#b7cbc5; }
+.safety-link,.employer-link,.account-link { background:#194845;color:#f0eee5;border-color:#ffffff24; }
+.account-link:hover,.safety-link:hover,.employer-link:hover { background:#245b54;border-color:#d5a84b88; }
+.language-picker select { background:#194845;color:#f8f7f1;border-color:#ffffff30; }
+.hero {
+ background:radial-gradient(circle at 72% 42%,#39766b 0,#20564f 34%,#153f3c 72%,#123b3a 100%);
+ border-color:#d5a84b50; box-shadow:0 24px 70px #061e1b80;
+}
+.hero:before { background-image:radial-gradient(#f1d99b42 1px,transparent 1px); }
+.eyebrow {color:#f1dfb6;background:#ffffff12;border-color:#d5a84b66}
+.live-dot {background:#d5c078;box-shadow:0 0 12px #d5c078}
+.hero h1 em {background:linear-gradient(90deg,#f0d58e,#fff1c9 55%,#9bd0bd);background-clip:text;color:transparent}
+.hero p {color:#d0dfd8}
+.art-orbit {border-color:#e8d59a55}
+.art-card {background:linear-gradient(145deg,#28635a,#164640);border-color:#d5a84b66}
+.art-card span {color:#f0d58e}.art-card small{color:#c8ddd4}
+.art-bubble {background:linear-gradient(145deg,#367568,#17443f);border-color:#d5a84b66}
+.search-panel {color:#183b35;border-color:#e8e1ce}
+.search-heading h2,.section-heading h2 {color:#183b35}
+.section-kicker {color:#9a742d}
+.query-field,.select-field,.area-query-field {background:#faf9f4;border-color:#e6e0d1}
+.query-field>span,.area-query-field>span {color:#39766b}
+.query-field input,.select-field select,.area-query-field input {color:#253b35}
+.search-button,.candidate-profile-form>button,.apply-form>button {
+ background:linear-gradient(110deg,#176b63,#b58a35);color:#fff;box-shadow:0 8px 20px #174d4335
+}
+.search-foot button,.text-link {color:#d8bb75}
+.categories-section .section-kicker {color:#d8bb75}
+.category-card {background:linear-gradient(145deg,#194744,#123b3a);border-color:#c4a35a35;color:#f8f7f1}
+.category-card:hover,.category-card.selected {border-color:#d5a84b;box-shadow:0 10px 28px #061e1b55;background:linear-gradient(145deg,#245b54,#17433f)}
+.tone-0{background:linear-gradient(135deg,#f7ecd4,#e9c982);color:#79551b}
+.tone-1{background:linear-gradient(135deg,#e1eee7,#a8cdbb);color:#245d4b}
+.tone-2{background:linear-gradient(135deg,#e7ece7,#b8c8bf);color:#36564b}
+.tone-3{background:linear-gradient(135deg,#f4e8d6,#dfc39a);color:#805d2b}
+.category-card small{color:#c0d3ca}.card-arrow{color:#e0c17b}
+.job-card{border-color:#e8e1d2;color:#183b35}.job-type{color:#28675c;background:#e8f1eb}
+.job-detail-button{background:#f2ead8;color:#76591f}
+.trust-strip{background:linear-gradient(100deg,#194744,#245b54);border-color:#d5a84b55}
+.trust-icon{background:linear-gradient(135deg,#d5a84b,#f0d58e);color:#173b35}
+.trust-strip p{color:#d0dfd8}.trust-side{color:#c6d8cf}
+.bottom-nav{background:#0e302e;border-color:#ffffff20;box-shadow:0 12px 35px #061e1b88}
+.bottom-nav button{color:#a9c0b7}
+.bottom-nav button.active{background:linear-gradient(135deg,#176b63,#b58a35);color:#fff;box-shadow:0 6px 20px #0b292966}
+footer{color:#a7beb5}
+.ai-screen{border-color:#d5a84b55;background:radial-gradient(circle at 50% 0,#39766b,#123b3a 60%,#0b2929)}
+.ai-orb,.category-modal-icon{background:linear-gradient(135deg,#176b63,#d5a84b);box-shadow:0 0 35px #d5a84b44}
+.ai-screen h1 em{color:#e8ce91}.ai-screen p{color:#d0dfd8}
+.ai-suggestions button{border-color:#d5a84b66;background:#ffffff12}
+.category-modal{border-color:#d5a84b66;background:radial-gradient(circle at 100% 0,#28635a,#123b3a 58%,#0b2929)}
+.category-modal .section-kicker{color:#e0c17b}.category-modal p{color:#d0dfd8}
+.category-modal-primary{background:linear-gradient(110deg,#176b63,#b58a35);box-shadow:0 8px 24px #0b292955}
+.category-modal-secondary{color:#eee8d8}
+.candidate-area{color:#f8f7f1}.candidate-heading h1{color:#fff}
+.candidate-heading p,.candidate-privacy{color:#b7cbc5}
+.candidate-application,.candidate-profile-form{background:#194744;border-color:#d5a84b45;color:#f8f7f1}
+.application-symbol,.profile-avatar{background:linear-gradient(135deg,#176b63,#d5a84b)}
+.candidate-profile-form label{color:#d0dfd8}
+.candidate-profile-form input,.candidate-profile-form select,.candidate-profile-form textarea{background:#0e302e;border-color:#66877a;color:#fff}
+.candidate-profile-form input:focus,.candidate-profile-form select:focus,.candidate-profile-form textarea:focus{border-color:#d5a84b;box-shadow:0 0 0 3px #d5a84b35}
+.candidate-saved{color:#a8d8bd}
+.area-query-field>button{background:linear-gradient(135deg,#176b63,#b58a35)}
+.area-suggestions{border-color:#d9cfb7}
+.area-suggestions>button:hover,.area-suggestions>button:focus{background:#f3f0e6}
+.brand-intro-screen,.role-gateway{background:radial-gradient(ellipse at 50% 43%,#285b55 0%,#123b3a 48%,#0b2929 100%)}
+.brand-intro-glow-one{background:#d5a84b25}.brand-intro-glow-two{background:#78b9a51c}
+.brand-intro-orbit{border-color:#e6d39a24}
+.brand-intro-progress span{background:linear-gradient(90deg,#7fc2a7,#e4c477)}
+.brand-intro-lockup small,.gateway-brand small{color:#d0dfd8}
+.brand-intro-screen>p{color:#d0dfd8}.brand-intro-foot{color:#a0bdb1}
+.gateway-glow-one{background:#d5a84b22}.gateway-glow-two{background:#2c806e28}
+.gateway-header .language-picker select{background:#194744;border-color:#66877a;color:#f8f7f1}
+.gateway-kicker{color:#d8c58f}.gateway-kicker i{background:#d5a84b;box-shadow:0 0 15px #d5a84b}
+.gateway-content h1 em{background:linear-gradient(90deg,#e5c77e,#fff0c7);-webkit-background-clip:text;background-clip:text;color:transparent}
+.gateway-subtitle{color:#d0dfd8}
+.role-choice{border-color:#d5a84b45}
+.role-choice-candidate{background:linear-gradient(145deg,#28665b,#194744 58%,#123b3a)}
+.role-choice-employer{background:linear-gradient(145deg,#725c31,#4b492f 55%,#263e37)}
+.role-choice-icon,.role-choice-employer .role-choice-icon{background:linear-gradient(135deg,#176b63,#d5a84b);color:#fff}
+.role-choice-label{color:#e0c17b}.role-choice small{color:#d5e0d9}
+.role-choice-action,.role-choice-employer .role-choice-action{color:#f0d58e}
+.role-choice:hover,.role-choice:focus-visible{border-color:#e8ca7e}
+.gateway-reassurance{color:#d0dfd8}.gateway-reassurance span{background:#34775f}
+.gateway-last-choice{color:#a7beb5}.gateway-last-choice strong{color:#f0d58e}
+.gateway-footer{color:#9db7ad}
