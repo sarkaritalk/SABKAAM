@@ -4,7 +4,7 @@ import CandidateArea from './CandidateArea'
 import SafetyCenter from './safety-center'
 import EmployerDashboard from './EmployerDashboard'
 
-import { districts, type StateName } from './locations'
+import { districts, stateNames, getStateLabel, type StateName } from './locations'
 
 type Category = { name: string; icon: string; count: string }
 
@@ -76,7 +76,7 @@ function App() {
         {activeTab === 'होम' && <>
         <section className="hero">
           <div className="hero-copy">
-            <span className="eyebrow"><span className="live-dot" /> बिहार और झारखंड से शुरुआत</span>
+            <span className="eyebrow"><span className="live-dot" /> पूरे भारत में काम के अवसर</span>
             <h1>काम की तलाश अब<br /><em>आसान होगी।</em></h1>
             <p>अपने आसपास नौकरी, रोज़गार और काम के मौके खोजें। छोटी दुकान से लेकर बड़ी कंपनी तक — सब एक जगह।</p>
           </div>
@@ -91,11 +91,11 @@ function App() {
           <div className="search-heading"><div><span className="section-kicker">अपना अगला काम खोजें</span><h2>आप क्या काम ढूँढ रहे हैं?</h2></div><span className="search-step">01 <i>/</i> 03</span></div>
           <div className="search-controls">
             <label className="query-field"><span>⌕</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="काम, पद या दुकान का नाम लिखें..." /></label>
-            <label className="select-field"><span>राज्य</span><select value={stateName} onChange={(event) => changeState(event.target.value as StateName)}><option value="Bihar">बिहार</option><option value="Jharkhand">झारखंड</option></select></label>
+            <label className="select-field"><span>राज्य</span><select value={stateName} onChange={(event) => changeState(event.target.value as StateName)}>{stateNames.map((state) => <option key={state} value={state}>{getStateLabel(state)}</option>)}</select></label>
             <label className="select-field"><span>जिला</span><select value={district} onChange={(event) => setDistrict(event.target.value)}>{districts[stateName].map((item) => <option key={item}>{item}</option>)}</select></label>
             <button className="search-button" onClick={searchJobs}>काम खोजें <span>→</span></button>
           </div>
-          <div className="search-foot"><span>⌖ {stateName === 'Bihar' ? 'बिहार' : 'झारखंड'} में अवसर खोजें</span><button onClick={() => alert('Voice search सुविधा आगे जोड़ी जाएगी।')}>🎙️ बोलकर खोजें <small>जल्द आ रहा है</small></button></div>
+          <div className="search-foot"><span>⌖ {getStateLabel(stateName)} में अवसर खोजें</span><button onClick={() => alert('Voice search सुविधा आगे जोड़ी जाएगी।')}>🎙️ बोलकर खोजें <small>जल्द आ रहा है</small></button></div>
         </section>
 
         <section className="categories-section">
@@ -139,7 +139,7 @@ function App() {
       <nav className="bottom-nav" aria-label="मुख्य नेविगेशन">
         {['होम', 'मेरे आवेदन', 'सूचनाएँ', 'प्रोफ़ाइल'].map((tab, index) => <button key={tab} className={activeTab === tab ? 'active' : ''} onClick={() => setActiveTab(tab)}><span>{['⌂', '▤', '♧', '◉'][index]}</span>{tab}</button>)}
       </nav>
-      <footer><span>© SABKAAM · Jobs, Work & Opportunities</span><span>बिहार + झारखंड · शुरुआती संस्करण</span></footer>
+      <footer><span>© SABKAAM · Jobs, Work & Opportunities</span><span>भारत · शुरुआती संस्करण</span></footer>
     </div>
   )
 }
