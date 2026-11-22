@@ -639,3 +639,8 @@ footer{color:#a7beb5}
   color: #c5d4cb;
   font-weight: 600;
 }
+
+.brand small {
+  color: #f1ead7;
+  font-weight: 700;
+}
