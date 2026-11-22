@@ -271,45 +271,109 @@ with check (user_id = (select auth.uid()));
 
 -- audit_logs intentionally has no client policies: server-side trusted writes only.
 
--- Prevent client-side privilege escalation and self-approval.
+-- Protect privileged fields on both INSERT and UPDATE. RLS alone is not
+-- enough: a user must not be able to choose an approved/published state
+-- in the initial INSERT payload.
 create or replace function public.protect_reviewed_fields()
 returns trigger
 language plpgsql
 set search_path = ''
-as $$
+as $
 begin
-  if auth.uid() is not null then
-    if tg_table_name = 'profiles' and new.role is distinct from old.role then
+  if auth.uid() is null then
+    return new;
+  end if;
+
+  if tg_table_name = 'profiles' then
+    if tg_op = 'INSERT' then
+      if new.role <> 'candidate' then
+        raise exception 'New accounts must start as candidates';
+      end if;
+    elsif new.role is distinct from old.role then
       raise exception 'Account role changes require an authorized administrator';
-    elsif tg_table_name = 'employers' and new.verification_status is distinct from old.verification_status then
+    end if;
+
+  elsif tg_table_name = 'employers' then
+    if tg_op = 'INSERT' then
+      if new.verification_status <> 'pending' then
+        raise exception 'New employers must start pending verification';
+      end if;
+    elsif new.verification_status is distinct from old.verification_status then
       raise exception 'Employer verification status is managed by reviewers';
-    elsif tg_table_name = 'verification_requests' and (
-      new.status is distinct from old.status
+    end if;
+
+  elsif tg_table_name = 'verification_requests' then
+    if tg_op = 'INSERT' then
+      if new.status <> 'pending'
+        or new.reviewer_notes is not null
+        or new.reviewed_by is not null
+        or new.reviewed_at is not null then
+        raise exception 'New verification requests must start pending review';
+      end if;
+    elsif new.status is distinct from old.status
       or new.reviewer_notes is distinct from old.reviewer_notes
       or new.reviewed_by is distinct from old.reviewed_by
-      or new.reviewed_at is distinct from old.reviewed_at
-    ) then
+      or new.reviewed_at is distinct from old.reviewed_at then
       raise exception 'Verification review fields are managed by reviewers';
-    elsif tg_table_name = 'job_posts' and new.status in ('published', 'rejected') then
-      raise exception 'Only an authorized reviewer can publish or reject a job';
+    end if;
+
+  elsif tg_table_name = 'job_posts' then
+    if tg_op = 'INSERT' then
+      if new.status <> 'draft' then
+        raise exception 'New jobs must start as drafts';
+      end if;
+    elsif new.status is distinct from old.status then
+      raise exception 'Job status changes require an authorized review workflow';
+    end if;
+
+  elsif tg_table_name = 'applications' and tg_op = 'UPDATE' then
+    if new.status is distinct from old.status and new.status <> 'withdrawn' then
+      raise exception 'Candidates may only withdraw their own applications';
+    end if;
+
+  elsif tg_table_name = 'reports' and tg_op = 'INSERT' then
+    if new.status <> 'open' then
+      raise exception 'New reports must start open';
+    end if;
+
+  elsif tg_table_name = 'notifications' and tg_op = 'UPDATE' then
+    if new.user_id is distinct from old.user_id
+      or new.title is distinct from old.title
+      or new.body is distinct from old.body
+      or new.kind is distinct from old.kind
+      or new.created_at is distinct from old.created_at then
+      raise exception 'Users may only mark their own notifications as read';
     end if;
   end if;
+
   return new;
 end;
-$$;
+$;
 
 create trigger protect_profile_role
-before update on public.profiles
+before insert or update on public.profiles
 for each row execute function public.protect_reviewed_fields();
 
 create trigger protect_employer_verification
-before update on public.employers
+before insert or update on public.employers
 for each row execute function public.protect_reviewed_fields();
 
 create trigger protect_verification_review
-before update on public.verification_requests
+before insert or update on public.verification_requests
 for each row execute function public.protect_reviewed_fields();
 
 create trigger protect_job_publication
-before update on public.job_posts
+before insert or update on public.job_posts
+for each row execute function public.protect_reviewed_fields();
+
+create trigger protect_application_status
+before update on public.applications
+for each row execute function public.protect_reviewed_fields();
+
+create trigger protect_report_status
+before insert on public.reports
+for each row execute function public.protect_reviewed_fields();
+
+create trigger protect_notification_content
+before update on public.notifications
 for each row execute function public.protect_reviewed_fields();
