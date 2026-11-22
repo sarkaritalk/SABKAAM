@@ -7,7 +7,7 @@ import AuthPanel from './AuthPanel'
 import AdminDashboard from './AdminDashboard'
 import { LanguageSelect, Localized, type Language } from './i18n'
 
-import { stateNames, getStateLabel, getDistrictOptions, getStateCode, getDistrictCode, type StateName } from './locations'
+import { stateNames, getStateLabel, getDistrictOptions, getStateCode, getDistrictCode, getDistrictNameByCode, type StateName } from './locations'
 import { backendConfigured, listPublishedJobs, readAuthSession, clearAuthSession, submitApplication, getMyProfile, type AuthSession, type PublishedJob } from './lib/backend'
 
 type Category = { name: string; icon: string; count: string }
@@ -79,7 +79,8 @@ function App() {
           const number = new Intl.NumberFormat('en-IN')
           const salary = job.salary_min != null && job.salary_max != null ? '₹' + number.format(job.salary_min) + '–₹' + number.format(job.salary_max) + (job.salary_period ? ' / ' + job.salary_period : '') : job.salary_max != null ? 'Up to ₹' + number.format(job.salary_max) : 'वेतन विवरण उपलब्ध नहीं'
           const workTypes: Record<string, string> = { full_time: 'फुल टाइम', part_time: 'पार्ट टाइम', daily_wage: 'दैनिक मजदूरी', contract: 'कॉन्ट्रैक्ट', work_from_home: 'वर्क फ्रॉम होम', freelance: 'फ्रीलांस', internship: 'इंटर्नशिप' }
-          return { id: job.id, title: job.title, state: stateName, district: job.district, company: job.employer_display_name || 'नियोक्ता विवरण', place: job.town_or_market || job.district, pay: salary, type: workTypes[job.work_type] || job.work_type, category: job.category, description: job.description, isDemo: false }
+          const districtLabel = job.district_lgd_code ? getDistrictNameByCode(stateName, job.district_lgd_code, language) || job.district : job.district
+          return { id: job.id, title: job.title, state: stateName, district: districtLabel, company: job.employer_display_name || 'नियोक्ता विवरण', place: job.town_or_market || districtLabel, pay: salary, type: workTypes[job.work_type] || job.work_type, category: job.category, description: job.description, isDemo: false }
         }))
       })
       .catch((error: unknown) => { if (!cancelled) setJobsError(error instanceof Error ? error.message : 'Jobs could not be loaded') })
