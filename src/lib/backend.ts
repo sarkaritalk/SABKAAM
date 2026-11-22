@@ -227,6 +227,26 @@ export type ReviewJob = { id: string; title: string; description: string; distri
 export type ReviewRequest = { id: string; employer_id: string; business_name: string; business_type: string | null; contact_phone: string | null; district: string; address: string | null; created_at: string; status: string }
 export type OpenReport = { id: string; reason: string; details: string | null; contact_phone: string | null; created_at: string; status: string }
 
+
+export type EmployerApplication = {
+  id: string; job_id: string; full_name: string; phone: string; message: string | null
+  status: string; created_at: string; job_posts?: { title: string } | null
+}
+
+export async function getEmployerApplications(accessToken: string, employerId: string) {
+  return request<EmployerApplication[]>(
+    `/rest/v1/applications?select=id,job_id,full_name,phone,message,status,created_at,job_posts!inner(title,employer_id)&job_posts.employer_id=eq.${encodeURIComponent(employerId)}&order=created_at.desc`,
+    { accessToken },
+  )
+}
+
+export async function updateApplicationStatus(accessToken: string, applicationId: string, status: 'viewed' | 'shortlisted' | 'interview' | 'hired' | 'rejected') {
+  return request<Array<{ id: string; status: string }>>(
+    `/rest/v1/applications?id=eq.${encodeURIComponent(applicationId)}`,
+    { method: 'PATCH', accessToken, prefer: 'return=representation', body: { status } },
+  )
+}
+
 export async function getPendingJobs(accessToken: string) {
   return request<ReviewJob[]>('/rest/v1/job_posts?select=id,title,description,district,created_at,employers(business_name,contact_phone)&status=eq.pending_review&order=created_at.asc', { accessToken })
 }
