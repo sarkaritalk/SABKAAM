@@ -1,12 +1,13 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import './employer-dashboard.css'
 import { LanguageSelect, Localized, type Language } from './i18n'
-import { stateNames, getStateLabel, getDistrictOptions, type StateName } from './locations'
+import { stateNames, getStateLabel, getDistrictOptions, getStateCode, getDistrictCode, type StateName } from './locations'
+import { createEmployer, createJobDraft, getMyEmployer, submitJobForReview, type AuthSession } from './lib/backend'
 
-type Props = { onBack: () => void; language: Language; onLanguageChange: (language: Language) => void }
+type Props = { onBack: () => void; language: Language; onLanguageChange: (language: Language) => void; session: AuthSession | null; onSignIn: () => void; onSignOut: () => void }
 
 
-export default function EmployerDashboard({ onBack, language, onLanguageChange }: Props) {
+export default function EmployerDashboard({ onBack, language, onLanguageChange, session, onSignIn, onSignOut }: Props) {
   const [company, setCompany] = useState('')
   const [contact, setContact] = useState('')
   const [phone, setPhone] = useState('')
@@ -19,6 +20,7 @@ export default function EmployerDashboard({ onBack, language, onLanguageChange }
   const [vacancies, setVacancies] = useState('1')
   const [description, setDescription] = useState('')
   const [success, setSuccess] = useState(false)
+  const [submitMessage, setSubmitMessage] = useState('')
   useEffect(() => { const options = getDistrictOptions(stateName, language); if (!options.includes(district)) setDistrict(options[0] ?? '') }, [stateName, language])
 
   function submit(event: FormEvent<HTMLFormElement>) {
