@@ -83,7 +83,7 @@ export type AuthSession = {
   refresh_token: string
   expires_in: number
   token_type: string
-  user: { id: string; email?: string; phone?: string }
+  user: { id: string; email?: string; phone?: string; user_metadata?: { full_name?: string; account_type?: 'candidate' | 'employer' } }
 }
 
 export async function signUpWithEmail(email: string, password: string, fullName: string, accountType: 'candidate' | 'employer' = 'candidate') {
