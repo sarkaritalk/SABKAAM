@@ -139,7 +139,7 @@ export async function getMyEmployer(accessToken: string, ownerId: string) {
 }
 
 export async function createEmployer(accessToken: string, payload: {
-  owner_id: string; business_name: string; business_type?: string; contact_phone: string
+  owner_id: string; business_name: string; business_type?: string; contact_person?: string; contact_phone: string
   state_lgd_code: number; district_lgd_code: number; district: string; address?: string
 }) {
   return request<Array<{ id: string; verification_status: string }>>('/rest/v1/employers', {
