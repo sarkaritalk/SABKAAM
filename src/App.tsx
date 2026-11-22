@@ -85,7 +85,7 @@ function App() {
 
   function changeLanguage(next: Language) { setLanguage(next); localStorage.setItem('sabkaam-language', next) }
 
-  if (showEmployer) return <EmployerDashboard onBack={() => setShowEmployer(false)} language={language} onLanguageChange={changeLanguage} session={session} onSignIn={() => setShowAuth(true)} onSignOut={() => { clearAuthSession(); setSession(null) }} />
+  if (showEmployer) return <><EmployerDashboard onBack={() => setShowEmployer(false)} language={language} onLanguageChange={changeLanguage} session={session} onSignIn={() => setShowAuth(true)} onSignOut={() => { clearAuthSession(); setSession(null) }} />{showAuth && <AuthPanel language={language} onClose={() => setShowAuth(false)} onSuccess={(nextSession) => { setSession(nextSession); setShowAuth(false) }} />}</>
 
 
   function startVoiceSearch() {
