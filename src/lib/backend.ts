@@ -169,7 +169,7 @@ export async function submitApplication(accessToken: string, payload: {
 
 export async function createJobDraft(accessToken: string, payload: {
   employer_id: string; employer_display_name: string; title: string; category: string; description: string; work_type: string
-  state_lgd_code: number; district_lgd_code: number; district: string; town_or_market?: string
+  state_lgd_code: number; district_lgd_code: number; district: string; town_or_market?: string; locality?: string
   salary_min?: number; salary_max?: number; salary_period?: string; vacancies: number
 }) {
   return request<Array<{ id: string; status: string }>>('/rest/v1/job_posts', {
