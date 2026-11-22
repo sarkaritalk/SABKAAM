@@ -127,7 +127,7 @@ function App() {
       </header>
 
       <main>{showSafety && <SafetyCenter language={language} session={session} onSignIn={() => setShowAuth(true)} />}
-        {(activeTab === 'मेरे आवेदन' || activeTab === 'सूचनाएँ' || activeTab === 'प्रोफ़ाइल') && <CandidateArea mode={activeTab} language={language} />}
+        {(activeTab === 'मेरे आवेदन' || activeTab === 'सूचनाएँ' || activeTab === 'प्रोफ़ाइल') && <CandidateArea mode={activeTab} language={language} session={session} onSignIn={() => setShowAuth(true)} />}
         {activeTab === 'होम' && <>
         <section className="hero">
           <div className="hero-copy">
