@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from 'react'
 import './admin-dashboard.css'
-import { Localized, type Language } from './i18n'
+import { LanguageSelect, Localized, type Language } from './i18n'
 import { getOpenReports, getPendingJobs, getPendingVerifications, reviewJob, reviewReport, reviewVerification, type AuthSession, type OpenReport, type ReviewJob, type ReviewRequest } from './lib/backend'
 
-type Props = { session: AuthSession; language: Language; onBack: () => void }
+type Props = { session: AuthSession; language: Language; onBack: () => void; onLanguageChange: (language: Language) => void }
 
-export default function AdminDashboard({ session, language, onBack }: Props) {
+export default function AdminDashboard({ session, language, onBack, onLanguageChange }: Props) {
   const [jobs, setJobs] = useState<ReviewJob[]>([])
   const [verifications, setVerifications] = useState<ReviewRequest[]>([])
   const [reports, setReports] = useState<OpenReport[]>([])
@@ -46,7 +46,7 @@ export default function AdminDashboard({ session, language, onBack }: Props) {
       <header className="admin-header">
         <button type="button" onClick={onBack}>← वापस SABKAAM</button>
         <div><span className="section-kicker">SABKAAM TRUST OPERATIONS</span><h1>समीक्षा और मॉडरेशन</h1></div>
-        <span className="admin-role">Staff access</span>
+        <div className="admin-header-actions"><LanguageSelect language={language} onChange={onLanguageChange} /><span className="admin-role">Staff access</span></div>
       </header>
       <div className="admin-tabs">
         <button className={tab === 'jobs' ? 'active' : ''} onClick={() => setTab('jobs')}>नौकरी पोस्ट ({jobs.length})</button>
