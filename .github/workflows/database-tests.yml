@@ -34,7 +34,7 @@ jobs:
         run: supabase test db
 
       - name: Lint local database
-        run: supabase db lint --local --fail-on error
+        run: supabase db lint --fail-on error
 
       - name: Stop local Supabase
         if: always()
