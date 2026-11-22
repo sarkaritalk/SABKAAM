@@ -142,7 +142,7 @@ function App() {
 
   function searchJobs() {
     const normalized = normalizeWorkAreaQuery(areaQuery)
-    const exactCity = areaSuggestions.find(item => normalizeWorkAreaQuery(item.city) === normalized && normalizeWorkAreaQuery(item.area) === normalized)
+    const exactCity = areaSuggestions.find(item => normalizeWorkAreaQuery(item.area) === normalizeWorkAreaQuery(item.city))
     if (exactCity) {
       setStateName(exactCity.state)
       const localizedDistrict = exactCity.district === '*' ? 'सभी जिले' : getDistrictOptions(exactCity.state, language).find(label => getDistrictEnglishName(exactCity.state, label, language) === exactCity.district) ?? exactCity.district
