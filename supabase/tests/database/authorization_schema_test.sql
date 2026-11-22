@@ -45,7 +45,7 @@ select ok(
   'staff helper pins an empty search_path'
 );
 select ok(
-  (select p.proconfig @> array['search_path=']::text[]
+  (select p.proconfig @> array['search_path=""']::text[]
    from pg_proc p
    where p.oid = to_regprocedure('public.is_sabkaam_admin()')),
   'admin helper pins an empty search_path'
