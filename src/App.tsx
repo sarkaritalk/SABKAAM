@@ -63,6 +63,33 @@ function App() {
   const [applicationSent, setApplicationSent] = useState(false)
   const [showSafety, setShowSafety] = useState(false)
   const [showEmployer, setShowEmployer] = useState(false)
+  const [showBrandIntro, setShowBrandIntro] = useState(true)
+  const [showRolePicker, setShowRolePicker] = useState(false)
+  const [selectedRole, setSelectedRole] = useState<'candidate' | 'employer'>(() => {
+    const saved = localStorage.getItem('sabkaam-selected-role')
+    return saved === 'employer' ? 'employer' : 'candidate'
+  })
+
+  useEffect(() => {
+    const introTimer = window.setTimeout(() => {
+      setShowBrandIntro(false)
+      setShowRolePicker(true)
+    }, 1450)
+    return () => window.clearTimeout(introTimer)
+  }, [])
+
+  function chooseRole(role: 'candidate' | 'employer') {
+    localStorage.setItem('sabkaam-selected-role', role)
+    setSelectedRole(role)
+    setShowRolePicker(false)
+    setShowEmployer(role === 'employer')
+    setActiveTab('होम')
+  }
+
+  function openRolePicker() {
+    setShowEmployer(false)
+    setShowRolePicker(true)
+  }
 
   const preferredDistrict = district === 'सभी जिले' ? undefined : getDistrictEnglishName(stateName, district, language)
   const areaSuggestions = useMemo(() => getWorkAreaSuggestions(areaQuery, stateName, preferredDistrict, 8), [areaQuery, stateName, preferredDistrict])
@@ -101,9 +128,39 @@ function App() {
 
   function changeLanguage(next: Language) { setLanguage(next); localStorage.setItem('sabkaam-language', next) }
 
+  if (showBrandIntro) return <div className="brand-intro-screen" role="status" aria-label="SABKAAM खुल रहा है">
+    <div className="brand-intro-glow brand-intro-glow-one" /><div className="brand-intro-glow brand-intro-glow-two" />
+    <div className="brand-intro-orbit brand-intro-orbit-one" /><div className="brand-intro-orbit brand-intro-orbit-two" />
+    <div className="brand-intro-lockup"><img src="/sabkaam-mark.svg" alt="" /><span><strong>SABKAAM</strong><small>हर काम, हर इंसान के लिए।</small></span></div>
+    <div className="brand-intro-progress"><span /></div>
+    <p>काम के नए अवसर खुल रहे हैं</p>
+    <small className="brand-intro-foot">JOBS · WORK · OPPORTUNITIES</small>
+  </div>
+
+  if (showRolePicker) return <div className="role-gateway">
+    <div className="gateway-glow gateway-glow-one" /><div className="gateway-glow gateway-glow-two" />
+    <header className="gateway-header"><div className="gateway-brand"><img src="/sabkaam-mark.svg" alt="" /><span><strong>SABKAAM</strong><small>हर काम, हर इंसान के लिए।</small></span></div><LanguageSelect language={language} onChange={changeLanguage} /></header>
+    <main className="gateway-content">
+      <span className="gateway-kicker"><i /> YOUR NEXT STEP STARTS HERE</span>
+      <h1>आप SABKAAM पर<br /><em>क्या करना चाहते हैं?</em></h1>
+      <p className="gateway-subtitle">अपनी ज़रूरत के अनुसार आगे बढ़ें। सही अनुभव आपका इंतज़ार कर रहा है।</p>
+      <div className="role-choice-grid">
+        <button className="role-choice role-choice-candidate" type="button" onClick={() => chooseRole('candidate')} aria-label="मुझे काम नौकरी चाहिए">
+          <span className="role-choice-icon">⌕</span><span className="role-choice-label">FOR JOB SEEKERS</span><strong>मुझे काम / नौकरी चाहिए</strong><small>अपने आसपास नौकरी, रोज़गार और नए अवसर खोजें।</small><span className="role-choice-action">नौकरी खोजें <b>↗</b></span>
+        </button>
+        <button className="role-choice role-choice-employer" type="button" onClick={() => chooseRole('employer')} aria-label="मुझे कामगार कर्मचारी चाहिए">
+          <span className="role-choice-icon">✦</span><span className="role-choice-label">FOR EMPLOYERS</span><strong>मुझे कामगार / कर्मचारी चाहिए</strong><small>अपनी टीम के लिए सही लोगों को खोजें और भर्ती करें।</small><span className="role-choice-action">हायरिंग शुरू करें <b>↗</b></span>
+        </button>
+      </div>
+      <div className="gateway-reassurance"><span>✓</span> आप बाद में भी अपना रोल बदल सकते हैं</div>
+      <div className="gateway-last-choice">आपकी पिछली पसंद: <strong>{selectedRole === 'employer' ? 'कामगार / कर्मचारी चाहिए' : 'काम / नौकरी चाहिए'}</strong></div>
+    </main>
+    <footer className="gateway-footer"><span>© SABKAAM</span><span>हर काम, हर इंसान के लिए।</span><span>MADE FOR INDIA</span></footer>
+  </div>
+
   if (showAdmin && session) return <AdminDashboard session={session} language={language} onBack={() => setShowAdmin(false)} onLanguageChange={changeLanguage} />
 
-  if (showEmployer) return <><EmployerDashboard onBack={() => setShowEmployer(false)} language={language} onLanguageChange={changeLanguage} session={session} onSignIn={() => setShowAuth(true)} onSignOut={() => { clearAuthSession(); setSession(null) }} />{showAuth && <AuthPanel language={language} onClose={() => setShowAuth(false)} onSuccess={(nextSession) => { setSession(nextSession); setShowAuth(false) }} />}</>
+  if (showEmployer) return <><EmployerDashboard onBack={openRolePicker} language={language} onLanguageChange={changeLanguage} session={session} onSignIn={() => setShowAuth(true)} onSignOut={() => { clearAuthSession(); setSession(null) }} />{showAuth && <AuthPanel language={language} defaultAccountType={selectedRole} onClose={() => setShowAuth(false)} onSuccess={(nextSession) => { setSession(nextSession); setShowAuth(false) }} />}</>
 
 
   function startVoiceSearch() {
@@ -160,10 +217,10 @@ function App() {
     <Localized language={language}><div className="app-shell" data-active-tab={activeTab} data-safety-open={showSafety}>
       <header className="topbar">
         <a className="brand" href="#" aria-label="SABKAAM होम">
-          <span className="brand-mark">स</span>
+          <img className="brand-logo-image" src="/sabkaam-mark.svg" alt="" />
           <span><strong>SABKAAM</strong><small>हर काम, हर इंसान के लिए।</small></span>
         </a>
-        <div className="topbar-actions">{(accountRole === "moderator" || accountRole === "admin") && <button className="account-link" onClick={() => setShowAdmin(true)}>Admin</button>}{session ? <button className="account-link" onClick={() => { clearAuthSession(); setSession(null) }}>लॉगआउट</button> : backendConfigured ? <button className="account-link" onClick={() => setShowAuth(true)}>लॉगिन</button> : <span className="account-link">Preview mode</span>}<LanguageSelect language={language} onChange={changeLanguage} /><button className="safety-link" onClick={() => setShowSafety(!showSafety)}>{showSafety ? '← वापस' : '🛡️ सुरक्षा और शिकायत'}</button><button className="employer-link" onClick={() => setShowEmployer(true)}>नौकरी देने वाले? <span>यहाँ जाएँ ↗</span></button></div>
+        <div className="topbar-actions">{(accountRole === "moderator" || accountRole === "admin") && <button className="account-link" onClick={() => setShowAdmin(true)}>Admin</button>}{session ? <button className="account-link" onClick={() => { clearAuthSession(); setSession(null) }}>लॉगआउट</button> : backendConfigured ? <button className="account-link" onClick={() => setShowAuth(true)}>लॉगिन</button> : <span className="account-link">Preview mode</span>}<LanguageSelect language={language} onChange={changeLanguage} /><button className="safety-link" onClick={() => setShowSafety(!showSafety)}>{showSafety ? '← वापस' : '🛡️ सुरक्षा और शिकायत'}</button><button className="employer-link" onClick={openRolePicker}>रोल बदलें <span>↗</span></button></div>
       </header>
 
       <main>{showSafety && <SafetyCenter language={language} session={session} onSignIn={() => setShowAuth(true)} />}
@@ -272,7 +329,7 @@ function App() {
         </>}
       </main>
 
-      {showAuth && <AuthPanel language={language} onClose={() => setShowAuth(false)} onSuccess={(nextSession) => { setSession(nextSession); setShowAuth(false) }} />}
+      {showAuth && <AuthPanel language={language} defaultAccountType={selectedRole} onClose={() => setShowAuth(false)} onSuccess={(nextSession) => { setSession(nextSession); setShowAuth(false) }} />}
       <nav className="bottom-nav" aria-label="मुख्य नेविगेशन">
         {['होम', 'AI आवेदक', 'मेरे आवेदन', 'सूचनाएँ', 'प्रोफ़ाइल'].map((tab, index) => <button key={tab} className={activeTab === tab ? 'active' : ''} onClick={() => { setActiveTab(tab); setSelectedCategoryInfo(null) }}><span>{['⌂', '✦', '▤', '♧', '◉'][index]}</span>{tab}</button>)}
       </nav>
