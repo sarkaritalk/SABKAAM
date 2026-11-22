@@ -86,10 +86,10 @@ export type AuthSession = {
   user: { id: string; email?: string; phone?: string }
 }
 
-export async function signUpWithEmail(email: string, password: string, fullName: string) {
+export async function signUpWithEmail(email: string, password: string, fullName: string, accountType: 'candidate' | 'employer' = 'candidate') {
   return request<AuthSession | { id: string; email: string; confirmation_sent_at?: string }>('/auth/v1/signup', {
     method: 'POST',
-    body: { email, password, data: { full_name: fullName } },
+    body: { email, password, data: { full_name: fullName, account_type: accountType } },
   })
 }
 
@@ -97,6 +97,62 @@ export async function signInWithEmail(email: string, password: string) {
   return request<AuthSession>('/auth/v1/token?grant_type=password', {
     method: 'POST',
     body: { email, password },
+  })
+}
+
+
+export type StoredAuthSession = AuthSession & { expires_at: number }
+
+export function readAuthSession(): AuthSession | null {
+  try {
+    const raw = sessionStorage.getItem('sabkaam-auth-session')
+    if (!raw) return null
+    const saved = JSON.parse(raw) as StoredAuthSession
+    if (!saved.access_token || !saved.user?.id || saved.expires_at <= Date.now()) {
+      sessionStorage.removeItem('sabkaam-auth-session')
+      return null
+    }
+    return saved
+  } catch {
+    sessionStorage.removeItem('sabkaam-auth-session')
+    return null
+  }
+}
+
+export function saveAuthSession(session: AuthSession) {
+  sessionStorage.setItem('sabkaam-auth-session', JSON.stringify({
+    ...session,
+    expires_at: Date.now() + session.expires_in * 1000,
+  }))
+}
+
+export function clearAuthSession() {
+  sessionStorage.removeItem('sabkaam-auth-session')
+}
+
+export async function getMyEmployer(accessToken: string, ownerId: string) {
+  const rows = await request<Array<{ id: string; verification_status: string }>>(
+    `/rest/v1/employers?select=id,verification_status&owner_id=eq.${encodeURIComponent(ownerId)}&limit=1`,
+    { accessToken },
+  )
+  return rows[0] ?? null
+}
+
+export async function createEmployer(accessToken: string, payload: {
+  owner_id: string; business_name: string; business_type?: string; contact_phone: string
+  state_lgd_code: number; district_lgd_code: number; district: string; address?: string
+}) {
+  return request<Array<{ id: string; verification_status: string }>>('/rest/v1/employers', {
+    method: 'POST', accessToken, prefer: 'return=representation', body: { ...payload, state_code: String(payload.state_lgd_code) },
+  })
+}
+
+export async function createVerificationRequest(accessToken: string, payload: {
+  employer_id: string; business_name: string; business_type?: string; contact_phone: string
+  state_lgd_code: number; district_lgd_code: number; district: string; address: string
+}) {
+  return request<Array<{ id: string; status: string }>>('/rest/v1/verification_requests', {
+    method: 'POST', accessToken, prefer: 'return=representation', body: { ...payload, state_code: String(payload.state_lgd_code) },
   })
 }
 
