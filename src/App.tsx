@@ -190,7 +190,7 @@ function App() {
               setLiveApplyBusy(true)
               setLiveApplyMessage('')
               try {
-                await submitApplication(session.access_token, { job_id: selectedJob.id, candidate_id: session.user.id, full_name: String(form.get('full_name') || ''), phone: String(form.get('phone') || ''), message: String(form.get('message') || '') })
+                await submitApplication(session.access_token, { job_id: selectedJob.id ?? '', candidate_id: session.user.id, full_name: String(form.get('full_name') || ''), phone: String(form.get('phone') || ''), message: String(form.get('message') || '') })
                 setLiveApplyMessage('आपका आवेदन सफलतापूर्वक भेजा गया।')
               } catch (error) {
                 setLiveApplyMessage(error instanceof Error ? error.message : 'आवेदन नहीं भेजा जा सका।')
