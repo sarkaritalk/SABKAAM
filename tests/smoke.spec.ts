@@ -20,6 +20,7 @@ test.describe('SABKAAM desktop and mobile smoke tests', () => {
     await page.getByLabel('Website language').selectOption('hinglish')
     await expect(page.getByRole('heading', { name: /Sahi log dhoondhein/ })).toBeVisible()
     await page.getByLabel('Website language').selectOption('en')
+    await page.getByRole('button', { name: /Back to home/ }).click()
     await page.getByRole('button', { name: 'Profile' }).click()
     await expect(page.getByRole('heading', { name: 'My profile' })).toBeVisible()
     await page.getByRole('button', { name: /Safety & reports/ }).click()
