@@ -9,7 +9,7 @@ import { stateNames, getStateLabel, getDistrictOptions, getStateCode, getDistric
 import { backendConfigured, listPublishedJobs, type PublishedJob } from './lib/backend'
 
 type Category = { name: string; icon: string; count: string }
-type JobListing = { id?: string; title: string; state: string; company: string; place: string; pay: string; type: string; category: string; description?: string; isDemo?: boolean }
+type JobListing = { id?: string; title: string; state: string; district?: string; company: string; place: string; pay: string; type: string; category: string; description?: string; isDemo?: boolean }
 type SpeechRecognitionLike = { lang: string; interimResults: boolean; maxAlternatives: number; onresult: ((event: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null; onerror: (() => void) | null; onend: (() => void) | null; start: () => void }
 
 const categories: Category[] = [
@@ -54,7 +54,7 @@ function App() {
     const matchesQuery = !query || `${job.title} ${job.company} ${job.place} ${job.category}`.toLowerCase().includes(query.toLowerCase())
     const matchesCategory = !selectedCategory || job.category === selectedCategory
     const matchesState = job.state === stateName
-    const matchesLocation = district === 'सभी जिले' || job.place === district
+    const matchesLocation = district === 'सभी जिले' || (job.district || job.place) === district
     return matchesQuery && matchesCategory && matchesState && matchesLocation
   }), [query, selectedCategory, stateName, district, liveJobs])
 
@@ -70,7 +70,7 @@ function App() {
           const number = new Intl.NumberFormat('en-IN')
           const salary = job.salary_min != null && job.salary_max != null ? '₹' + number.format(job.salary_min) + '–₹' + number.format(job.salary_max) + (job.salary_period ? ' / ' + job.salary_period : '') : job.salary_max != null ? 'Up to ₹' + number.format(job.salary_max) : 'वेतन विवरण उपलब्ध नहीं'
           const workTypes: Record<string, string> = { full_time: 'फुल टाइम', part_time: 'पार्ट टाइम', daily_wage: 'दैनिक मजदूरी', contract: 'कॉन्ट्रैक्ट', work_from_home: 'वर्क फ्रॉम होम', freelance: 'फ्रीलांस', internship: 'इंटर्नशिप' }
-          return { id: job.id, title: job.title, state: stateName, company: 'नियोक्ता विवरण', place: job.town_or_market || job.district, pay: salary, type: workTypes[job.work_type] || job.work_type, category: job.category, description: job.description, isDemo: false }
+          return { id: job.id, title: job.title, state: stateName, district: job.district, company: 'नियोक्ता विवरण', place: job.town_or_market || job.district, pay: salary, type: workTypes[job.work_type] || job.work_type, category: job.category, description: job.description, isDemo: false }
         }))
       })
       .catch((error: unknown) => { if (!cancelled) setJobsError(error instanceof Error ? error.message : 'Jobs could not be loaded') })
