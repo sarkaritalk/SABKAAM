@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test'
 
 test.describe('SABKAAM desktop and mobile smoke tests', () => {
   test.beforeEach(async ({ page }) => {
+    await page.goto('/')
     await page.getByRole('button', { name: /मुझे काम \/ नौकरी चाहिए/ }).click()
   })
 
