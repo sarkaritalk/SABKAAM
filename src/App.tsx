@@ -145,10 +145,10 @@ function App() {
       <h1>आप SABKAAM पर<br /><em>क्या करना चाहते हैं?</em></h1>
       <p className="gateway-subtitle">अपनी ज़रूरत के अनुसार आगे बढ़ें। सही अनुभव आपका इंतज़ार कर रहा है।</p>
       <div className="role-choice-grid">
-        <button className="role-choice role-choice-candidate" type="button" onClick={() => chooseRole('candidate')} aria-label="मुझे काम नौकरी चाहिए">
+        <button className="role-choice role-choice-candidate" type="button" onClick={() => chooseRole('candidate')} aria-label="मुझे काम / नौकरी चाहिए">
           <span className="role-choice-icon">⌕</span><span className="role-choice-label">FOR JOB SEEKERS</span><strong>मुझे काम / नौकरी चाहिए</strong><small>अपने आसपास नौकरी, रोज़गार और नए अवसर खोजें।</small><span className="role-choice-action">नौकरी खोजें <b>↗</b></span>
         </button>
-        <button className="role-choice role-choice-employer" type="button" onClick={() => chooseRole('employer')} aria-label="मुझे कामगार कर्मचारी चाहिए">
+        <button className="role-choice role-choice-employer" type="button" onClick={() => chooseRole('employer')} aria-label="मुझे कामगार / कर्मचारी चाहिए">
           <span className="role-choice-icon">✦</span><span className="role-choice-label">FOR EMPLOYERS</span><strong>मुझे कामगार / कर्मचारी चाहिए</strong><small>अपनी टीम के लिए सही लोगों को खोजें और भर्ती करें।</small><span className="role-choice-action">हायरिंग शुरू करें <b>↗</b></span>
         </button>
       </div>
