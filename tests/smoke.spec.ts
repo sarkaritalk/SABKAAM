@@ -49,6 +49,7 @@ test.describe('SABKAAM desktop and mobile smoke tests', () => {
     await page.getByLabel('संपर्क व्यक्ति का नाम').fill('टेस्ट यूजर')
     await page.getByLabel('मोबाइल नंबर').fill('9876543210')
     await page.getByLabel('काम / पद का नाम').fill('सेल्स हेल्पर')
+    await page.getByLabel(/शहर \/ इलाका \/ सेक्टर \/ गली \/ मेट्रो \/ PIN/).fill('उत्तम नगर')
     await page.getByRole('button', { name: /डेमो पोस्ट का प्रीव्यू देखें/ }).click()
     await expect(page.getByText(/प्रीव्यू तैयार है/)).toBeVisible()
     const width = await page.evaluate(() => document.documentElement.scrollWidth)
