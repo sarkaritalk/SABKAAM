@@ -37,13 +37,13 @@ export function getStateLabel(state: string, language: 'hi' | 'en' | 'hinglish' 
 export const districts = Object.fromEntries(
   Object.entries(locationData.states).map(([state, value]) => [
     state,
-    ['सभी जिले', ...value.districts.map((district) => district.local && /[\\u0900-\\u097F]/.test(district.local) ? district.local : district.name)],
+    ['सभी जिले', ...value.districts.map((district) => district.local && /[\u0900-\u097F]/.test(district.local) ? district.local : district.name)],
   ]),
 ) as Record<StateName, string[]>
 
 export function getDistrictOptions(state: StateName, language: 'hi' | 'en' | 'hinglish' = 'hi'): string[] {
   const records = locationData.states[state].districts
-  return records.map((district) => language === 'hi' && district.local && /[\\u0900-\\u097F]/.test(district.local) ? district.local : district.name)
+  return records.map((district) => language === 'hi' && district.local && /[\u0900-\u097F]/.test(district.local) ? district.local : district.name)
 }
 
 export const locationSource = {
