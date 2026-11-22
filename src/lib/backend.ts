@@ -196,6 +196,15 @@ export async function getMyApplications(accessToken: string) {
 }
 
 
+
+export async function getMyProfile(accessToken: string, userId: string) {
+  const rows = await request<Array<{ id: string; full_name: string | null; phone: string | null; skills: string | null; preferred_work_type: string | null; district: string | null; state_lgd_code: number | null; district_lgd_code: number | null; preferred_language: string }>>(
+    `/rest/v1/profiles?select=id,full_name,phone,skills,preferred_work_type,district,state_lgd_code,district_lgd_code,preferred_language&id=eq.${encodeURIComponent(userId)}&limit=1`,
+    { accessToken },
+  )
+  return rows[0] ?? null
+}
+
 export async function updateMyProfile(accessToken: string, userId: string, payload: {
   full_name: string; phone: string; district: string; state_code: string
   state_lgd_code: number; district_lgd_code: number; preferred_language: string; skills: string; preferred_work_type: string
