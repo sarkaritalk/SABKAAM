@@ -5,9 +5,10 @@ import SafetyCenter from './safety-center'
 import EmployerDashboard from './EmployerDashboard'
 import { LanguageSelect, Localized, type Language } from './i18n'
 
-import { districts, stateNames, getStateLabel, type StateName } from './locations'
+import { stateNames, getStateLabel, getDistrictOptions, type StateName } from './locations'
 
 type Category = { name: string; icon: string; count: string }
+type SpeechRecognitionLike = { lang: string; interimResults: boolean; maxAlternatives: number; onresult: ((event: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null; onerror: (() => void) | null; onend: (() => void) | null; start: () => void }
 
 const categories: Category[] = [
   { name: 'दुकान और रिटेल', icon: '🛍️', count: 'दुकान, सेल्स, काउंटर' },
@@ -33,7 +34,8 @@ const demoJobs = [
 function App() {
   const [language, setLanguage] = useState<Language>(() => { const saved = localStorage.getItem('sabkaam-language'); return saved === 'en' || saved === 'hinglish' ? saved : 'hi' })
   const [stateName, setStateName] = useState<StateName>('Bihar')
-  const [district, setDistrict] = useState('मधुबनी')
+  const [district, setDistrict] = useState('सभी जिले')
+  const [voiceStatus, setVoiceStatus] = useState<'idle' | 'listening' | 'unsupported' | 'error'>('idle')
   const [query, setQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('')
   const [activeTab, setActiveTab] = useState('होम')
@@ -54,6 +56,25 @@ function App() {
   function changeLanguage(next: Language) { setLanguage(next); localStorage.setItem('sabkaam-language', next) }
 
   if (showEmployer) return <EmployerDashboard onBack={() => setShowEmployer(false)} language={language} onLanguageChange={changeLanguage} />
+
+
+  function startVoiceSearch() {
+    const speechWindow = window as Window & { SpeechRecognition?: new () => SpeechRecognitionLike; webkitSpeechRecognition?: new () => SpeechRecognitionLike }
+    const SpeechRecognition = speechWindow.SpeechRecognition || speechWindow.webkitSpeechRecognition
+    if (!SpeechRecognition) { setVoiceStatus('unsupported'); return }
+    const recognition = new SpeechRecognition()
+    recognition.lang = language === 'en' ? 'en-IN' : 'hi-IN'
+    recognition.interimResults = false
+    recognition.maxAlternatives = 1
+    recognition.onresult = (event) => {
+      const transcript = event.results[0]?.[0]?.transcript ?? ''
+      if (transcript) { setQuery(transcript); setShowDemo(true); setVoiceStatus('idle') }
+    }
+    recognition.onerror = () => setVoiceStatus('error')
+    recognition.onend = () => setVoiceStatus((current) => current === 'listening' ? 'idle' : current)
+    setVoiceStatus('listening')
+    try { recognition.start() } catch { setVoiceStatus('error') }
+  }
 
   function changeState(next: StateName) {
     setStateName(next)
@@ -95,11 +116,11 @@ function App() {
           <div className="search-heading"><div><span className="section-kicker">अपना अगला काम खोजें</span><h2>आप क्या काम ढूँढ रहे हैं?</h2></div><span className="search-step">01 <i>/</i> 03</span></div>
           <div className="search-controls">
             <label className="query-field"><span>⌕</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="काम, पद या दुकान का नाम लिखें..." /></label>
-            <label className="select-field"><span>राज्य</span><select value={stateName} onChange={(event) => changeState(event.target.value as StateName)}>{stateNames.map((state) => <option key={state} value={state}>{getStateLabel(state)}</option>)}</select></label>
-            <label className="select-field"><span>जिला</span><select value={district} onChange={(event) => setDistrict(event.target.value)}>{districts[stateName].map((item) => <option key={item}>{item}</option>)}</select></label>
+            <label className="select-field"><span>राज्य</span><select value={stateName} onChange={(event) => changeState(event.target.value as StateName)}>{stateNames.map((state) => <option key={state} value={state}>{getStateLabel(state, language)}</option>)}</select></label>
+            <label className="select-field"><span>जिला</span><select value={district} onChange={(event) => setDistrict(event.target.value)}><option value="सभी जिले">सभी जिले</option>{getDistrictOptions(stateName, language).map((item) => <option key={item}>{item}</option>)}</select></label>
             <button className="search-button" onClick={searchJobs}>काम खोजें <span>→</span></button>
           </div>
-          <div className="search-foot"><span>⌖ {getStateLabel(stateName)} में अवसर खोजें</span><button onClick={() => alert('Voice search सुविधा आगे जोड़ी जाएगी।')}>🎙️ बोलकर खोजें <small>जल्द आ रहा है</small></button></div>
+          <div className="search-foot"><span>⌖ {getStateLabel(stateName)} में अवसर खोजें</span><button onClick={startVoiceSearch} disabled={voiceStatus === 'listening'}>🎙️ {voiceStatus === 'listening' ? 'सुन रहा हूँ...' : 'बोलकर खोजें'} <small>{voiceStatus === 'unsupported' ? 'इस ब्राउज़र में उपलब्ध नहीं' : voiceStatus === 'error' ? 'माइक अनुमति जाँचें' : voiceStatus === 'listening' ? 'बोलिए' : 'हिंदी / English'}</small></button></div>
         </section>
 
         <section className="categories-section">
