@@ -1881,6 +1881,416 @@
         "Industrial Estate",
         "Nakkalagutta"
       ]
+    },
+    {
+      "state": "Jammu And Kashmir",
+      "district": "Srinagar",
+      "city": "Srinagar",
+      "aliases": [
+        "Srinagar City"
+      ],
+      "areas": [
+        "Lal Chowk",
+        "Rajbagh",
+        "Hazratbal",
+        "Dal Lake Road",
+        "Bemina",
+        "Hyderpora",
+        "Soura",
+        "Nowgam",
+        "Pantha Chowk",
+        "Zainakote Industrial Estate"
+      ]
+    },
+    {
+      "state": "Jammu And Kashmir",
+      "district": "Jammu",
+      "city": "Jammu",
+      "aliases": [
+        "Jammu City"
+      ],
+      "areas": [
+        "Gandhi Nagar",
+        "Trikuta Nagar",
+        "Bari Brahmana Industrial Area",
+        "Gangyal Industrial Estate",
+        "Sidhra",
+        "Channi Himmat",
+        "Talab Tillo",
+        "Rehari",
+        "Narwal",
+        "Raghunath Bazaar"
+      ]
+    },
+    {
+      "state": "Uttarakhand",
+      "district": "Dehradun",
+      "city": "Dehradun",
+      "aliases": [
+        "Doon"
+      ],
+      "areas": [
+        "ISBT",
+        "Selaqui Industrial Area",
+        "Patel Nagar",
+        "Sahastradhara Road",
+        "Rajpur Road",
+        "Prem Nagar",
+        "Clement Town",
+        "Nehru Colony",
+        "Ballupur",
+        "Dharampur",
+        "IT Park",
+        "Mohabbewala Industrial Area"
+      ]
+    },
+    {
+      "state": "Uttarakhand",
+      "district": "Haridwar",
+      "city": "Haridwar",
+      "aliases": [
+        "Haridwar City"
+      ],
+      "areas": [
+        "SIDCUL Industrial Area",
+        "BHEL Ranipur",
+        "Roorkee Road",
+        "Jwalapur",
+        "Bahadrabad",
+        "Shivalik Nagar",
+        "Roorkee",
+        "Laksar Industrial Area"
+      ]
+    },
+    {
+      "state": "Uttarakhand",
+      "district": "Nainital",
+      "city": "Haldwani",
+      "aliases": [
+        "Haldwani City",
+        "Kathgodam"
+      ],
+      "areas": [
+        "Mukhani",
+        "Kathgodam",
+        "Transport Nagar",
+        "Rampur Road",
+        "Kusumkhera",
+        "Lalkuan Industrial Area"
+      ]
+    },
+    {
+      "state": "Manipur",
+      "district": "Imphal West",
+      "city": "Imphal",
+      "aliases": [
+        "Imphal City"
+      ],
+      "areas": [
+        "Thangal Bazaar",
+        "Paona Bazaar",
+        "Lamphelpat",
+        "Takyel Industrial Estate",
+        "Keishampat",
+        "Kakching",
+        "Porompat",
+        "Chingmeirong"
+      ]
+    },
+    {
+      "state": "Tripura",
+      "district": "West Tripura",
+      "city": "Agartala",
+      "aliases": [
+        "Agartala City"
+      ],
+      "areas": [
+        "Bodhjungnagar Industrial Area",
+        "AD Nagar",
+        "Kunjaban",
+        "Dhaleswar",
+        "Battala",
+        "GB Bazar",
+        "Indranagar",
+        "Jogendranagar"
+      ]
+    },
+    {
+      "state": "Meghalaya",
+      "district": "East Khasi Hills",
+      "city": "Shillong",
+      "aliases": [
+        "Shillong City"
+      ],
+      "areas": [
+        "Police Bazaar",
+        "Laitumkhrah",
+        "Mawlai",
+        "Nongthymmai",
+        "Nongmynsong",
+        "Madanrting",
+        "Rynjah",
+        "Iewduh",
+        "Byrnihat Industrial Area"
+      ]
+    },
+    {
+      "state": "Himachal Pradesh",
+      "district": "Shimla",
+      "city": "Shimla",
+      "aliases": [
+        "Simla"
+      ],
+      "areas": [
+        "Sanjauli",
+        "New Shimla",
+        "Summer Hill",
+        "Tara Devi",
+        "Dhalli",
+        "Kufri",
+        "Boileauganj",
+        "Mehli"
+      ]
+    },
+    {
+      "state": "Himachal Pradesh",
+      "district": "Solan",
+      "city": "Baddi",
+      "aliases": [
+        "Baddi Barotiwala Nalagarh",
+        "BBN Industrial Area"
+      ],
+      "areas": [
+        "Baddi Industrial Area",
+        "Barotiwala",
+        "Nalagarh",
+        "EPIP Phase 1",
+        "EPIP Phase 2",
+        "Jharmajri",
+        "Katha",
+        "Manpura"
+      ]
+    },
+    {
+      "state": "Mizoram",
+      "district": "Aizawl",
+      "city": "Aizawl",
+      "aliases": [
+        "Aizawl City"
+      ],
+      "areas": [
+        "Zarkawt",
+        "Dawrpui",
+        "Chaltlang",
+        "Bawngkawn",
+        "Zemabawk",
+        "Ramhlun",
+        "Durtlang",
+        "Luangmual"
+      ]
+    },
+    {
+      "state": "Lakshadweep",
+      "district": "Lakshadweep District",
+      "city": "Kavaratti",
+      "aliases": [
+        "Kavaratti Island"
+      ],
+      "areas": [
+        "Kavaratti Town",
+        "Agatti",
+        "Andrott",
+        "Minicoy",
+        "Amini"
+      ]
+    },
+    {
+      "state": "Arunachal Pradesh",
+      "district": "Papum Pare",
+      "city": "Itanagar",
+      "aliases": [
+        "Naharlagun",
+        "Nirjuli"
+      ],
+      "areas": [
+        "Naharlagun",
+        "Nirjuli",
+        "Ganga Market",
+        "Bank Tinali",
+        "Banderdewa",
+        "Doimukh",
+        "Lekhi"
+      ]
+    },
+    {
+      "state": "Nagaland",
+      "district": "Dimapur",
+      "city": "Dimapur",
+      "aliases": [
+        "Dimapur City"
+      ],
+      "areas": [
+        "Half Nagarjan",
+        "Purana Bazaar",
+        "Chumoukedima",
+        "Industrial Estate Dimapur",
+        "7th Mile",
+        "4th Mile",
+        "Super Market",
+        "Thahekhu"
+      ]
+    },
+    {
+      "state": "Nagaland",
+      "district": "Kohima",
+      "city": "Kohima",
+      "aliases": [
+        "Kohima City"
+      ],
+      "areas": [
+        "New Market",
+        "Mao Gate",
+        "Kohima Village",
+        "High School Area",
+        "PR Hill",
+        "Razhu Point",
+        "Seikhazou"
+      ]
+    },
+    {
+      "state": "Goa",
+      "district": "North Goa",
+      "city": "Panaji",
+      "aliases": [
+        "Panjim"
+      ],
+      "areas": [
+        "Patto Plaza",
+        "Porvorim",
+        "Mapusa",
+        "Verna Industrial Estate",
+        "Tivim Industrial Estate",
+        "Pilerne Industrial Estate",
+        "Bicholim",
+        "Pernem"
+      ]
+    },
+    {
+      "state": "Goa",
+      "district": "South Goa",
+      "city": "Vasco da Gama",
+      "aliases": [
+        "Vasco",
+        "Mormugao"
+      ],
+      "areas": [
+        "Vasco Market",
+        "Dabolim",
+        "Verna Industrial Estate",
+        "Sancoale",
+        "Zuarinagar",
+        "Cortalim",
+        "Margao",
+        "Cuncolim Industrial Estate"
+      ]
+    },
+    {
+      "state": "Ladakh",
+      "district": "Leh Ladakh",
+      "city": "Leh",
+      "aliases": [
+        "Leh City"
+      ],
+      "areas": [
+        "Leh Main Market",
+        "Choglamsar",
+        "Skara",
+        "Agling",
+        "Karu",
+        "Thiksey"
+      ]
+    },
+    {
+      "state": "Ladakh",
+      "district": "Kargil",
+      "city": "Kargil",
+      "aliases": [
+        "Kargil Town"
+      ],
+      "areas": [
+        "Kargil Main Market",
+        "Baroo",
+        "Chanigound",
+        "Drass",
+        "Sankoo"
+      ]
+    },
+    {
+      "state": "The Dadra And Nagar Haveli And Daman And Diu",
+      "district": "Dadra And Nagar Haveli",
+      "city": "Silvassa",
+      "aliases": [
+        "Silvassa City"
+      ],
+      "areas": [
+        "Dadra Industrial Estate",
+        "Piparia Industrial Area",
+        "Masat Industrial Estate",
+        "Amli",
+        "Vapi Road",
+        "Khanvel"
+      ]
+    },
+    {
+      "state": "The Dadra And Nagar Haveli And Daman And Diu",
+      "district": "Daman",
+      "city": "Daman",
+      "aliases": [
+        "Daman City"
+      ],
+      "areas": [
+        "Dabhel Industrial Estate",
+        "Bhimpore",
+        "Kachigam",
+        "Ringanwada",
+        "Nani Daman",
+        "Moti Daman"
+      ]
+    },
+    {
+      "state": "Sikkim",
+      "district": "Gangtok",
+      "city": "Gangtok",
+      "aliases": [
+        "Gangtok City"
+      ],
+      "areas": [
+        "Tadong",
+        "Deorali",
+        "Ranipool Industrial Area",
+        "Singtam",
+        "Rangpo Industrial Area",
+        "Sichey",
+        "Development Area"
+      ]
+    },
+    {
+      "state": "Andaman And Nicobar Islands",
+      "district": "South Andamans",
+      "city": "Port Blair",
+      "aliases": [
+        "Sri Vijaya Puram"
+      ],
+      "areas": [
+        "Aberdeen Bazaar",
+        "Dollygunj",
+        "Garacharma",
+        "Bhatubasti",
+        "Prothrapur",
+        "Phoenix Bay",
+        "Chatham",
+        "Bambooflat"
+      ]
     }
   ]
 }
