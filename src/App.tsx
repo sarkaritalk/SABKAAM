@@ -3,10 +3,11 @@ import './job-apply.css'
 import CandidateArea from './CandidateArea'
 import SafetyCenter from './safety-center'
 import EmployerDashboard from './EmployerDashboard'
+import AuthPanel from './AuthPanel'
 import { LanguageSelect, Localized, type Language } from './i18n'
 
 import { stateNames, getStateLabel, getDistrictOptions, getStateCode, getDistrictCode, type StateName } from './locations'
-import { backendConfigured, listPublishedJobs, type PublishedJob } from './lib/backend'
+import { backendConfigured, listPublishedJobs, readAuthSession, clearAuthSession, submitApplication, type AuthSession, type PublishedJob } from './lib/backend'
 
 type Category = { name: string; icon: string; count: string }
 type JobListing = { id?: string; title: string; state: string; district?: string; company: string; place: string; pay: string; type: string; category: string; description?: string; isDemo?: boolean }
@@ -34,6 +35,10 @@ const demoJobs: JobListing[] = [
 ]
 
 function App() {
+  const [session, setSession] = useState<AuthSession | null>(() => readAuthSession())
+  const [showAuth, setShowAuth] = useState(false)
+  const [liveApplyBusy, setLiveApplyBusy] = useState(false)
+  const [liveApplyMessage, setLiveApplyMessage] = useState('')
   const [language, setLanguage] = useState<Language>(() => { const saved = localStorage.getItem('sabkaam-language'); return saved === 'en' || saved === 'hinglish' ? saved : 'hi' })
   const [stateName, setStateName] = useState<StateName>('Bihar')
   const [district, setDistrict] = useState('सभी जिले')
@@ -80,7 +85,7 @@ function App() {
 
   function changeLanguage(next: Language) { setLanguage(next); localStorage.setItem('sabkaam-language', next) }
 
-  if (showEmployer) return <EmployerDashboard onBack={() => setShowEmployer(false)} language={language} onLanguageChange={changeLanguage} />
+  if (showEmployer) return <EmployerDashboard onBack={() => setShowEmployer(false)} language={language} onLanguageChange={changeLanguage} session={session} onSignIn={() => setShowAuth(true)} onSignOut={() => { clearAuthSession(); setSession(null) }} />
 
 
   function startVoiceSearch() {
