@@ -37,7 +37,7 @@ export default function CandidateArea({ mode, language, session, onSignIn }: { m
   if (mode === 'मेरे आवेदन') {
     return <Localized language={language}><section className="candidate-area">
       <div className="candidate-heading"><span className="section-kicker">आपकी नौकरी की यात्रा</span><h1>मेरे आवेदन</h1><p>आपने जिन नौकरियों के लिए आवेदन किया है, उनकी स्थिति यहाँ देख सकेंगे।</p></div>
-      {session ? <div className="application-list">{realApplications.length ? realApplications.map(item => <article className="candidate-application" key={item.id}><div className="application-symbol">▤</div><div className="application-info"><strong>{item.job_posts?.title || "नौकरी आवेदन"}</strong><span>{item.job_posts?.district || "भारत"} · {new Date(item.created_at).toLocaleDateString()}</span><small className="pending">{item.status}</small></div></article>) : <div className="candidate-notice">अभी आपके खाते में कोई आवेदन नहीं है।</div>}</div> : <div className="candidate-notice">अपने वास्तविक आवेदन देखने के लिए लॉगिन करें। <button type="button" onClick={onSignIn}>लॉगिन करें</button></div>}</div>
+      {session ? <div className="application-list">{realApplications.length ? realApplications.map(item => <article className="candidate-application" key={item.id}><div className="application-symbol">▤</div><div className="application-info"><strong>{item.job_posts?.title || "नौकरी आवेदन"}</strong><span>{item.job_posts?.district || "भारत"} · {new Date(item.created_at).toLocaleDateString()}</span><small className="pending">{item.status}</small></div></article>) : <div className="candidate-notice">अभी आपके खाते में कोई आवेदन नहीं है।</div>}</div> : <div className="candidate-notice">अपने वास्तविक आवेदन देखने के लिए लॉगिन करें। <button type="button" onClick={onSignIn}>लॉगिन करें</button></div>}
       <div className="candidate-empty-tip"><strong>अगला कदम</strong><p>नौकरी खोजें और आवेदन करें। वास्तविक आवेदन सुविधा लाइव जॉब सिस्टम बनने के बाद जोड़ी जाएगी।</p></div>
     </section></Localized>
   }
@@ -45,9 +45,7 @@ export default function CandidateArea({ mode, language, session, onSignIn }: { m
   if (mode === 'सूचनाएँ') {
     return <Localized language={language}><section className="candidate-area">
       <div className="candidate-heading"><span className="section-kicker">काम की खबर</span><h1>सूचनाएँ</h1><p>नौकरी और आवेदन से जुड़ी जरूरी जानकारी एक जगह।</p></div>
-      <div className="candidate-notice">अभी नोटिफिकेशन सेवा कनेक्ट नहीं है। ये उदाहरण सिर्फ स्क्रीन का नमूना हैं।</div>
-      <article className="candidate-application"><div className="application-symbol">✦</div><div className="application-info"><strong>अपनी प्रोफ़ाइल पूरी करें</strong><span>अपनी स्किल और पसंदीदा काम जोड़ें ताकि सही अवसर ढूँढना आसान हो।</span><small className="pending">डेमो सूचना</small></div></article>
-      <article className="candidate-application"><div className="application-symbol">⌖</div><div className="application-info"><strong>अपना जिला चुनें</strong><span>स्थानीय अवसरों के लिए अपना जिला और क्षेत्र सही रखें।</span><small className="pending">डेमो सूचना</small></div></article>
+      {session ? realNotifications.length ? realNotifications.map(item => <article className="candidate-application" key={item.id}><div className="application-symbol">✦</div><div className="application-info"><strong>{item.title}</strong><span>{item.body}</span><small className="pending">{item.read_at ? "पढ़ा गया" : "नया संदेश"}</small></div></article>) : <div className="candidate-notice">अभी कोई नई सूचना नहीं है।</div> : <div className="candidate-notice">अपनी सूचनाएँ देखने के लिए लॉगिन करें। <button type="button" onClick={onSignIn}>लॉगिन करें</button></div>}
     </section></Localized>
   }
 
