@@ -43,7 +43,7 @@ test.describe('SABKAAM desktop and mobile smoke tests', () => {
     await expect(state.locator('option')).toHaveCount(36)
     await state.selectOption('Karnataka')
     await page.getByRole('button', { name: /काम खोजें/ }).click()
-    await expect(page.getByLabel('जिला').locator('option')).toContainText('Bengaluru Urban')
+    await expect(page.getByLabel('जिला').locator('option', { hasText: 'Bengaluru Urban' })).toHaveCount(1)
   })
 
   test('candidate profile form validates and updates its preview', async ({ page }) => {
