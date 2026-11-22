@@ -37,7 +37,7 @@ export function getStateLabel(state: string): string {
 export const districts = Object.fromEntries(
   Object.entries(locationData.states).map(([state, value]) => [
     state,
-    ['सभी जिले', ...value.districts.map((district) => district.local || district.name)],
+    ['सभी जिले', ...value.districts.map((district) => district.local && /[\\u0900-\\u097F]/.test(district.local) ? district.local : district.name)],
   ]),
 ) as Record<StateName, string[]>
 
