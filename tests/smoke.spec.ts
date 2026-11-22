@@ -1,0 +1,69 @@
+import { test, expect } from '@playwright/test'
+
+test.describe('SABKAAM desktop and mobile smoke tests', () => {
+  test('home screen fits a mobile viewport without horizontal overflow', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 })
+    await page.goto('/')
+    await expect(page.getByRole('heading', { name: /काम की तलाश अब/ })).toBeVisible()
+    const width = await page.evaluate(() => document.documentElement.scrollWidth)
+    expect(width).toBeLessThanOrEqual(390)
+  })
+
+  test('desktop home can filter sample jobs by state and district', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.goto('/')
+    await page.getByRole('button', { name: /सभी श्रेणियाँ/ }).click()
+    await expect(page.getByText('दुकान में सेल्स हेल्पर')).toBeVisible()
+    await page.getByLabel('राज्य').selectOption('Jharkhand')
+    await page.getByRole('button', { name: /काम खोजें/ }).click()
+    await expect(page.getByText(/इस फ़िल्टर के लिए अभी कोई डेमो उदाहरण नहीं है/)).toBeVisible()
+  })
+
+  test('employer form exposes all Bihar and Jharkhand districts and validates required fields', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 })
+    await page.goto('/')
+    await page.getByRole('button', { name: /नौकरी देने वाले/ }).click()
+    const district = page.getByLabel('जिला')
+    await expect(district.locator('option')).toHaveCount(38)
+    await page.getByLabel('राज्य').selectOption('झारखंड')
+    await expect(district.locator('option')).toHaveCount(24)
+    await page.getByLabel('दुकान / कंपनी का नाम').fill('टेस्ट स्टोर')
+    await page.getByLabel('संपर्क व्यक्ति का नाम').fill('टेस्ट यूजर')
+    await page.getByLabel('मोबाइल नंबर').fill('9876543210')
+    await page.getByLabel('काम / पद का नाम').fill('सेल्स हेल्पर')
+    await page.getByRole('button', { name: /डेमो पोस्ट का प्रीव्यू देखें/ }).click()
+    await expect(page.getByText(/प्रीव्यू तैयार है/)).toBeVisible()
+    const width = await page.evaluate(() => document.documentElement.scrollWidth)
+    expect(width).toBeLessThanOrEqual(390)
+  })
+
+  test('candidate profile form validates and updates its preview', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('button', { name: 'प्रोफ़ाइल' }).click()
+    await page.getByLabel('आपका नाम').fill('सीमा देवी')
+    await page.getByLabel('मोबाइल नंबर').fill('9876543210')
+    await page.getByLabel('आपको कौन-सा काम आता है?').fill('सिलाई')
+    await page.getByRole('button', { name: /प्रोफ़ाइल सेव करें/ }).click()
+    await expect(page.getByText('सीमा देवी')).toBeVisible()
+    await expect(page.getByText(/डेमो प्रोफ़ाइल/)).toBeVisible()
+  })
+
+  test('job detail and application demo form work', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('button', { name: /सभी श्रेणियाँ/ }).click()
+    await page.getByText('दुकान में सेल्स हेल्पर').click()
+    await expect(page.getByRole('dialog')).toBeVisible()
+    await page.getByLabel('आपका नाम').fill('राम कुमार')
+    await page.getByLabel('मोबाइल नंबर').fill('9876543210')
+    await page.getByRole('button', { name: /डेमो आवेदन देखें/ }).click()
+    await expect(page.getByText(/डेमो आवेदन तैयार हुआ/)).toBeVisible()
+  })
+
+  test('safety report form can be completed and is labelled as a demo', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('button', { name: /सुरक्षा और शिकायत/ }).click()
+    await page.getByLabel('क्या हुआ?').fill('यह ब्राउज़र परीक्षण की नमूना शिकायत है।')
+    await page.getByRole('button', { name: /डेमो शिकायत तैयार करें/ }).click()
+    await expect(page.getByText(/डेमो शिकायत तैयार हुई/)).toBeVisible()
+  })
+})
