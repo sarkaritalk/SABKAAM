@@ -1,8 +1,7 @@
 name: Deploy SABKAAM to GitHub Pages
 
 on:
-  push:
-    branches: [main]
+  # Keep production Pages deployment manual until the Cloudflare release is approved.
   workflow_dispatch:
 
 permissions:
