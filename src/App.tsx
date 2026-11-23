@@ -53,7 +53,7 @@ function App() {
   const [query, setQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('')
   const [selectedCategoryInfo, setSelectedCategoryInfo] = useState<Category | null>(null)
-  const [activeTab, setActiveTab] = useState('होम')
+  const [activeTab, setActiveTab] = useState(() => localStorage.getItem('sabkaam-active-tab') || 'होम')
   const [showDemo, setShowDemo] = useState(false)
   const [selectedJob, setSelectedJob] = useState<JobListing | null>(null)
   const [liveJobs, setLiveJobs] = useState<JobListing[]>([])
@@ -68,6 +68,8 @@ function App() {
     const saved = localStorage.getItem('sabkaam-selected-role')
     return saved === 'employer' ? 'employer' : 'candidate'
   })
+
+  useEffect(() => { localStorage.setItem('sabkaam-active-tab', activeTab) }, [activeTab])
 
   useEffect(() => {
     if (showAuth) localStorage.setItem('sabkaam-auth-panel-open', 'true')
