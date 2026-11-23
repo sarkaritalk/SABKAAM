@@ -160,9 +160,13 @@ export async function createVerificationRequest(accessToken: string, payload: {
 export async function submitApplication(accessToken: string, payload: {
   job_id: string; candidate_id: string; full_name: string; phone: string; experience?: string; message?: string
 }) {
-  return request<Array<{ id: string; status: string }>>('/rest/v1/applications', {
+  const rows = await request<Array<{ id: string; status: string }>>('/rest/v1/applications', {
     method: 'POST', accessToken, prefer: 'return=representation', body: payload,
   })
+  if (!rows?.some(row => row.id && row.status === 'submitted')) {
+    throw new BackendError('आवेदन भेजने की पुष्टि नहीं मिली। कृपया दोबारा कोशिश करें।')
+  }
+  return rows
 }
 
 export async function createJobDraft(accessToken: string, payload: {
@@ -176,9 +180,13 @@ export async function createJobDraft(accessToken: string, payload: {
 }
 
 export async function submitJobForReview(accessToken: string, jobId: string) {
-  return request<Array<{ id: string; status: string }>>(`/rest/v1/job_posts?id=eq.${encodeURIComponent(jobId)}`, {
+  const rows = await request<Array<{ id: string; status: string }>>(`/rest/v1/job_posts?id=eq.${encodeURIComponent(jobId)}`, {
     method: 'PATCH', accessToken, prefer: 'return=representation', body: { status: 'pending_review' },
   })
+  if (!rows?.some(row => row.id === jobId && row.status === 'pending_review')) {
+    throw new BackendError('नौकरी समीक्षा के लिए भेजे जाने की पुष्टि नहीं मिली। कृपया दोबारा कोशिश करें।')
+  }
+  return rows
 }
 
 export async function submitSafetyReport(accessToken: string, payload: {
@@ -247,10 +255,14 @@ export async function getEmployerApplications(accessToken: string, employerId: s
 }
 
 export async function updateApplicationStatus(accessToken: string, applicationId: string, status: 'viewed' | 'shortlisted' | 'interview' | 'hired' | 'rejected') {
-  return request<Array<{ id: string; status: string }>>(
+  const rows = await request<Array<{ id: string; status: string }>>(
     `/rest/v1/applications?id=eq.${encodeURIComponent(applicationId)}`,
     { method: 'PATCH', accessToken, prefer: 'return=representation', body: { status } },
   )
+  if (!rows?.some(row => row.id === applicationId && row.status === status)) {
+    throw new BackendError('आवेदन की स्थिति बदलने की पुष्टि नहीं मिली। कृपया दोबारा कोशिश करें।')
+  }
+  return rows
 }
 
 export async function getPendingJobs(accessToken: string) {

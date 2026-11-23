@@ -124,6 +124,77 @@ select ok(exists (
     and cmd = 'SELECT'
 ), 'audit logs are readable through an admin-only policy');
 
+-- India-wide job/employer schema used by the live discovery and posting clients.
+select has_column('public', 'job_posts', 'state_lgd_code', 'job posts store official state LGD codes');
+select has_column('public', 'job_posts', 'district_lgd_code', 'job posts store official district LGD codes');
+select has_column('public', 'job_posts', 'employer_display_name', 'published jobs expose a safe business display name');
+select has_column('public', 'employers', 'state_lgd_code', 'employers store official state LGD codes');
+select has_column('public', 'employers', 'district_lgd_code', 'employers store official district LGD codes');
+select has_column('public', 'employers', 'contact_person', 'employers store their contact person');
+select has_column('public', 'verification_requests', 'state_lgd_code', 'verification requests store official state LGD codes');
+select has_column('public', 'verification_requests', 'district_lgd_code', 'verification requests store official district LGD codes');
+
+select ok(not exists (
+  select 1 from pg_constraint
+  where conrelid in ('public.profiles'::regclass, 'public.employers'::regclass,
+    'public.verification_requests'::regclass, 'public.job_posts'::regclass)
+    and conname in ('profiles_state_code_check', 'employers_state_code_check',
+      'verification_requests_state_code_check', 'job_posts_state_code_check')
+), 'legacy two-state checks no longer block India-wide state codes');
+
+select is(
+  (select count(*)::int from pg_constraint
+   where conrelid = 'public.profiles'::regclass and contype = 'c'
+     and lower(pg_get_constraintdef(oid)) like '%lgd_code is null%'),
+  2,
+  'profiles have exactly one positive check per LGD column'
+);
+select is(
+  (select count(*)::int from pg_constraint
+   where conrelid = 'public.employers'::regclass and contype = 'c'
+     and lower(pg_get_constraintdef(oid)) like '%lgd_code is null%'),
+  2,
+  'employers have exactly one positive check per LGD column'
+);
+select is(
+  (select count(*)::int from pg_constraint
+   where conrelid = 'public.verification_requests'::regclass and contype = 'c'
+     and lower(pg_get_constraintdef(oid)) like '%lgd_code is null%'),
+  2,
+  'verification requests have exactly one positive check per LGD column'
+);
+select is(
+  (select count(*)::int from pg_constraint
+   where conrelid = 'public.job_posts'::regclass and contype = 'c'
+     and lower(pg_get_constraintdef(oid)) like '%lgd_code is null%'),
+  2,
+  'job posts have exactly one positive check per LGD column'
+);
+
+select ok(exists (
+  select 1 from pg_policies
+  where schemaname = 'public' and tablename = 'applications'
+    and policyname = 'candidates can apply as themselves'
+    and cmd = 'INSERT' and with_check like '%profiles%' 
+), 'application insert policy restricts submissions to candidate accounts');
+
+select ok(exists (
+  select 1 from pg_trigger
+  where tgrelid = 'public.applications'::regclass
+    and tgname = 'notify_application_created' and not tgisinternal
+), 'new applications trigger employer notifications');
+select ok(exists (
+  select 1 from pg_trigger
+  where tgrelid = 'public.applications'::regclass
+    and tgname = 'notify_application_status_changed' and not tgisinternal
+), 'application status changes trigger candidate notifications');
+
+select ok(
+  not has_function_privilege('anon', 'public.notify_application_event()', 'EXECUTE')
+  and not has_function_privilege('authenticated', 'public.notify_application_event()', 'EXECUTE'),
+  'notification trigger function is not directly executable by client roles'
+);
+
 -- Every table whose reviewed fields are guarded must have its trigger installed.
 select ok(exists (
   select 1 from pg_trigger
