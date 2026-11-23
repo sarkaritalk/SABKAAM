@@ -142,6 +142,35 @@ select ok(not exists (
       'verification_requests_state_code_check', 'job_posts_state_code_check')
 ), 'legacy two-state checks no longer block India-wide state codes');
 
+select is(
+  (select count(*)::int from pg_constraint
+   where conrelid = 'public.profiles'::regclass and contype = 'c'
+     and lower(pg_get_constraintdef(oid)) like '%lgd_code is null%'),
+  2,
+  'profiles have exactly one positive check per LGD column'
+);
+select is(
+  (select count(*)::int from pg_constraint
+   where conrelid = 'public.employers'::regclass and contype = 'c'
+     and lower(pg_get_constraintdef(oid)) like '%lgd_code is null%'),
+  2,
+  'employers have exactly one positive check per LGD column'
+);
+select is(
+  (select count(*)::int from pg_constraint
+   where conrelid = 'public.verification_requests'::regclass and contype = 'c'
+     and lower(pg_get_constraintdef(oid)) like '%lgd_code is null%'),
+  2,
+  'verification requests have exactly one positive check per LGD column'
+);
+select is(
+  (select count(*)::int from pg_constraint
+   where conrelid = 'public.job_posts'::regclass and contype = 'c'
+     and lower(pg_get_constraintdef(oid)) like '%lgd_code is null%'),
+  2,
+  'job posts have exactly one positive check per LGD column'
+);
+
 select ok(exists (
   select 1 from pg_policies
   where schemaname = 'public' and tablename = 'applications'
