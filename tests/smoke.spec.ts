@@ -100,7 +100,7 @@ test.describe('SABKAAM desktop and mobile smoke tests', () => {
     const district = page.getByLabel('आपका जिला')
     await expect(district.locator('option')).toHaveCount(38)
     await district.selectOption({ index: 1 })
-    await expect(district).toHaveValue(await district.inputValue())
+    expect(await district.inputValue()).not.toBe('')
   })
 
   test('job detail and application demo form work', async ({ page }) => {
