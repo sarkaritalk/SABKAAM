@@ -106,6 +106,7 @@ export default function CandidateArea({ mode, language, session, onSignIn }: { m
   }
 
   return <Localized language={language}><section className="candidate-area">
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}><img src={`${import.meta.env.BASE_URL}sabkaam-mark.svg`} alt="" aria-hidden="true" style={{ width: 40, height: 40, objectFit: 'contain', background: '#123B3A', borderRadius: 11, padding: 4, boxSizing: 'border-box' }} /><strong style={{ color: '#123B3A', letterSpacing: 1.2 }}>SABKAAM</strong></div>
     <div className="candidate-heading"><span className="section-kicker">आपकी पहचान, आपकी पसंद</span><h1>मेरी प्रोफ़ाइल</h1><p>बिना रिज़्यूमे के भी अपनी बुनियादी जानकारी तैयार रखें।</p></div>
     <div className="profile-layout">
       <form className="candidate-profile-form" onSubmit={saveProfile}>
