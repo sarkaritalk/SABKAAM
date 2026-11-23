@@ -8,6 +8,7 @@ test.describe('SABKAAM desktop and mobile smoke tests', () => {
 
 
   test('brand intro leads to role choice and both role routes are selectable', async ({ page }) => {
+    await page.evaluate(() => localStorage.clear())
     await page.reload()
     await expect(page.getByText('SABKAAM', { exact: true }).first()).toBeVisible()
     await expect(page.getByRole('button', { name: /मुझे काम \/ नौकरी चाहिए/ })).toBeVisible()
@@ -33,14 +34,14 @@ test.describe('SABKAAM desktop and mobile smoke tests', () => {
     await language.selectOption('en')
     await expect(page.getByRole('heading', { name: /Finding work is now/ })).toBeVisible()
     await expect(page.getByRole('button', { name: /Search jobs/ })).toBeVisible()
-    await page.getByRole('button', { name: /रोल बदलें|Hiring/ }).click()
-    await page.getByRole('button', { name: /मुझे कामगार \/ कर्मचारी चाहिए/ }).click()
+    await page.getByRole('button', { name: /Switch role|रोल बदलें|Hiring/ }).click()
+    await page.getByRole('button', { name: /I need workers \/ employees/ }).click()
     await expect(page.getByRole('heading', { name: /Find the right people/ })).toBeVisible()
     await page.getByLabel('Website language').selectOption('hinglish')
     await expect(page.getByRole('heading', { name: /Sahi log dhoondhein/ })).toBeVisible()
     await page.getByLabel('Website language').selectOption('en')
-    await page.getByRole('button', { name: /Back to home|रोल बदलें/ }).click()
-    await page.getByRole('button', { name: /मुझे काम \/ नौकरी चाहिए/ }).click()
+    await page.getByRole('button', { name: /Back to home|Switch role|रोल बदलें/ }).click()
+    await page.getByRole('button', { name: /I am looking for work \/ a job/ }).click()
     await page.getByRole('button', { name: 'Profile' }).click()
     await expect(page.getByRole('heading', { name: 'My profile' })).toBeVisible()
     await page.getByRole('button', { name: /Safety & reports/ }).click()
@@ -53,7 +54,7 @@ test.describe('SABKAAM desktop and mobile smoke tests', () => {
     await expect(page.getByText('दुकान में सेल्स हेल्पर')).toBeVisible()
     await page.getByLabel('राज्य').selectOption('Jharkhand')
     await page.getByRole('button', { name: /काम खोजें/ }).click()
-    await expect(page.getByText(/इस फ़िल्टर के लिए अभी कोई डेमो उदाहरण नहीं है/)).toBeVisible()
+    await expect(page.getByText(/इस फ़िल्टर के लिए अभी कोई नौकरी उपलब्ध नहीं है/)).toBeVisible()
   })
 
   test('employer form exposes India-wide state and district options and validates required fields', async ({ page }) => {
@@ -187,7 +188,6 @@ test.describe('SABKAAM desktop and mobile smoke tests', () => {
       }))
     })
     await page.goto('/')
-    await page.getByRole('button', { name: /नौकरी देने वाले/ }).click()
     await expect(page.getByRole('button', { name: 'लॉगआउट' })).toBeVisible()
     await page.getByRole('button', { name: 'लॉगआउट' }).click()
     await expect.poll(() => page.evaluate(() => sessionStorage.getItem('sabkaam-auth-session'))).toBeNull()
