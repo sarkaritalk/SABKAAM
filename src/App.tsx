@@ -138,7 +138,7 @@ function App() {
 
   if (showRolePicker) return <div className="role-gateway">
     <div className="gateway-glow gateway-glow-one" /><div className="gateway-glow gateway-glow-two" />
-    <header className="gateway-header"><div className="gateway-brand"><img src="/sabkaam-mark.svg" alt="" /><span><strong>SABKAAM</strong><small>हर काम, हर इंसान के लिए।</small></span></div><LanguageSelect language={language} onChange={changeLanguage} /></header>
+    <header className="gateway-header"><div className="gateway-brand"><img src={`${import.meta.env.BASE_URL}sabkaam-mark.svg`} alt="" /><span><strong>SABKAAM</strong><small>हर काम, हर इंसान के लिए।</small></span></div><LanguageSelect language={language} onChange={changeLanguage} /></header>
     <main className="gateway-content">
       <span className="gateway-kicker"><i /> YOUR NEXT STEP STARTS HERE</span>
       <h1>आप SABKAAM पर<br /><em>क्या करना चाहते हैं?</em></h1>
@@ -216,7 +216,7 @@ function App() {
     <Localized language={language}><div className="app-shell" data-active-tab={activeTab} data-safety-open={showSafety}>
       <header className="topbar">
         <a className="brand" href="#" aria-label="SABKAAM होम">
-          <img className="brand-logo-image" src="/sabkaam-mark.svg" alt="" />
+          <img className="brand-logo-image" src={`${import.meta.env.BASE_URL}sabkaam-mark.svg`} alt="" />
           <span><strong>SABKAAM</strong><small>हर काम, हर इंसान के लिए।</small></span>
         </a>
         <div className="topbar-actions">{(accountRole === "moderator" || accountRole === "admin") && <button className="account-link" onClick={() => setShowAdmin(true)}>Admin</button>}{session ? <button className="account-link" onClick={() => { clearAuthSession(); setSession(null) }}>लॉगआउट</button> : backendConfigured ? <button className="account-link" onClick={() => setShowAuth(true)}>लॉगिन</button> : <span className="account-link">Preview mode</span>}<LanguageSelect language={language} onChange={changeLanguage} /><button className="safety-link" onClick={() => setShowSafety(!showSafety)}>{showSafety ? '← वापस' : '🛡️ सुरक्षा और शिकायत'}</button><button className="employer-link" onClick={openRolePicker}>रोल बदलें <span>↗</span></button></div>
