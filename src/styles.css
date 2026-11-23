@@ -83,3 +83,5 @@ footer{display:flex;justify-content:space-between;padding:18px 4.3% 25px;color:#
   .topbar-actions{width:100%;justify-content:flex-end;flex-wrap:wrap}
   .topbar-actions .account-link{display:none}
 }
+
+.auth-brand-lockup{display:flex;align-items:center;gap:9px;margin:0 0 10px}.auth-brand-lockup img{width:30px;height:30px;display:block;flex:0 0 auto}
