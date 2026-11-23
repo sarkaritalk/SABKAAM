@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 /** Persist non-sensitive form drafts locally so accidental refreshes do not erase work. */
 export function usePersistentDraft<T>(key: string, initialValue: T): [T, (value: T | ((current: T) => T)) => void] {
@@ -10,8 +10,10 @@ export function usePersistentDraft<T>(key: string, initialValue: T): [T, (value:
       return initialValue
     }
   })
+  const shouldPersist = useRef(false)
 
   useEffect(() => {
+    if (!shouldPersist.current) return
     try {
       localStorage.setItem(key, JSON.stringify(value))
     } catch {
@@ -19,5 +21,10 @@ export function usePersistentDraft<T>(key: string, initialValue: T): [T, (value:
     }
   }, [key, value])
 
-  return [value, setValue]
+  function setDraftValue(nextValue: T | ((current: T) => T)) {
+    shouldPersist.current = true
+    setValue(nextValue)
+  }
+
+  return [value, setDraftValue]
 }
