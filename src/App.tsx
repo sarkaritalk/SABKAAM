@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import './job-apply.css'
 import CandidateArea from './CandidateArea'
 import SafetyCenter from './safety-center'
@@ -59,6 +59,12 @@ function App() {
   const [liveJobs, setLiveJobs] = useState<JobListing[]>([])
   const [jobsLoading, setJobsLoading] = useState(false)
   const [jobsError, setJobsError] = useState('')
+  const [showNoJobsModal, setShowNoJobsModal] = useState(false)
+  const [searchSubmitted, setSearchSubmitted] = useState(false)
+  const [searchBusy, setSearchBusy] = useState(false)
+  const areaSearchRef = useRef<HTMLDivElement>(null)
+  const jobsLoadingRef = useRef(jobsLoading)
+  jobsLoadingRef.current = jobsLoading
   const [applicationSent, setApplicationSent] = useState(false)
   const [showSafety, setShowSafety] = useState(false)
   const [showEmployer, setShowEmployer] = useState(() => localStorage.getItem('sabkaam-entry-complete') === 'true' && localStorage.getItem('sabkaam-selected-role') === 'employer')
@@ -135,6 +141,16 @@ function App() {
   const preferredDistrict = district === 'सभी जिले' ? undefined : getDistrictEnglishName(stateName, district, language)
   const areaSuggestions = useMemo(() => getWorkAreaSuggestions(areaQuery, stateName, preferredDistrict, 8), [areaQuery, stateName, preferredDistrict])
 
+  useEffect(() => {
+    if (!showAreaSuggestions) return
+    const closeOnOutsideClick = (event: PointerEvent) => {
+      const target = event.target
+      if (target instanceof Node && !areaSearchRef.current?.contains(target)) setShowAreaSuggestions(false)
+    }
+    document.addEventListener('pointerdown', closeOnOutsideClick)
+    return () => document.removeEventListener('pointerdown', closeOnOutsideClick)
+  }, [showAreaSuggestions])
+
   const visibleJobs = useMemo(() => (backendConfigured ? liveJobs : demoJobs).filter((job) => {
     const matchesQuery = !query || `${job.title} ${job.company} ${job.place} ${job.category}`.toLowerCase().includes(query.toLowerCase())
     const matchesCategory = !selectedCategory || job.category === selectedCategory
@@ -166,6 +182,23 @@ function App() {
       .finally(() => { if (!cancelled) setJobsLoading(false) })
     return () => { cancelled = true }
   }, [stateName, district, language, appliedAreaQuery])
+
+  useEffect(() => {
+    if (!searchSubmitted) return
+    const frame = window.requestAnimationFrame(() => {
+      if (jobsLoadingRef.current) return
+      setSearchSubmitted(false)
+      setSearchBusy(false)
+      if (jobsError) return
+      if (backendConfigured && visibleJobs.length === 0) {
+        setShowNoJobsModal(true)
+        return
+      }
+      setShowNoJobsModal(false)
+      window.requestAnimationFrame(() => document.getElementById('jobs-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [searchSubmitted, jobsLoading, jobsError, visibleJobs.length])
 
   function changeLanguage(next: Language) { setLanguage(next); localStorage.setItem('sabkaam-language', next) }
 
@@ -251,6 +284,9 @@ function App() {
     }
     setShowAreaSuggestions(false)
     setShowDemo(true)
+    setShowNoJobsModal(false)
+    setSearchSubmitted(true)
+    setSearchBusy(true)
     setActiveTab('होम')
   }
 
@@ -287,10 +323,10 @@ function App() {
             <label className="query-field"><span>⌕</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="काम, पद या दुकान का नाम लिखें..." /></label>
             <label className="select-field"><span>राज्य</span><select value={stateName} onChange={(event) => changeState(event.target.value as StateName)}>{stateNames.map((state) => <option key={state} value={state}>{getStateLabel(state, language)}</option>)}</select></label>
             <label className="select-field"><span>जिला</span><select value={district} onChange={(event) => setDistrict(event.target.value)}><option value="सभी जिले">सभी जिले</option>{getDistrictOptions(stateName, language).map((item) => <option key={item}>{item}</option>)}</select></label>
-            <button className="search-button" onClick={searchJobs}>काम खोजें <span>→</span></button>
+            <button className={`search-button ${searchBusy ? 'is-searching' : ''}`} onClick={searchJobs} aria-busy={searchBusy} disabled={searchBusy}>{searchBusy ? 'खोज रहे हैं...' : 'काम खोजें'} <span>→</span></button>
           </div>
-          <div className="area-search-wrap">
-            <label className="area-query-field"><span aria-hidden="true">⌖</span><input aria-label="शहर, इलाका या सेक्टर" value={areaQuery} onFocus={() => setShowAreaSuggestions(true)} onChange={event => { setAreaQuery(event.target.value); setShowAreaSuggestions(true) }} onKeyDown={event => { if (event.key === "Enter") { event.preventDefault(); searchJobs() } if (event.key === "Escape") setShowAreaSuggestions(false) }} placeholder="शहर, कॉलोनी, सेक्टर, ब्लॉक, फेज़, मेट्रो, चौक या PIN कोड लिखें..." /><button type="button" aria-label="इलाका खोजें" onClick={searchJobs}>⌕</button></label>
+          <div className="area-search-wrap" ref={areaSearchRef}>
+            <label className="area-query-field"><span aria-hidden="true">⌖</span><input aria-label="शहर, इलाका या सेक्टर" value={areaQuery} onClick={() => setShowAreaSuggestions(open => !open)} onChange={event => { setAreaQuery(event.target.value); setShowAreaSuggestions(true) }} onKeyDown={event => { if (event.key === "Enter") { event.preventDefault(); searchJobs() } if (event.key === "Escape") setShowAreaSuggestions(false) }} placeholder="शहर, कॉलोनी, सेक्टर, ब्लॉक, फेज़, मेट्रो, चौक या PIN कोड लिखें..." /><button type="button" aria-label="इलाका खोजें" onClick={searchJobs}>⌕</button></label>
             {showAreaSuggestions && <div className="area-suggestions" role="listbox" aria-label="इलाके के सुझाव">
               {areaSuggestions.length ? areaSuggestions.map((suggestion, index) => <button type="button" role="option" aria-selected="false" key={suggestion.state + suggestion.district + suggestion.city + suggestion.area + index} onClick={() => chooseWorkArea(suggestion)}><span>📍</span><strong>{suggestion.area}</strong><small>{suggestion.city} · {suggestion.district === '*' ? 'पूरी दिल्ली NCR' : suggestion.district}, {getStateLabel(suggestion.state, language)}</small></button>) : <p>यह इलाका सूची में नहीं है। अपना लिखा हुआ नाम वैसे ही खोज सकते हैं।</p>}
               <div className="area-suggestion-hint">सूची के बाहर का इलाका भी लिखकर खोजें</div>
@@ -310,6 +346,17 @@ function App() {
           </div>
 
         </section>
+
+        {showNoJobsModal && <div className="category-overlay search-empty-overlay" role="presentation" onClick={() => setShowNoJobsModal(false)}>
+          <section className="category-modal search-empty-modal" role="dialog" aria-modal="true" aria-labelledby="search-empty-title" onClick={event => event.stopPropagation()}>
+            <button className="modal-close" onClick={() => setShowNoJobsModal(false)} aria-label="बंद करें">×</button>
+            <div className="category-modal-icon">⌕</div>
+            <span className="section-kicker">SABKAAM · JOB SEARCH</span>
+            <h2 id="search-empty-title">अभी यहाँ नौकरी उपलब्ध नहीं है</h2>
+            <p>{getStateLabel(stateName, language)}{district !== 'सभी जिले' ? ` · ${district}` : ''} में अभी कोई प्रकाशित नौकरी उपलब्ध नहीं मिली। नई नौकरी प्रकाशित होते ही वह यहाँ दिखाई देगी। आप बाद में फिर खोज सकते हैं या अपना जिला/इलाका बदलकर देख सकते हैं।</p>
+            <div className="category-modal-actions"><button className="category-modal-primary" onClick={() => setShowNoJobsModal(false)}>ठीक है <span>✓</span></button></div>
+          </section>
+        </div>}
 
         {selectedCategoryInfo && <div className="category-overlay" role="presentation" onClick={() => setSelectedCategoryInfo(null)}>
           <section className="category-modal" role="dialog" aria-modal="true" aria-labelledby="category-modal-title" onClick={event => event.stopPropagation()}>
