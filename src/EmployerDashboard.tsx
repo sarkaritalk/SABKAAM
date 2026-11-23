@@ -3,24 +3,25 @@ import './employer-dashboard.css'
 import { LanguageSelect, Localized, type Language } from './i18n'
 import { stateNames, getStateLabel, getDistrictOptions, getStateCode, getDistrictCode, getDistrictEnglishName, type StateName } from './locations'
 import { normalizeWorkAreaQuery } from './work-areas'
+import { usePersistentDraft } from './lib/drafts'
 import { backendConfigured, createEmployer, createJobDraft, getMyEmployer, getEmployerApplications, updateApplicationStatus, submitJobForReview, type AuthSession, type EmployerApplication } from './lib/backend'
 
 type Props = { onBack: () => void; language: Language; onLanguageChange: (language: Language) => void; session: AuthSession | null; onSignIn: () => void; onSignOut: () => void }
 
 
 export default function EmployerDashboard({ onBack, language, onLanguageChange, session, onSignIn, onSignOut }: Props) {
-  const [company, setCompany] = useState('')
-  const [contact, setContact] = useState('')
-  const [phone, setPhone] = useState('')
-  const [title, setTitle] = useState('')
-  const [category, setCategory] = useState('दुकान और रिटेल')
-  const [stateName, setStateName] = useState<StateName>('Bihar')
-  const [district, setDistrict] = useState('मधुबनी')
-  const [townOrMarket, setTownOrMarket] = useState('')
-  const [workType, setWorkType] = useState('फुल टाइम')
-  const [salary, setSalary] = useState('')
-  const [vacancies, setVacancies] = useState('1')
-  const [description, setDescription] = useState('')
+  const [company, setCompany] = usePersistentDraft('sabkaam-employer-company', '')
+  const [contact, setContact] = usePersistentDraft('sabkaam-employer-contact', '')
+  const [phone, setPhone] = usePersistentDraft('sabkaam-employer-phone', '')
+  const [title, setTitle] = usePersistentDraft('sabkaam-employer-title', '')
+  const [category, setCategory] = usePersistentDraft('sabkaam-employer-category', 'दुकान और रिटेल')
+  const [stateName, setStateName] = usePersistentDraft<StateName>('sabkaam-employer-stateName', 'Bihar')
+  const [district, setDistrict] = usePersistentDraft('sabkaam-employer-district', 'मधुबनी')
+  const [townOrMarket, setTownOrMarket] = usePersistentDraft('sabkaam-employer-townOrMarket', '')
+  const [workType, setWorkType] = usePersistentDraft('sabkaam-employer-workType', 'फुल टाइम')
+  const [salary, setSalary] = usePersistentDraft('sabkaam-employer-salary', '')
+  const [vacancies, setVacancies] = usePersistentDraft('sabkaam-employer-vacancies', '1')
+  const [description, setDescription] = usePersistentDraft('sabkaam-employer-description', '')
   const [success, setSuccess] = useState(false)
   const [submitMessage, setSubmitMessage] = useState('')
   const [applications, setApplications] = useState<EmployerApplication[]>([])
