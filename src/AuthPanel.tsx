@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import './auth-panel.css'
 import { Localized, type Language } from './i18n'
+import { usePersistentDraft } from './lib/drafts'
 import { saveAuthSession, signInWithEmail, signUpWithEmail, type AuthSession } from './lib/backend'
 
 type Props = {
@@ -11,10 +12,10 @@ type Props = {
 }
 
 export default function AuthPanel({ language, onClose, onSuccess, defaultAccountType = 'candidate' }: Props) {
-  const [mode, setMode] = useState<'signin' | 'signup'>('signin')
-  const [accountType, setAccountType] = useState<'candidate' | 'employer'>(defaultAccountType)
-  const [fullName, setFullName] = useState('')
-  const [email, setEmail] = useState('')
+  const [mode, setMode] = usePersistentDraft<'signin' | 'signup'>('sabkaam-auth-mode', 'signin')
+  const [accountType, setAccountType] = usePersistentDraft<'candidate' | 'employer'>('sabkaam-auth-account-type', defaultAccountType)
+  const [fullName, setFullName] = usePersistentDraft('sabkaam-auth-full-name', '')
+  const [email, setEmail] = usePersistentDraft('sabkaam-auth-email', '')
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
