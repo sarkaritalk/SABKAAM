@@ -4,12 +4,13 @@ import { LanguageSelect, Localized, type Language } from './i18n'
 import { stateNames, getStateLabel, getDistrictOptions, getStateCode, getDistrictCode, getDistrictEnglishName, type StateName } from './locations'
 import { normalizeWorkAreaQuery } from './work-areas'
 import { usePersistentDraft } from './lib/drafts'
-import { backendConfigured, createEmployer, createJobDraft, getMyEmployer, getEmployerApplications, updateApplicationStatus, submitJobForReview, type AuthSession, type EmployerApplication } from './lib/backend'
+import { backendConfigured, createEmployer, createJobDraft, getMyEmployer, getEmployerApplications, updateApplicationStatus, submitJobForReview, getMyProfile, type AuthSession, type EmployerApplication } from './lib/backend'
 
 type Props = { onBack: () => void; language: Language; onLanguageChange: (language: Language) => void; session: AuthSession | null; onSignIn: () => void; onSignOut: () => void }
 
 
 export default function EmployerDashboard({ onBack, language, onLanguageChange, session, onSignIn, onSignOut }: Props) {
+  const [accountRole, setAccountRole] = useState('')
   const [company, setCompany] = usePersistentDraft('sabkaam-employer-company', '')
   const [contact, setContact] = usePersistentDraft('sabkaam-employer-contact', '')
   const [phone, setPhone] = usePersistentDraft('sabkaam-employer-phone', '')
@@ -30,7 +31,8 @@ export default function EmployerDashboard({ onBack, language, onLanguageChange, 
   const [refreshApplications, setRefreshApplications] = useState(0)
   useEffect(() => { const options = getDistrictOptions(stateName, language); if (!options.includes(district)) setDistrict(options[0] ?? '') }, [stateName, language])
 
-  useEffect(() => { if (!session || session.user.user_metadata?.account_type !== 'employer') { setApplications([]); return } getMyEmployer(session.access_token, session.user.id).then(employer => employer ? getEmployerApplications(session.access_token, employer.id) : []).then(setApplications).catch(error => setApplicationsError(error instanceof Error ? error.message : 'आवेदन लोड नहीं हुए')) }, [session?.access_token, refreshApplications])
+  useEffect(() => { if (!session) { setAccountRole(''); return } getMyProfile(session.access_token, session.user.id).then(profile => setAccountRole(profile?.role ?? '')).catch(() => setAccountRole('')) }, [session?.access_token, session?.user.id])
+  useEffect(() => { if (!session || accountRole !== 'employer') { setApplications([]); return } getMyEmployer(session.access_token, session.user.id).then(employer => employer ? getEmployerApplications(session.access_token, employer.id) : []).then(setApplications).catch(error => setApplicationsError(error instanceof Error ? error.message : 'आवेदन लोड नहीं हुए')) }, [session?.access_token, accountRole, refreshApplications])
 
   async function changeApplicationStatus(applicationId: string, status: 'viewed' | 'shortlisted' | 'interview' | 'hired' | 'rejected') { setApplicationBusy(applicationId); setApplicationsError(''); try { await updateApplicationStatus(session!.access_token, applicationId, status); setRefreshApplications(value => value + 1) } catch (error) { setApplicationsError(error instanceof Error ? error.message : 'स्थिति अपडेट नहीं हुई') } finally { setApplicationBusy('') } }
 
@@ -40,17 +42,24 @@ export default function EmployerDashboard({ onBack, language, onLanguageChange, 
     setSubmitMessage('')
     if (!backendConfigured) { setSuccess(true); setSubmitMessage('Backend अभी connect नहीं है। यह केवल preview है; जानकारी सेव या प्रकाशित नहीं हुई।'); return }
     if (!session) { setSubmitMessage('पोस्ट भेजने के लिए employer account से लॉगिन करें।'); onSignIn(); return }
-    if (session.user.user_metadata?.account_type !== 'employer') { setSubmitMessage('इस खाते का प्रकार candidate है। Employer खाता बनाकर लॉगिन करें।'); return }
+    if (accountRole !== 'employer') { setSubmitMessage('इस खाते का प्रकार candidate है। Employer खाता बनाकर लॉगिन करें।'); return }
+    if (!/^[6-9][0-9]{9}$/.test(phone)) { setSubmitMessage('कृपया 6 से 9 से शुरू होने वाला 10 अंकों का भारतीय मोबाइल नंबर लिखें।'); return }
     try {
+      const stateLgdCode = getStateCode(stateName)
+      const districtLgdCode = getDistrictCode(stateName, district, language)
+      if (!districtLgdCode || districtLgdCode <= 0) throw new Error('कृपया सूची से सही जिला चुनें।')
       let employer = await getMyEmployer(session.access_token, session.user.id)
       if (!employer) {
-        const created = await createEmployer(session.access_token, { owner_id: session.user.id, business_name: company, business_type: category, contact_person: contact, contact_phone: phone, state_lgd_code: getStateCode(stateName), district_lgd_code: getDistrictCode(stateName, district, language) ?? 0, district: getDistrictEnglishName(stateName, district, language) ?? district })
+        const created = await createEmployer(session.access_token, { owner_id: session.user.id, business_name: company, business_type: category, contact_person: contact, contact_phone: phone, state_lgd_code: stateLgdCode, district_lgd_code: districtLgdCode, district: getDistrictEnglishName(stateName, district, language) ?? district })
         employer = created[0]
       }
       if (!employer?.id) throw new Error('Employer profile could not be created.')
       const numbers = salary.replace(/,/g, '').match(/[0-9]+/g)?.map(Number) ?? []
+      if (salary.trim() && (!numbers.length || numbers.length > 2 || numbers.some(number => !Number.isFinite(number)) || (numbers.length === 2 && numbers[1] < numbers[0]))) throw new Error('वेतन सही तरीके से लिखें, जैसे ₹8,000–10,000।')
+      const vacancyCount = Number(vacancies)
+      if (!Number.isInteger(vacancyCount) || vacancyCount < 1 || vacancyCount > 500) throw new Error('कुल पद 1 से 500 के बीच लिखें।')
       const workTypes: Record<string, string> = { 'फुल टाइम': 'full_time', 'पार्ट टाइम': 'part_time', 'दैनिक मजदूरी': 'daily_wage', 'वर्क फ्रॉम होम': 'work_from_home', 'कॉन्ट्रैक्ट': 'contract' }
-      const draft = await createJobDraft(session.access_token, { employer_id: employer.id, employer_display_name: company, title, category, description: description || title, work_type: workTypes[workType] ?? 'full_time', state_lgd_code: getStateCode(stateName), district_lgd_code: getDistrictCode(stateName, district, language) ?? 0, district: getDistrictEnglishName(stateName, district, language) ?? district, town_or_market: townOrMarket.trim(), locality: normalizeWorkAreaQuery(townOrMarket), salary_min: numbers[0], salary_max: numbers[1] ?? numbers[0], salary_period: workType === 'दैनिक मजदूरी' ? 'day' : 'month', vacancies: Number(vacancies) || 1 })
+      const draft = await createJobDraft(session.access_token, { employer_id: employer.id, employer_display_name: company, title, category, description: description || title, work_type: workTypes[workType] ?? 'full_time', state_lgd_code: stateLgdCode, district_lgd_code: districtLgdCode, district: getDistrictEnglishName(stateName, district, language) ?? district, town_or_market: townOrMarket.trim(), locality: normalizeWorkAreaQuery(townOrMarket), salary_min: numbers[0], salary_max: numbers[1] ?? numbers[0], salary_period: workType === 'दैनिक मजदूरी' ? 'day' : 'month', vacancies: vacancyCount })
       if (!draft[0]?.id) throw new Error('Job draft could not be created.')
       await submitJobForReview(session.access_token, draft[0].id)
       setSuccess(true)

@@ -16,19 +16,74 @@ export default function CandidateArea({ mode, language, session, onSignIn }: { m
   const [skills, setSkills] = usePersistentDraft('sabkaam-candidate-profile-skills', '')
   const [workType, setWorkType] = usePersistentDraft('sabkaam-candidate-profile-work-type', 'फुल टाइम')
   const [profileMessage, setProfileMessage] = useState('')
+  const [profileLoading, setProfileLoading] = useState(false)
+  const [profileSaving, setProfileSaving] = useState(false)
   const [realApplications, setRealApplications] = useState<Array<{ id: string; job_id: string; status: string; created_at: string; job_posts?: { title: string; district: string } | null }>>([])
   const [realNotifications, setRealNotifications] = useState<Array<{ id: string; title: string; body: string; kind: string; read_at: string | null; created_at: string }>>([])
   useEffect(() => { const options = getDistrictOptions(stateName, language); if (!options.includes(district)) setDistrict(options[0] ?? '') }, [stateName, language])
   useEffect(() => { if (!session) return; if (mode === 'मेरे आवेदन') getMyApplications(session.access_token).then(setRealApplications).catch(error => setProfileMessage(error instanceof Error ? error.message : 'आवेदन लोड नहीं हुए')); if (mode === 'सूचनाएँ') getMyNotifications(session.access_token).then(setRealNotifications).catch(error => setProfileMessage(error instanceof Error ? error.message : 'सूचनाएँ लोड नहीं हुईं')) }, [mode, session?.access_token])
-  useEffect(() => { if (!session || mode !== 'प्रोफ़ाइल') return; getMyProfile(session.access_token, session.user.id).then(profile => { if (!profile) return; const hasLocalDraft = ['name', 'phone', 'state', 'district', 'skills', 'work-type'].some(field => localStorage.getItem('sabkaam-candidate-profile-' + field) !== null); if (hasLocalDraft) return; setName(profile.full_name || ''); setPhone(profile.phone || ''); setSkills(profile.skills || ''); setWorkType(profile.preferred_work_type || 'फुल टाइम'); if (profile.state_lgd_code) { const state = getStateNameByCode(profile.state_lgd_code); if (state) { setStateName(state); if (profile.district_lgd_code) setDistrict(getDistrictNameByCode(state, profile.district_lgd_code, language) || getDistrictOptions(state, language)[0] || '') } } }).catch(error => setProfileMessage(error instanceof Error ? error.message : 'प्रोफ़ाइल लोड नहीं हुई')) }, [mode, session?.access_token, language])
+  useEffect(() => {
+    if (!session || mode !== 'प्रोफ़ाइल') return
+    let cancelled = false
+    setProfileLoading(true)
+    setProfileMessage('')
+    getMyProfile(session.access_token, session.user.id)
+      .then(profile => {
+        if (cancelled || !profile) return
+        const hasLocalDraft = ['name', 'phone', 'state', 'district', 'skills', 'work-type']
+          .some(field => localStorage.getItem('sabkaam-candidate-profile-' + field) !== null)
+        if (hasLocalDraft) return
+        setName(profile.full_name || '')
+        setPhone((profile.phone || '').replace(/\D/g, '').slice(0, 10))
+        setSkills(profile.skills || '')
+        setWorkType(profile.preferred_work_type || 'फुल टाइम')
+        if (profile.state_lgd_code) {
+          const state = getStateNameByCode(profile.state_lgd_code)
+          if (state) {
+            setStateName(state)
+            const savedDistrict = profile.district_lgd_code ? getDistrictNameByCode(state, profile.district_lgd_code, language) : undefined
+            const legacyDistrict = profile.district
+              ? getDistrictOptions(state, language).find(option => getDistrictEnglishName(state, option, language)?.toLowerCase() === profile.district?.toLowerCase())
+              : undefined
+            setDistrict(savedDistrict || legacyDistrict || getDistrictOptions(state, language)[0] || '')
+          }
+        }
+      })
+      .catch(error => { if (!cancelled) setProfileMessage(error instanceof Error ? error.message : 'प्रोफ़ाइल लोड नहीं हुई') })
+      .finally(() => { if (!cancelled) setProfileLoading(false) })
+    return () => { cancelled = true }
+  }, [mode, session?.access_token, session?.user.id, language])
 
   async function saveProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!session) { setProfileMessage('यह डेमो प्रोफ़ाइल केवल इस स्क्रीन पर तैयार हुई। सेव करने के लिए लॉगिन करें।'); return }
+    const normalizedPhone = phone.replace(/\D/g, '')
+    const districtCode = getDistrictCode(stateName, district, language)
+    if (!name.trim()) { setProfileMessage('कृपया अपना पूरा नाम लिखें।'); return }
+    if (!/^[6-9][0-9]{9}$/.test(normalizedPhone)) { setProfileMessage('कृपया 6 से 9 से शुरू होने वाला 10 अंकों का भारतीय मोबाइल नंबर लिखें।'); return }
+    if (!districtCode || districtCode <= 0) { setProfileMessage('कृपया सूची से अपना सही जिला चुनें।'); return }
+    setProfileSaving(true)
+    setProfileMessage('')
     try {
-      await updateMyProfile(session.access_token, session.user.id, { full_name: name, phone, district: getDistrictEnglishName(stateName, district, language) ?? district, state_code: String(getStateCode(stateName)), state_lgd_code: getStateCode(stateName), district_lgd_code: getDistrictCode(stateName, district, language) ?? 0, preferred_language: language, skills, preferred_work_type: workType })
-       setProfileMessage('आपकी प्रोफ़ाइल सुरक्षित रूप से सेव हो गई।')
-    } catch (error) { setProfileMessage(error instanceof Error ? error.message : 'प्रोफ़ाइल सेव नहीं हुई।') }
+      const saved = await updateMyProfile(session.access_token, session.user.id, {
+        full_name: name.trim(),
+        phone: normalizedPhone,
+        district: getDistrictEnglishName(stateName, district, language) ?? district,
+        state_code: stateName === 'Bihar' ? 'BR' : stateName === 'Jharkhand' ? 'JH' : null,
+        state_lgd_code: getStateCode(stateName),
+        district_lgd_code: districtCode,
+        preferred_language: language,
+        skills: skills.trim(),
+        preferred_work_type: workType,
+      })
+      if (saved.id !== session.user.id) throw new Error('प्रोफ़ाइल सेव होने की पुष्टि नहीं मिली। कृपया दोबारा कोशिश करें।')
+      setPhone(normalizedPhone)
+      setProfileMessage('आपकी प्रोफ़ाइल सुरक्षित रूप से सेव हो गई।')
+    } catch (error) {
+      setProfileMessage(error instanceof Error ? error.message : 'प्रोफ़ाइल सेव नहीं हुई।')
+    } finally {
+      setProfileSaving(false)
+    }
   }
 
   if (mode === 'मेरे आवेदन') {
@@ -51,12 +106,12 @@ export default function CandidateArea({ mode, language, session, onSignIn }: { m
     <div className="profile-layout">
       <form className="candidate-profile-form" onSubmit={saveProfile}>
         <label>आपका नाम<input required value={name} onChange={event => { setName(event.target.value); setProfileMessage('') }} placeholder="अपना नाम लिखें" /></label>
-        <label>मोबाइल नंबर<input required type="tel" inputMode="numeric" pattern="[0-9]{10}" maxLength={10} value={phone} onChange={event => { setPhone(event.target.value); setProfileMessage('') }} placeholder="10 अंकों का नंबर" /></label>
+        <label>मोबाइल नंबर<input required type="tel" inputMode="numeric" pattern="[6-9][0-9]{9}" minLength={10} maxLength={10} title="10 अंकों का भारतीय मोबाइल नंबर लिखें" value={phone} onChange={event => { setPhone(event.target.value.replace(/\D/g, '').slice(0, 10)); setProfileMessage('') }} placeholder="10 अंकों का नंबर" /></label>
         <label>राज्य<select value={stateName} onChange={event => { const nextState = event.target.value as StateName; setStateName(nextState); setDistrict(getDistrictOptions(nextState, language)[0] ?? ''); setProfileMessage('') }}>{stateNames.map(state => <option key={state} value={state}>{getStateLabel(state, language)}</option>)}</select></label>
-        <label>आपका जिला<select value={district} onChange={event => { setDistrict(event.target.value); setProfileMessage('') }}>{getDistrictOptions(stateName, language).map(item => <option key={item}>{item}</option>)}</select></label>
+        <label>आपका जिला<select required value={district} onChange={event => { setDistrict(event.target.value); setProfileMessage('') }}>{getDistrictOptions(stateName, language).map(item => <option key={item}>{item}</option>)}</select></label>
         <label>आपको कौन-सा काम आता है?<textarea rows={3} value={skills} onChange={event => { setSkills(event.target.value); setProfileMessage('') }} placeholder="जैसे: दुकान संभालना, ड्राइविंग, सिलाई..." /></label>
         <label>काम का प्रकार<select value={workType} onChange={event => { setWorkType(event.target.value); setProfileMessage('') }}><option>फुल टाइम</option><option>पार्ट टाइम</option><option>दैनिक मजदूरी</option><option>घर से काम</option><option>फ्रीलांस</option></select></label>
-        <button type="submit">प्रोफ़ाइल सेव करें →</button>
+        <button type="submit" disabled={profileLoading || profileSaving}>{profileLoading ? 'प्रोफ़ाइल लोड हो रही है...' : profileSaving ? 'सेव हो रही है...' : 'प्रोफ़ाइल सेव करें →'}</button>
         {profileMessage && <p className="profile-saved" role="status">{profileMessage}</p>}
       </form>
       <aside className="profile-side"><div className="profile-avatar"><img src={`${import.meta.env.BASE_URL}sabkaam-mark.webp`} alt="SABKAAM लोगो" /></div><strong>{name || 'आपका नाम'}</strong><span>{district} · {getStateLabel(stateName, language)} · {workType}</span><p>{skills || 'आपकी स्किल यहाँ दिखाई देंगी।'}</p><small>{session ? 'प्रोफ़ाइल आपके खाते में सुरक्षित है।' : 'प्रोफ़ाइल प्रीव्यू · केवल इसी स्क्रीन पर'}</small></aside>

@@ -110,6 +110,16 @@ select is((select count(*)::int from public.employers), 1, 'employer reads only 
 select is((select count(*)::int from public.job_posts), 3, 'employer reads their own jobs plus public published jobs');
 select is((select count(*)::int from public.applications), 1, 'employer reads applications to their own jobs');
 select ok(not public.is_sabkaam_staff(), 'employer is not staff');
+select is((select count(*)::int from public.notifications), 1, 'employer receives a notification for a new application');
+select throws_ok(
+  $test$ insert into public.applications (job_id, candidate_id, full_name, phone)
+     values ('30000000-0000-0000-0000-000000000001',
+       '00000000-0000-0000-0000-000000000003', 'Employer A', '9000000003') $test$,
+  '42501',
+  'new row violates row-level security policy for table "applications"',
+  'employer accounts cannot submit candidate applications'
+);
+
 
 -- Switch to the new employer account: the insert policy requires the
 -- authenticated owner_id to match auth.uid(), not merely an employer role.

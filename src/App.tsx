@@ -10,6 +10,7 @@ import { LanguageSelect, Localized, type Language } from './i18n'
 import { stateNames, getStateLabel, getDistrictOptions, getStateCode, getDistrictCode, getDistrictNameByCode, getDistrictEnglishName, type StateName } from './locations'
 import { getWorkAreaSuggestions, normalizeWorkAreaQuery, type WorkAreaSuggestion } from './work-areas'
 import { backendConfigured, listPublishedJobs, readAuthSession, refreshAuthSession, clearAuthSession, submitApplication, getMyProfile, type AuthSession, type PublishedJob } from './lib/backend'
+import { restoreAuthSession, revokeAuthSession } from './lib/auth-session'
 
 type Category = { name: string; icon: string; count: string }
 type JobListing = { id?: string; title: string; state: string; district?: string; locality?: string; company: string; place: string; pay: string; type: string; category: string; description?: string; isDemo?: boolean }
@@ -37,7 +38,7 @@ const demoJobs: JobListing[] = [
 ]
 
 function App() {
-  const [session, setSession] = useState<AuthSession | null>(() => readAuthSession())
+  const [session, setSession] = useState<AuthSession | null>(null)
   const [showAuth, setShowAuth] = useState(() => localStorage.getItem('sabkaam-auth-panel-open') === 'true')
   const [accountRole, setAccountRole] = useState('')
   const [showAdmin, setShowAdmin] = useState(false)
@@ -99,7 +100,7 @@ function App() {
       }
     }
 
-    void syncSession()
+    void restoreAuthSession().then(restored => { if (active) setSession(restored); return syncSession() }).catch(() => { if (active) setSession(null) })
     const refreshTimer = window.setInterval(() => {
       if (document.visibilityState === 'visible') void syncSession()
     }, 30_000)
@@ -136,6 +137,13 @@ function App() {
   function openRolePicker() {
     setShowEmployer(false)
     setShowRolePicker(true)
+  }
+
+  function signOut() {
+    if (session) void revokeAuthSession(session.access_token)
+    clearAuthSession()
+    setSession(null)
+    setAccountRole('')
   }
 
   const preferredDistrict = district === 'सभी जिले' ? undefined : getDistrictEnglishName(stateName, district, language)
@@ -234,7 +242,7 @@ function App() {
 
   if (showAdmin && session) return <AdminDashboard session={session} language={language} onBack={() => setShowAdmin(false)} onLanguageChange={changeLanguage} />
 
-  if (showEmployer) return <><EmployerDashboard onBack={openRolePicker} language={language} onLanguageChange={changeLanguage} session={session} onSignIn={() => setShowAuth(true)} onSignOut={() => { clearAuthSession(); setSession(null) }} />{showAuth && <AuthPanel language={language} defaultAccountType={selectedRole} onClose={() => setShowAuth(false)} onSuccess={(nextSession) => { setSession(nextSession); setShowAuth(false) }} />}</>
+  if (showEmployer) return <><EmployerDashboard onBack={openRolePicker} language={language} onLanguageChange={changeLanguage} session={session} onSignIn={() => setShowAuth(true)} onSignOut={signOut} />{showAuth && <AuthPanel language={language} defaultAccountType={selectedRole} onClose={() => setShowAuth(false)} onSuccess={(nextSession) => { setSession(nextSession); setShowAuth(false) }} />}</>
 
 
   function startVoiceSearch() {
@@ -297,7 +305,7 @@ function App() {
           <img className="brand-logo-image" src={`${import.meta.env.BASE_URL}sabkaam-mark.webp`} alt="" />
           <span><strong>SABKAAM</strong><small>हर काम, हर इंसान के लिए।</small></span>
         </a>
-        <div className="topbar-actions">{(accountRole === "moderator" || accountRole === "admin") && <button className="account-link" onClick={() => setShowAdmin(true)}>Admin</button>}{session ? <button className="account-link" onClick={() => { clearAuthSession(); setSession(null) }}>लॉगआउट</button> : backendConfigured ? <button className="account-link" onClick={() => setShowAuth(true)}>लॉगिन</button> : <span className="account-link">Preview mode</span>}<LanguageSelect language={language} onChange={changeLanguage} /><button className="safety-link" onClick={() => setShowSafety(!showSafety)}>{showSafety ? '← वापस' : '🛡️ सुरक्षा और शिकायत'}</button><button className="employer-link" onClick={openRolePicker}>रोल बदलें <span>↗</span></button></div>
+        <div className="topbar-actions">{(accountRole === "moderator" || accountRole === "admin") && <button className="account-link" onClick={() => setShowAdmin(true)}>Admin</button>}{session ? <button className="account-link" onClick={signOut}>लॉगआउट</button> : backendConfigured ? <button className="account-link" onClick={() => setShowAuth(true)}>लॉगिन</button> : <span className="account-link">Preview mode</span>}<LanguageSelect language={language} onChange={changeLanguage} /><button className="safety-link" onClick={() => setShowSafety(!showSafety)}>{showSafety ? '← वापस' : '🛡️ सुरक्षा और शिकायत'}</button><button className="employer-link" onClick={openRolePicker}>रोल बदलें <span>↗</span></button></div>
       </header>
 
       <main>{showSafety && <SafetyCenter language={language} session={session} onSignIn={() => setShowAuth(true)} />}
@@ -386,7 +394,7 @@ function App() {
             <p className="modal-company">{selectedJob.company} · {selectedJob.place}</p>
             <div className="modal-facts"><span>वेतन <b>{selectedJob.pay}</b></span><span>काम <b>{selectedJob.type}</b></span><span>श्रेणी <b>{selectedJob.category}</b></span></div>
             <p className="modal-disclaimer">{selectedJob.isDemo === false ? "यह प्रकाशित नौकरी है। आवेदन भेजने के लिए candidate खाते से लॉगिन करें।" : "यह एक काल्पनिक उदाहरण है, वास्तविक नौकरी या नियोक्ता नहीं। यहाँ आवेदन भेजने से किसी कंपनी को जानकारी नहीं जाएगी।"}</p>
-            {selectedJob.isDemo === false ? (session && session.user.user_metadata?.account_type === 'candidate' && selectedJob.id ? <form className="apply-form" onSubmit={async event => {
+            {selectedJob.isDemo === false ? (session && accountRole === 'candidate' && selectedJob.id ? <form className="apply-form" onSubmit={async event => {
               event.preventDefault()
               const form = new FormData(event.currentTarget)
               setLiveApplyBusy(true)

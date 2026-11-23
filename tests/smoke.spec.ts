@@ -66,7 +66,11 @@ test.describe('SABKAAM desktop and mobile smoke tests', () => {
     await expect(district.locator('option')).toHaveCount(24)
     await page.getByLabel('दुकान / कंपनी का नाम').fill('टेस्ट स्टोर')
     await page.getByLabel('संपर्क व्यक्ति का नाम').fill('टेस्ट यूजर')
-    await page.getByLabel('मोबाइल नंबर').fill('9876543210')
+    const employerPhone = page.getByLabel('मोबाइल नंबर')
+    await employerPhone.fill('5123456789')
+    expect(await employerPhone.evaluate(input => (input as HTMLInputElement).checkValidity())).toBe(false)
+    await employerPhone.fill('9876543210')
+    expect(await employerPhone.evaluate(input => (input as HTMLInputElement).checkValidity())).toBe(true)
     await page.getByLabel('काम / पद का नाम').fill('सेल्स हेल्पर')
     await page.getByLabel(/शहर \/ इलाका \/ सेक्टर \/ गली \/ मेट्रो \/ PIN/).fill('उत्तम नगर')
     await page.getByRole('button', { name: /डेमो पोस्ट का प्रीव्यू देखें/ }).click()
@@ -106,13 +110,31 @@ test.describe('SABKAAM desktop and mobile smoke tests', () => {
     await expect(page.getByText(/डेमो प्रोफ़ाइल/)).toBeVisible()
   })
 
+  test('candidate profile accepts only valid Indian mobile numbers and real district options', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('button', { name: 'प्रोफ़ाइल' }).click()
+    const phone = page.getByLabel('मोबाइल नंबर')
+    await phone.fill('5123456789')
+    expect(await phone.evaluate(input => (input as HTMLInputElement).checkValidity())).toBe(false)
+    await phone.fill('9876543210')
+    expect(await phone.evaluate(input => (input as HTMLInputElement).checkValidity())).toBe(true)
+    const district = page.getByLabel('आपका जिला')
+    await expect(district.locator('option')).toHaveCount(38)
+    await district.selectOption({ index: 1 })
+    expect(await district.inputValue()).not.toBe('')
+  })
+
   test('job detail and application demo form work', async ({ page }) => {
     test.setTimeout(60000)
     await page.getByRole('button', { name: /सभी श्रेणियाँ/ }).click()
     await page.getByText('दुकान में सेल्स हेल्पर').click()
     await expect(page.getByRole('dialog')).toBeVisible()
     await page.getByLabel('आपका नाम').fill('राम कुमार')
-    await page.getByLabel('मोबाइल नंबर').fill('9876543210')
+    const applicationPhone = page.getByLabel('मोबाइल नंबर')
+    await applicationPhone.fill('5123456789')
+    expect(await applicationPhone.evaluate(input => (input as HTMLInputElement).checkValidity())).toBe(false)
+    await applicationPhone.fill('9876543210')
+    expect(await applicationPhone.evaluate(input => (input as HTMLInputElement).checkValidity())).toBe(true)
     await page.getByRole('button', { name: /डेमो आवेदन देखें/ }).click()
     await expect(page.getByText(/डेमो आवेदन तैयार हुआ/)).toBeVisible()
   })
@@ -152,4 +174,23 @@ test.describe('SABKAAM desktop and mobile smoke tests', () => {
     await page.getByRole('button', { name: /शिकायत भेजें/ }).click()
     await expect(page.getByText(/डेमो शिकायत तैयार हुई/)).toBeVisible()
   })
+
+  test('restores a valid tab session and clears it on sign-out', async ({ page }) => {
+    await page.addInitScript(() => {
+      sessionStorage.setItem('sabkaam-auth-session', JSON.stringify({
+        access_token: 'test-access-token',
+        refresh_token: 'test-refresh-token',
+        expires_in: 3600,
+        expires_at: Date.now() + 3_600_000,
+        token_type: 'bearer',
+        user: { id: '00000000-0000-0000-0000-000000000001', user_metadata: { account_type: 'candidate' } },
+      }))
+    })
+    await page.goto('/')
+    await page.getByRole('button', { name: /नौकरी देने वाले/ }).click()
+    await expect(page.getByRole('button', { name: 'लॉगआउट' })).toBeVisible()
+    await page.getByRole('button', { name: 'लॉगआउट' }).click()
+    await expect.poll(() => page.evaluate(() => sessionStorage.getItem('sabkaam-auth-session'))).toBeNull()
+  })
+
 })
