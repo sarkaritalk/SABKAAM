@@ -2,18 +2,19 @@ import { useEffect, useState, type FormEvent } from 'react'
 import './candidate-area.css'
 import { Localized, type Language } from './i18n'
 import { stateNames, getStateLabel, getDistrictOptions, getStateCode, getDistrictCode, getDistrictEnglishName, getStateNameByCode, getDistrictNameByCode, type StateName } from './locations'
+import { usePersistentDraft } from './lib/drafts'
 import { backendConfigured, getMyApplications, getMyNotifications, getMyProfile, updateMyProfile, type AuthSession } from './lib/backend'
 
 type Mode = 'मेरे आवेदन' | 'सूचनाएँ' | 'प्रोफ़ाइल'
 
 
 export default function CandidateArea({ mode, language, session, onSignIn }: { mode: Mode; language: Language; session: AuthSession | null; onSignIn: () => void }) {
-  const [name, setName] = useState('')
-  const [phone, setPhone] = useState('')
-  const [stateName, setStateName] = useState<StateName>('Bihar')
-  const [district, setDistrict] = useState('मधुबनी')
-  const [skills, setSkills] = useState('')
-  const [workType, setWorkType] = useState('फुल टाइम')
+  const [name, setName] = usePersistentDraft('sabkaam-candidate-profile-name', '')
+  const [phone, setPhone] = usePersistentDraft('sabkaam-candidate-profile-phone', '')
+  const [stateName, setStateName] = usePersistentDraft<StateName>('sabkaam-candidate-profile-state', 'Bihar')
+  const [district, setDistrict] = usePersistentDraft('sabkaam-candidate-profile-district', 'मधुबनी')
+  const [skills, setSkills] = usePersistentDraft('sabkaam-candidate-profile-skills', '')
+  const [workType, setWorkType] = usePersistentDraft('sabkaam-candidate-profile-work-type', 'फुल टाइम')
   const [profileMessage, setProfileMessage] = useState('')
   const [realApplications, setRealApplications] = useState<Array<{ id: string; job_id: string; status: string; created_at: string; job_posts?: { title: string; district: string } | null }>>([])
   const [realNotifications, setRealNotifications] = useState<Array<{ id: string; title: string; body: string; kind: string; read_at: string | null; created_at: string }>>([])
