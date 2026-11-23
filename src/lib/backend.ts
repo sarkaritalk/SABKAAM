@@ -22,11 +22,20 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     throw new BackendError('SABKAAM backend is not configured. Add the Supabase URL and publishable key.')
   }
 
+  let accessToken = options.accessToken
+  if (accessToken) {
+    const savedSession = readAuthSession()
+    if (savedSession?.access_token === accessToken) {
+      const refreshedSession = await refreshAuthSession()
+      accessToken = refreshedSession?.access_token ?? accessToken
+    }
+  }
+
   const response = await fetch(`${supabaseUrl}${path}`, {
     method: options.method ?? 'GET',
     headers: {
       apikey: publishableKey,
-      Authorization: `Bearer ${options.accessToken ?? publishableKey}`,
+      Authorization: `Bearer ${accessToken ?? publishableKey}`,
       'Content-Type': 'application/json',
       ...(options.prefer ? { Prefer: options.prefer } : {}),
     },
@@ -57,6 +66,7 @@ export type PublishedJob = {
   district: string
   district_lgd_code: number | null
   town_or_market: string | null
+  locality: string | null
   salary_min: number | null
   salary_max: number | null
   salary_period: string | null
@@ -66,15 +76,19 @@ export type PublishedJob = {
   expires_at: string | null
 }
 
-export async function listPublishedJobs(filters: { stateLgdCode?: number; districtLgdCode?: number } = {}) {
+export async function listPublishedJobs(filters: { stateLgdCode?: number; districtLgdCode?: number; townOrMarket?: string } = {}) {
   const params = new URLSearchParams({
-    select: 'id,title,employer_display_name,category,description,work_type,state_code,state_lgd_code,district,district_lgd_code,town_or_market,salary_min,salary_max,salary_period,vacancies,food_or_stay,created_at,expires_at',
+    select: 'id,title,employer_display_name,category,description,work_type,state_code,state_lgd_code,district,district_lgd_code,town_or_market,locality,salary_min,salary_max,salary_period,vacancies,food_or_stay,created_at,expires_at',
     status: 'eq.published',
     order: 'created_at.desc',
     limit: '100',
   })
   if (filters.stateLgdCode) params.set('state_lgd_code', `eq.${filters.stateLgdCode}`)
   if (filters.districtLgdCode) params.set('district_lgd_code', `eq.${filters.districtLgdCode}`)
+  if (filters.townOrMarket?.trim()) {
+    const area = filters.townOrMarket.trim().replace(/[,*()]/g, ' ')
+    params.set('and', `(or(town_or_market.ilike.*${area}*,locality.ilike.*${area}*))`)
+  }
   params.set('or', `(expires_at.is.null,expires_at.gt.${new Date().toISOString()})`)
   return request<PublishedJob[]>(`/rest/v1/job_posts?${params.toString()}`)
 }
@@ -109,7 +123,7 @@ export function readAuthSession(): AuthSession | null {
     const raw = sessionStorage.getItem('sabkaam-auth-session')
     if (!raw) return null
     const saved = JSON.parse(raw) as StoredAuthSession
-    if (!saved.access_token || !saved.user?.id || saved.expires_at <= Date.now()) {
+    if (!saved.access_token || !saved.refresh_token || !saved.user?.id) {
       sessionStorage.removeItem('sabkaam-auth-session')
       return null
     }
@@ -118,6 +132,38 @@ export function readAuthSession(): AuthSession | null {
     sessionStorage.removeItem('sabkaam-auth-session')
     return null
   }
+}
+
+let refreshInFlight: Promise<AuthSession | null> | null = null
+
+export function refreshAuthSession(): Promise<AuthSession | null> {
+  if (refreshInFlight) return refreshInFlight
+
+  const current = readAuthSession() as StoredAuthSession | null
+  if (!current) return Promise.resolve(null)
+
+  const expiresAt = current.expires_at || Date.now() + current.expires_in * 1000
+  if (expiresAt > Date.now() + 60_000) return Promise.resolve(current)
+
+  refreshInFlight = (async () => {
+    try {
+      const refreshed = await request<AuthSession>('/auth/v1/token?grant_type=refresh_token', {
+        method: 'POST',
+        body: { refresh_token: current.refresh_token },
+      })
+      saveAuthSession(refreshed)
+      return refreshed
+    } catch (error) {
+      if (error instanceof BackendError && (error.status === 400 || error.status === 401)) {
+        clearAuthSession()
+      }
+      throw error
+    } finally {
+      refreshInFlight = null
+    }
+  })()
+
+  return refreshInFlight
 }
 
 export function saveAuthSession(session: AuthSession) {
@@ -171,7 +217,7 @@ export async function submitApplication(accessToken: string, payload: {
 
 export async function createJobDraft(accessToken: string, payload: {
   employer_id: string; employer_display_name: string; title: string; category: string; description: string; work_type: string
-  state_lgd_code: number; district_lgd_code: number; district: string; town_or_market?: string
+  state_lgd_code: number; district_lgd_code: number; district: string; town_or_market?: string; locality?: string
   salary_min?: number; salary_max?: number; salary_period?: string; vacancies: number
 }) {
   return request<Array<{ id: string; status: string }>>('/rest/v1/job_posts', {

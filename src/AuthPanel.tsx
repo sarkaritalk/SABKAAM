@@ -1,19 +1,21 @@
 import { useState, type FormEvent } from 'react'
 import './auth-panel.css'
 import { Localized, type Language } from './i18n'
+import { usePersistentDraft } from './lib/drafts'
 import { saveAuthSession, signInWithEmail, signUpWithEmail, type AuthSession } from './lib/backend'
 
 type Props = {
   language: Language
   onClose: () => void
   onSuccess: (session: AuthSession) => void
+  defaultAccountType?: 'candidate' | 'employer'
 }
 
-export default function AuthPanel({ language, onClose, onSuccess }: Props) {
-  const [mode, setMode] = useState<'signin' | 'signup'>('signin')
-  const [accountType, setAccountType] = useState<'candidate' | 'employer'>('candidate')
-  const [fullName, setFullName] = useState('')
-  const [email, setEmail] = useState('')
+export default function AuthPanel({ language, onClose, onSuccess, defaultAccountType = 'candidate' }: Props) {
+  const [mode, setMode] = usePersistentDraft<'signin' | 'signup'>('sabkaam-auth-mode', 'signin')
+  const [accountType, setAccountType] = usePersistentDraft<'candidate' | 'employer'>('sabkaam-auth-account-type', defaultAccountType)
+  const [fullName, setFullName] = usePersistentDraft('sabkaam-auth-full-name', '')
+  const [email, setEmail] = usePersistentDraft('sabkaam-auth-email', '')
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
@@ -49,7 +51,7 @@ export default function AuthPanel({ language, onClose, onSuccess }: Props) {
     <div className="auth-overlay" role="presentation" onClick={onClose}>
       <section className="auth-dialog" role="dialog" aria-modal="true" aria-labelledby="auth-title" onClick={event => event.stopPropagation()}>
         <button className="auth-close" type="button" onClick={onClose} aria-label="बंद करें">×</button>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}><img src={`${import.meta.env.BASE_URL}sabkaam-mark.svg`} alt="" aria-hidden="true" style={{ width: 38, height: 38, objectFit: 'contain', background: '#123B3A', borderRadius: 11, padding: 4, boxSizing: 'border-box' }} /><strong style={{ color: '#123B3A', letterSpacing: 1.2 }}>SABKAAM</strong></div>
+        <div className="auth-brand-lockup"><img src={`${import.meta.env.BASE_URL}sabkaam-mark.webp`} alt="" /><span className="section-kicker">SABKAAM ACCOUNT</span></div>
         <h2 id="auth-title">{mode === 'signin' ? 'अपने खाते में लॉगिन करें' : 'SABKAAM पर खाता बनाएँ'}</h2>
         <p>ईमेल और पासवर्ड से सुरक्षित रूप से प्रवेश करें। ईमेल पुष्टि आपके Supabase Auth सेटअप पर निर्भर करेगी।</p>
         <form onSubmit={submit}>

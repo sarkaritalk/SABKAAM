@@ -2,18 +2,19 @@ import { useEffect, useState, type FormEvent } from 'react'
 import './candidate-area.css'
 import { Localized, type Language } from './i18n'
 import { stateNames, getStateLabel, getDistrictOptions, getStateCode, getDistrictCode, getDistrictEnglishName, getStateNameByCode, getDistrictNameByCode, type StateName } from './locations'
+import { usePersistentDraft } from './lib/drafts'
 import { backendConfigured, getMyApplications, getMyNotifications, getMyProfile, updateMyProfile, type AuthSession } from './lib/backend'
 
 type Mode = 'मेरे आवेदन' | 'सूचनाएँ' | 'प्रोफ़ाइल'
 
 
 export default function CandidateArea({ mode, language, session, onSignIn }: { mode: Mode; language: Language; session: AuthSession | null; onSignIn: () => void }) {
-  const [name, setName] = useState('')
-  const [phone, setPhone] = useState('')
-  const [stateName, setStateName] = useState<StateName>('Bihar')
-  const [district, setDistrict] = useState('मधुबनी')
-  const [skills, setSkills] = useState('')
-  const [workType, setWorkType] = useState('फुल टाइम')
+  const [name, setName] = usePersistentDraft('sabkaam-candidate-profile-name', '')
+  const [phone, setPhone] = usePersistentDraft('sabkaam-candidate-profile-phone', '')
+  const [stateName, setStateName] = usePersistentDraft<StateName>('sabkaam-candidate-profile-state', 'Bihar')
+  const [district, setDistrict] = usePersistentDraft('sabkaam-candidate-profile-district', 'मधुबनी')
+  const [skills, setSkills] = usePersistentDraft('sabkaam-candidate-profile-skills', '')
+  const [workType, setWorkType] = usePersistentDraft('sabkaam-candidate-profile-work-type', 'फुल टाइम')
   const [profileMessage, setProfileMessage] = useState('')
   const [profileLoading, setProfileLoading] = useState(false)
   const [profileSaving, setProfileSaving] = useState(false)
@@ -29,6 +30,9 @@ export default function CandidateArea({ mode, language, session, onSignIn }: { m
     getMyProfile(session.access_token, session.user.id)
       .then(profile => {
         if (cancelled || !profile) return
+        const hasLocalDraft = ['name', 'phone', 'state', 'district', 'skills', 'work-type']
+          .some(field => localStorage.getItem('sabkaam-candidate-profile-' + field) !== null)
+        if (hasLocalDraft) return
         setName(profile.full_name || '')
         setPhone((profile.phone || '').replace(/\D/g, '').slice(0, 10))
         setSkills(profile.skills || '')
@@ -37,24 +41,16 @@ export default function CandidateArea({ mode, language, session, onSignIn }: { m
           const state = getStateNameByCode(profile.state_lgd_code)
           if (state) {
             setStateName(state)
-            const savedDistrict = profile.district_lgd_code
-              ? getDistrictNameByCode(state, profile.district_lgd_code, language)
-              : undefined
+            const savedDistrict = profile.district_lgd_code ? getDistrictNameByCode(state, profile.district_lgd_code, language) : undefined
             const legacyDistrict = profile.district
-              ? getDistrictOptions(state, language).find(option =>
-                  getDistrictEnglishName(state, option, language)?.toLowerCase() === profile.district?.toLowerCase(),
-                )
+              ? getDistrictOptions(state, language).find(option => getDistrictEnglishName(state, option, language)?.toLowerCase() === profile.district?.toLowerCase())
               : undefined
             setDistrict(savedDistrict || legacyDistrict || getDistrictOptions(state, language)[0] || '')
           }
         }
       })
-      .catch(error => {
-        if (!cancelled) setProfileMessage(error instanceof Error ? error.message : 'प्रोफ़ाइल लोड नहीं हुई')
-      })
-      .finally(() => {
-        if (!cancelled) setProfileLoading(false)
-      })
+      .catch(error => { if (!cancelled) setProfileMessage(error instanceof Error ? error.message : 'प्रोफ़ाइल लोड नहीं हुई') })
+      .finally(() => { if (!cancelled) setProfileLoading(false) })
     return () => { cancelled = true }
   }, [mode, session?.access_token, session?.user.id, language])
 
@@ -106,7 +102,6 @@ export default function CandidateArea({ mode, language, session, onSignIn }: { m
   }
 
   return <Localized language={language}><section className="candidate-area">
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}><img src={`${import.meta.env.BASE_URL}sabkaam-mark.svg`} alt="" aria-hidden="true" style={{ width: 40, height: 40, objectFit: 'contain', background: '#123B3A', borderRadius: 11, padding: 4, boxSizing: 'border-box' }} /><strong style={{ color: '#123B3A', letterSpacing: 1.2 }}>SABKAAM</strong></div>
     <div className="candidate-heading"><span className="section-kicker">आपकी पहचान, आपकी पसंद</span><h1>मेरी प्रोफ़ाइल</h1><p>बिना रिज़्यूमे के भी अपनी बुनियादी जानकारी तैयार रखें।</p></div>
     <div className="profile-layout">
       <form className="candidate-profile-form" onSubmit={saveProfile}>
@@ -119,7 +114,7 @@ export default function CandidateArea({ mode, language, session, onSignIn }: { m
         <button type="submit" disabled={profileLoading || profileSaving}>{profileLoading ? 'प्रोफ़ाइल लोड हो रही है...' : profileSaving ? 'सेव हो रही है...' : 'प्रोफ़ाइल सेव करें →'}</button>
         {profileMessage && <p className="profile-saved" role="status">{profileMessage}</p>}
       </form>
-      <aside className="profile-side"><div className="profile-avatar">👤</div><strong>{name || 'आपका नाम'}</strong><span>{district} · {getStateLabel(stateName, language)} · {workType}</span><p>{skills || 'आपकी स्किल यहाँ दिखाई देंगी।'}</p><small>{session ? 'आपकी प्रोफ़ाइल इस खाते से जुड़ी है।' : 'प्रोफ़ाइल प्रीव्यू · केवल इसी स्क्रीन पर'}</small></aside>
+      <aside className="profile-side"><div className="profile-avatar"><img src={`${import.meta.env.BASE_URL}sabkaam-mark.webp`} alt="SABKAAM लोगो" /></div><strong>{name || 'आपका नाम'}</strong><span>{district} · {getStateLabel(stateName, language)} · {workType}</span><p>{skills || 'आपकी स्किल यहाँ दिखाई देंगी।'}</p><small>{session ? 'प्रोफ़ाइल आपके खाते में सुरक्षित है।' : 'प्रोफ़ाइल प्रीव्यू · केवल इसी स्क्रीन पर'}</small></aside>
     </div>
     <p className="candidate-privacy">आपकी सहमति के बिना मोबाइल नंबर या निजी जानकारी किसी नियोक्ता के साथ साझा नहीं की जानी चाहिए।</p>
   </section></Localized>

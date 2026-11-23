@@ -274,13 +274,125 @@ const copy: Record<string, [string, string]> = {
   'व्यवसाय की बुनियादी जानकारी दें। इस डेमो में कोई पहचान-पत्र, आधार, PAN, बैंक विवरण या दस्तावेज़ अपलोड न करें।': ['Provide basic business details. Do not upload identity documents, Aadhaar, PAN, bank details, or documents in this demo.', 'Business ki basic details dein. Is demo mein ID, Aadhaar, PAN ya bank details upload na karein.'],
   'यह फॉर्म अभी केवल प्रोटोटाइप है। शिकायत कहीं भेजी या सेव नहीं होगी।': ['This form is a prototype only. Reports are not sent or saved.', 'Ye form abhi prototype hai. Complaint send ya save nahi hogi.'],
   'जरूरी: तत्काल खतरे या वित्तीय धोखाधड़ी की स्थिति में स्थानीय पुलिस / साइबर क्राइम सहायता से संपर्क करें। SABKAAM का यह प्रोटोटाइप आपातकालीन सेवा नहीं है।': ['Important: In immediate danger or financial fraud, contact local police or cybercrime support. This SABKAAM prototype is not an emergency service.', 'Zaroori: Turant khatre ya financial fraud mein local police / cybercrime help se sampark karein. SABKAAM emergency service nahi hai.'],
+
+  'SABKAAM खुल रहा है': ['Opening SABKAAM', 'SABKAAM khul raha hai'],
+  'काम के नए अवसर खुल रहे हैं': ['New work opportunities are opening up', 'Kaam ke naye mauke khul rahe hain'],
+  'आप SABKAAM पर': ['What would you like to do', 'Aap SABKAAM par'],
+  'क्या करना चाहते हैं?': ['on SABKAAM?', 'kya karna chahte hain?'],
+  'अपनी ज़रूरत के अनुसार आगे बढ़ें। सही अनुभव आपका इंतज़ार कर रहा है।': ['Choose the path that fits your needs. The right experience is waiting for you.', 'Apni zaroorat ke hisaab se aage badhein. Sahi experience aapka intezar kar raha hai.'],
+  'मुझे काम / नौकरी चाहिए': ['I am looking for work / a job', 'Mujhe kaam / naukri chahiye'],
+  'अपने आसपास नौकरी, रोज़गार और नए अवसर खोजें।': ['Find jobs, work, and new opportunities near you.', 'Apne aas-paas job, rozgaar aur naye mauke dhoondhein.'],
+  'नौकरी खोजें': ['Find jobs', 'Naukri khojein'],
+  'मुझे कामगार / कर्मचारी चाहिए': ['I need workers / employees', 'Mujhe kaamgaar / karmachaari chahiye'],
+  'अपनी टीम के लिए सही लोगों को खोजें और भर्ती करें।': ['Find and hire the right people for your team.', 'Apni team ke liye sahi log dhoondhein aur hire karein.'],
+  'हायरिंग शुरू करें': ['Start hiring', 'Hiring shuru karein'],
+  'आप बाद में भी अपना रोल बदल सकते हैं': ['You can change your role later', 'Aap baad mein bhi apna role badal sakte hain'],
+  'आपकी पिछली पसंद:': ['Your previous choice:', 'Aapki pichhli pasand:'],
+  'रोल बदलें': ['Switch role', 'Role badlein'],
+  'इस क्षेत्र के काम देखें': ['View jobs in this category', 'Is field ke kaam dekhein'],
+  'दूसरी श्रेणी चुनें': ['Choose another category', 'Doosri category chunein'],
+  'SABKAAM · काम की श्रेणी': ['SABKAAM · Job category', 'SABKAAM · Kaam ki category'],
+  'से जुड़े अवसर इस श्रेणी में मिलेंगे। अपना राज्य और जिला चुनकर नज़दीकी काम खोजें।': ['opportunities in this category. Choose your state and district to find nearby work.', 'se jude mauke is category mein milenge. Apna state aur district chunein.'],
+  'यह इलाका सूची में नहीं है। अपना लिखा हुआ नाम वैसे ही खोज सकते हैं।': ['This area is not listed. You can search using the name you entered.', 'Ye area list mein nahi hai. Apne likhe naam se search kar sakte hain.'],
+  'सूची के बाहर का इलाका भी लिखकर खोजें': ['You can also search for an area not in the list', 'List ke bahar ka area bhi likhkar search karein'],
+  'पूरी दिल्ली NCR': ['Across Delhi NCR', 'Poori Delhi NCR'],
+  'शहर, इलाका या सेक्टर': ['City, area, or sector', 'Shehar, area ya sector'],
+  'इलाका खोजें': ['Search area', 'Area khojein'],
+  'इलाके के सुझाव': ['Area suggestions', 'Area ke suggestions'],
+  'आपके लिए सही काम': ['The right work for you', 'Aapke liye sahi kaam'],
+  'ढूँढने में मदद करें?': ['Can we help you find it?', 'Dhoondhne mein madad karein?'],
+  'अपनी पसंद, अनुभव और जगह बताइए। AI सहायक आपको सही काम के विकल्प समझने में मदद करेगा।': ['Tell us your preferences, experience, and location. The AI assistant will help you explore suitable work options.', 'Apni pasand, experience aur jagah bataiye. AI assistant sahi kaam ke options batayega.'],
+  'दुकान में काम खोजें': ['Find shop jobs', 'Dukaan mein kaam khojein'],
+  'डिलीवरी का काम': ['Delivery jobs', 'Delivery ka kaam'],
+  'ऑफिस जॉब': ['Office jobs', 'Office job'],
+  'AI सुविधा का यह शुरुआती डिज़ाइन है। लाइव AI सेवा अभी कनेक्ट नहीं है।': ['This is an early design for the AI feature. The live AI service is not connected yet.', 'AI feature ka ye shuruaati design hai. Live AI service abhi connect nahi hai.'],
+  'रोल बदलें ↗': ['Switch role ↗', 'Role badlein ↗'],
+  'आपका नाम लिखें': ['Enter your name', 'Apna naam likhein'],
+  '10 अंकों का मोबाइल नंबर': ['10-digit mobile number', '10 digit mobile number'],
+  'शहर / इलाका / सेक्टर / गली / मेट्रो / PIN *': ['City / area / sector / street / metro / PIN *', 'Shehar / area / sector / gali / metro / PIN *'],
+  'सही इलाका लिखें ताकि उम्मीदवार उसी जगह की नौकरी खोज सकें।': ['Enter the correct area so candidates can find jobs at that location.', 'Sahi area likhein taaki candidates wahin ki job dhoondh sakein.'],
+  'पोस्ट पहले समीक्षा कतार में जाएगी। स्वीकृति के बाद ही उम्मीदवार इसे देख पाएँगे।': ['The post will first enter the review queue. Candidates can see it only after approval.', 'Post pehle review queue mein jayegi. Approval ke baad hi candidates dekh sakenge.'],
+  'यह preview mode है। Backend connect होने पर वास्तविक पोस्टिंग शुरू होगी।': ['This is preview mode. Live posting will begin when the backend is connected.', 'Ye preview mode hai. Backend connect hone par live posting shuru hogi.'],
+  'नौकरी समीक्षा के लिए भेजें': ['Submit job for review', 'Job review ke liye bhejein'],
+  'पोस्ट समीक्षा के लिए भेजी गई — अभी प्रकाशित नहीं हुई।': ['Post submitted for review — not published yet.', 'Post review ke liye bheji gayi — abhi publish nahi hui.'],
+  'यह जानकारी सुरक्षित रूप से सेव हुई है और समीक्षा के बाद ही प्रकाशित होगी।': ['This information was saved securely and will be published only after review.', 'Ye jaankari safely save hui hai aur review ke baad hi publish hogi.'],
+  'यह जानकारी केवल preview में दिखाई गई है; सेव नहीं हुई।': ['This information is shown in the preview only; it has not been saved.', 'Ye jaankari sirf preview mein dikhayi gayi hai; save nahi hui.'],
+  'SABKAAM पर संदिग्ध पोस्ट की रिपोर्ट और नियोक्ता सत्यापन की सुविधा उपलब्ध है।': ['SABKAAM provides suspicious-post reporting and employer verification.', 'SABKAAM par suspicious post report aur employer verification ki suvidha hai.'],
+  'प्रोफ़ाइल आपके खाते में सुरक्षित है।': ['Your profile is secure in your account.', 'Aapki profile aapke account mein secure hai.'],
+  'पढ़ा गया': ['Read', 'Padha gaya'],
+  'नया संदेश': ['New message', 'Naya sandesh'],
+  'अपने वास्तविक आवेदन देखने के लिए लॉगिन करें।': ['Sign in to view your applications.', 'Apne real applications dekhne ke liye login karein.'],
+  'अपनी सूचनाएँ देखने के लिए लॉगिन करें।': ['Sign in to view your notifications.', 'Apni notifications dekhne ke liye login karein.'],
+  'सुरक्षा और शिकायत': ['Safety & reports', 'Safety aur complaint'],
+  'Admin': ['Admin', 'Admin'],
+  'कोई नौकरी समीक्षा के लिए लंबित नहीं है।': ['No jobs are pending review.', 'Koi job review ke liye pending nahi hai.'],
+  'हर निर्णय रिकॉर्ड करें और आवश्यकतानुसार समीक्षा नोट्स सुरक्षित रखें। गलत पोस्ट को प्रकाशित न करें।': ['Record every decision and keep review notes as needed. Do not publish misleading posts.', 'Har decision record karein aur review notes rakhein. Galat post publish na karein.'],
+
+
+  'मधुबनी': ['Madhubani', 'Madhubani'],
+  'दरभंगा': ['Darbhanga', 'Darbhanga'],
+  'पटना': ['Patna', 'Patna'],
+  'काम के अनुसार': ['As per work', 'Kaam ke anusaar'],
+  'SABKAAM होम': ['SABKAAM home', 'SABKAAM home'],
+  'AI आवेदक': ['AI work assistant', 'AI kaam assistant'],
+  'मुख्य नेविगेशन': ['Main navigation', 'Main navigation'],
+  'सेल्स': ['Sales', 'Sales'],
+  'डिलीवरी': ['Delivery', 'Delivery'],
+  'ऑफिस': ['Office', 'Office'],
+  'शहर, कॉलोनी, सेक्टर, ब्लॉक, फेज़, मेट्रो, चौक या PIN कोड लिखें...': ['Enter a city, colony, sector, block, phase, metro, landmark, or PIN code...', 'Shehar, colony, sector, block, phase, metro, chowk ya PIN code likhein...'],
+  'वास्तविक नौकरी में आवेदन करने के लिए candidate खाते से लॉगिन करें।': ['Sign in with a candidate account to apply for a live job.', 'Real job mein apply karne ke liye candidate account se login karein.'],
+  'आवेदन तैयार हुआ।': ['Application prepared.', 'Application ready hua.'],
+  'आवेदन लोड नहीं हुए': ['Applications could not be loaded.', 'Applications load nahi hue.'],
+  'सूचनाएँ लोड नहीं हुईं': ['Notifications could not be loaded.', 'Notifications load nahi hui.'],
+  'प्रोफ़ाइल लोड नहीं हुई': ['Profile could not be loaded.', 'Profile load nahi hui.'],
+  'यह डेमो प्रोफ़ाइल केवल इस स्क्रीन पर तैयार हुई। सेव करने के लिए लॉगिन करें।': ['This demo profile is only shown on this screen. Sign in to save it.', 'Ye demo profile sirf is screen par bani hai. Save karne ke liye login karein.'],
+  'प्रोफ़ाइल सेव नहीं हुई।': ['Profile could not be saved.', 'Profile save nahi hui.'],
+  'नौकरी आवेदन': ['Job application', 'Job application'],
+  'भारत': ['India', 'India'],
+  'पोस्ट भेजने के लिए employer account से लॉगिन करें।': ['Sign in with an employer account to submit a job post.', 'Post bhejne ke liye employer account se login karein.'],
+  'इस खाते का प्रकार candidate है। Employer खाता बनाकर लॉगिन करें।': ['This is a candidate account. Create and sign in with an employer account.', 'Ye candidate account hai. Employer account banakar login karein.'],
+  'नौकरी समीक्षा के लिए भेज दी गई है। स्वीकृति से पहले यह सार्वजनिक नहीं होगी।': ['The job was submitted for review. It will not be public until approved.', 'Job review ke liye bhej di gayi hai. Approval se pehle public nahi hogi.'],
+  'नौकरी भेजी नहीं जा सकी।': ['The job could not be submitted.', 'Job bheji nahi ja saki.'],
+  'खाली पद की जानकारी भरें। पोस्ट समीक्षा के लिए जाएगी और स्वीकृति के बाद ही प्रकाशित होगी।': ['Enter the vacancy details. The post will be reviewed and published only after approval.', 'Vacancy ki details bharein. Post review aur approval ke baad hi publish hogi.'],
+  'अपने यहाँ खाली पद की जानकारी भरें। यह फॉर्म अभी preview mode में है; नौकरी ऑनलाइन प्रकाशित नहीं होगी।': ['Enter your vacancy details. This form is in preview mode; the job will not be published online.', 'Apne yahan vacancy ki details bharein. Ye form preview mode mein hai; job online publish nahi hogi.'],
+  'नया पद': ['New role', 'Naya pad'],
+  'आपकी कंपनी': ['Your company', 'Aapki company'],
+  'कामगार / कर्मचारी चाहिए': ['I need workers / employees', 'Mujhe kaamgaar / karmachaari chahiye'],
+  'काम / नौकरी चाहिए': ['I am looking for work / a job', 'Mujhe kaam / naukri chahiye'],
+  'नौकरी देने से पहले रजिस्ट्रेशन, सिक्योरिटी या ट्रेनिंग फीस माँगना': ['Asking for registration, security, or training fees before offering a job', 'Naukri dene se pehle registration, security ya training fees maangna'],
+  'डेमो शिकायत तैयार हुई। Backend connect होने पर ही रिपोर्ट भेजी जा सकेगी।': ['Demo report prepared. Reports can be submitted once the backend is connected.', 'Demo complaint ready hui. Backend connect hone par hi report bheji ja sakegi.'],
+  'शिकायत भेजने के लिए लॉगिन करें।': ['Sign in to submit a report.', 'Complaint bhejne ke liye login karein.'],
+  'शिकायत SABKAAM टीम को भेज दी गई है।': ['The report has been sent to the SABKAAM team.', 'Complaint SABKAAM team ko bhej di gayi hai.'],
+  'शिकायत भेजी नहीं जा सकी।': ['The report could not be submitted.', 'Complaint bheji nahi ja saki.'],
+  'डेमो अनुरोध तैयार हुआ। Backend connect होने पर ही समीक्षा के लिए भेजा जा सकेगा।': ['Demo request prepared. It can be submitted for review once the backend is connected.', 'Demo request ready hua. Backend connect hone par hi review ke liye bheja ja sakega.'],
+  'सत्यापन अनुरोध के लिए employer account से लॉगिन करें।': ['Sign in with an employer account to request verification.', 'Verification request ke liye employer account se login karein.'],
+  'इस अनुरोध के लिए employer account जरूरी है।': ['An employer account is required for this request.', 'Is request ke liye employer account zaroori hai.'],
+  'सत्यापन अनुरोध समीक्षा के लिए भेज दिया गया है।': ['The verification request has been submitted for review.', 'Verification request review ke liye bhej di gayi hai.'],
+  'सत्यापन अनुरोध भेजा नहीं जा सका।': ['The verification request could not be submitted.', 'Verification request bheji nahi ja saki.'],
+  'सत्यापन अनुरोध भेजा गया · स्थिति: समीक्षा बाकी': ['Verification request submitted · Status: Pending review', 'Verification request bheji gayi · Status: review baaki'],
+  'डेमो सत्यापन अनुरोध तैयार हुआ': ['Demo verification request prepared', 'Demo verification request ready hua'],
+  'अनुरोध सुरक्षित रूप से सेव हुआ है। सत्यापन बैज एडमिन की जाँच के बाद ही जारी होगा।': ['The request was saved securely. A verification badge will be issued only after admin review.', 'Request safely save hui. Verification badge admin review ke baad hi milega.'],
+  'दुकान या कंपनी का नाम': ['Shop or company name', 'Dukaan ya company ka naam'],
+  'आपकी शिकायत SABKAAM की समीक्षा कतार में भेजी जाएगी।': ['Your report will be sent to SABKAAM’s review queue.', 'Aapki complaint SABKAAM review queue mein bheji jayegi.'],
+  'शिकायत भेजने के लिए पहले लॉगिन करें।': ['Sign in first to submit a report.', 'Complaint bhejne ke liye pehle login karein.'],
+  'शिकायत भेज दी गई।': ['Report submitted.', 'Complaint bhej di gayi.'],
+  'जितनी जानकारी सुरक्षित रूप से साझा कर सकते हैं, लिखें...': ['Enter as much information as you can safely share...', 'Jitni jaankari surakshit roop se share kar sakte hain, likhein...'],
+
 }
 
 export function translateText(value: string, language: Language): string {
   if (language === 'hi') return value
   const trimmed = value.trim()
-  const translated = copy[trimmed]?.[language === 'en' ? 0 : 1]
-  return translated ? value.replace(trimmed, translated) : value
+  const column = language === 'en' ? 0 : 1
+  const exact = copy[trimmed]?.[column]
+  if (exact) return value.replace(trimmed, exact)
+  // Translate known phrases inside interpolated text nodes without altering user-entered names.
+  let result = value
+  const phrases = Object.entries(copy).filter(([source]) => source.length >= 8).sort((a, b) => b[0].length - a[0].length)
+  for (const [source, translations] of phrases) {
+    if (result.includes(source)) result = result.split(source).join(translations[column])
+  }
+  return result
 }
 
 function translateTree(node: ReactNode, language: Language): ReactNode {
@@ -308,7 +420,6 @@ export function LanguageSelect({ language, onChange }: { language: Language; onC
       <select aria-label="Website language" value={language} onChange={(event) => onChange(event.target.value as Language)}>
         <option value="hi">हिंदी</option>
         <option value="en">English</option>
-        <option value="hinglish">Hinglish</option>
       </select>
     </label>
   )
