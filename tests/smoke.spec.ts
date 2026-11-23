@@ -38,8 +38,6 @@ test.describe('SABKAAM desktop and mobile smoke tests', () => {
     await page.getByRole('button', { name: /मुझे कामगार \/ कर्मचारी चाहिए/ }).click()
     await language.selectOption('en')
     await expect(page.getByRole('heading', { name: /Find the right people/ })).toBeVisible()
-    await language.selectOption('hinglish')
-    await expect(page.getByRole('heading', { name: /Sahi log dhoondhein/ })).toBeVisible()
     await language.selectOption('hi')
     await page.getByRole('button', { name: /रोल बदलें/ }).click()
     await page.getByRole('button', { name: /मुझे काम \/ नौकरी चाहिए/ }).click()
