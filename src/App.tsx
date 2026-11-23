@@ -61,9 +61,9 @@ function App() {
   const [jobsError, setJobsError] = useState('')
   const [applicationSent, setApplicationSent] = useState(false)
   const [showSafety, setShowSafety] = useState(false)
-  const [showEmployer, setShowEmployer] = useState(false)
-  const [showBrandIntro, setShowBrandIntro] = useState(true)
-  const [showRolePicker, setShowRolePicker] = useState(false)
+  const [showEmployer, setShowEmployer] = useState(() => localStorage.getItem('sabkaam-entry-complete') === 'true' && localStorage.getItem('sabkaam-selected-role') === 'employer')
+  const [showBrandIntro, setShowBrandIntro] = useState(() => localStorage.getItem('sabkaam-entry-complete') !== 'true')
+  const [showRolePicker, setShowRolePicker] = useState(() => localStorage.getItem('sabkaam-entry-complete') === 'true' && !localStorage.getItem('sabkaam-selected-role'))
   const [selectedRole, setSelectedRole] = useState<'candidate' | 'employer'>(() => {
     const saved = localStorage.getItem('sabkaam-selected-role')
     return saved === 'employer' ? 'employer' : 'candidate'
@@ -104,14 +104,16 @@ function App() {
 
   useEffect(() => {
     const introTimer = window.setTimeout(() => {
+      localStorage.setItem('sabkaam-entry-complete', 'true')
       setShowBrandIntro(false)
-      setShowRolePicker(true)
+      setShowRolePicker(!localStorage.getItem('sabkaam-selected-role'))
     }, 1450)
     return () => window.clearTimeout(introTimer)
   }, [])
 
   function chooseRole(role: 'candidate' | 'employer') {
     localStorage.setItem('sabkaam-selected-role', role)
+    localStorage.setItem('sabkaam-entry-complete', 'true')
     setSelectedRole(role)
     setShowRolePicker(false)
     setShowEmployer(role === 'employer')
