@@ -40,16 +40,25 @@ export default function EmployerDashboard({ onBack, language, onLanguageChange, 
     if (!backendConfigured) { setSuccess(true); setSubmitMessage('Backend अभी connect नहीं है। यह केवल preview है; जानकारी सेव या प्रकाशित नहीं हुई।'); return }
     if (!session) { setSubmitMessage('पोस्ट भेजने के लिए employer account से लॉगिन करें।'); onSignIn(); return }
     if (accountRole !== 'employer') { setSubmitMessage('इस खाते का प्रकार candidate है। Employer खाता बनाकर लॉगिन करें।'); return }
+    if (!/^[6-9][0-9]{9}$/.test(phone)) { setSubmitMessage('कृपया 6 से 9 से शुरू होने वाला 10 अंकों का भारतीय मोबाइल नंबर लिखें।'); return }
     try {
+      const stateLgdCode = getStateCode(stateName)
+      const districtLgdCode = getDistrictCode(stateName, district, language)
+      if (!districtLgdCode || districtLgdCode <= 0) throw new Error('कृपया सूची से सही जिला चुनें।')
       let employer = await getMyEmployer(session.access_token, session.user.id)
       if (!employer) {
-        const created = await createEmployer(session.access_token, { owner_id: session.user.id, business_name: company, business_type: category, contact_person: contact, contact_phone: phone, state_lgd_code: getStateCode(stateName), district_lgd_code: getDistrictCode(stateName, district, language) ?? 0, district: getDistrictEnglishName(stateName, district, language) ?? district })
+        const created = await createEmployer(session.access_token, { owner_id: session.user.id, business_name: company, business_type: category, contact_person: contact, contact_phone: phone, state_lgd_code: stateLgdCode, district_lgd_code: districtLgdCode, district: getDistrictEnglishName(stateName, district, language) ?? district })
         employer = created[0]
       }
       if (!employer?.id) throw new Error('Employer profile could not be created.')
       const numbers = salary.replace(/,/g, '').match(/[0-9]+/g)?.map(Number) ?? []
+      if (salary.trim() && (!numbers.length || numbers.length > 2 || numbers.some(number => !Number.isFinite(number)) || (numbers.length === 2 && numbers[1] < numbers[0]))) {
+        throw new Error('वेतन सही तरीके से लिखें, जैसे ₹8,000–10,000।')
+      }
+      const vacancyCount = Number(vacancies)
+      if (!Number.isInteger(vacancyCount) || vacancyCount < 1 || vacancyCount > 500) throw new Error('कुल पद 1 से 500 के बीच लिखें।')
       const workTypes: Record<string, string> = { 'फुल टाइम': 'full_time', 'पार्ट टाइम': 'part_time', 'दैनिक मजदूरी': 'daily_wage', 'वर्क फ्रॉम होम': 'work_from_home', 'कॉन्ट्रैक्ट': 'contract' }
-      const draft = await createJobDraft(session.access_token, { employer_id: employer.id, employer_display_name: company, title, category, description: description || title, work_type: workTypes[workType] ?? 'full_time', state_lgd_code: getStateCode(stateName), district_lgd_code: getDistrictCode(stateName, district, language) ?? 0, district: getDistrictEnglishName(stateName, district, language) ?? district, salary_min: numbers[0], salary_max: numbers[1] ?? numbers[0], salary_period: workType === 'दैनिक मजदूरी' ? 'day' : 'month', vacancies: Number(vacancies) || 1 })
+      const draft = await createJobDraft(session.access_token, { employer_id: employer.id, employer_display_name: company, title, category, description: description || title, work_type: workTypes[workType] ?? 'full_time', state_lgd_code: stateLgdCode, district_lgd_code: districtLgdCode, district: getDistrictEnglishName(stateName, district, language) ?? district, salary_min: numbers[0], salary_max: numbers[1] ?? numbers[0], salary_period: workType === 'दैनिक मजदूरी' ? 'day' : 'month', vacancies: vacancyCount })
       if (!draft[0]?.id) throw new Error('Job draft could not be created.')
       await submitJobForReview(session.access_token, draft[0].id)
       setSuccess(true)
@@ -77,7 +86,7 @@ export default function EmployerDashboard({ onBack, language, onLanguageChange, 
             <div className="form-grid">
               <label>दुकान / कंपनी का नाम *<input required value={company} onChange={e => setCompany(e.target.value)} placeholder="जैसे: अपना बिजनेस नाम" /></label>
               <label>संपर्क व्यक्ति का नाम *<input required value={contact} onChange={e => setContact(e.target.value)} placeholder="आपका नाम" /></label>
-              <label className="full-field">मोबाइल नंबर *<input required type="tel" inputMode="numeric" pattern="[0-9]{10}" maxLength={10} value={phone} onChange={e => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))} placeholder="10 अंकों का मोबाइल नंबर" /><small>यह नंबर उम्मीदवार आपसे संपर्क करने के लिए देख सकेंगे (लाइव संस्करण में)।</small></label>
+              <label className="full-field">मोबाइल नंबर *<input required type="tel" inputMode="numeric" pattern="[6-9][0-9]{9}" minLength={10} maxLength={10} title="10 अंकों का भारतीय मोबाइल नंबर लिखें" value={phone} onChange={e => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))} placeholder="10 अंकों का मोबाइल नंबर" /><small>यह नंबर उम्मीदवार आपसे संपर्क करने के लिए देख सकेंगे (लाइव संस्करण में)।</small></label>
             </div>
             <div className="form-section-title"><b>02</b><span>खाली पद की जानकारी</span></div>
             <div className="form-grid">
