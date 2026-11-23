@@ -120,6 +120,7 @@ test.describe('SABKAAM desktop and mobile smoke tests', () => {
       }))
     })
     await page.goto('/')
+    await page.getByRole('button', { name: /नौकरी देने वाले/ }).click()
     await expect(page.getByRole('button', { name: 'लॉगआउट' })).toBeVisible()
     await page.getByRole('button', { name: 'लॉगआउट' }).click()
     await expect.poll(() => page.evaluate(() => sessionStorage.getItem('sabkaam-auth-session'))).toBeNull()
