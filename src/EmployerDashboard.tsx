@@ -87,7 +87,7 @@ export default function EmployerDashboard({ onBack, language, onLanguageChange, 
             <div className="form-grid">
               <label>दुकान / कंपनी का नाम *<input required value={company} onChange={e => setCompany(e.target.value)} placeholder="जैसे: अपना बिजनेस नाम" /></label>
               <label>संपर्क व्यक्ति का नाम *<input required value={contact} onChange={e => setContact(e.target.value)} placeholder="आपका नाम" /></label>
-              <label className="full-field">मोबाइल नंबर *<input required type="tel" inputMode="numeric" pattern="[0-9]{10}" maxLength={10} value={phone} onChange={e => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))} placeholder="10 अंकों का मोबाइल नंबर" /><small>यह नंबर उम्मीदवार आपसे संपर्क करने के लिए देख सकेंगे (लाइव संस्करण में)।</small></label>
+              <label className="full-field">मोबाइल नंबर *<input required type="tel" inputMode="numeric" pattern="[6-9][0-9]{9}" maxLength={10} value={phone} onChange={e => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))} placeholder="10 अंकों का मोबाइल नंबर" /><small>यह नंबर उम्मीदवार आपसे संपर्क करने के लिए देख सकेंगे (लाइव संस्करण में)।</small></label>
             </div>
             <div className="form-section-title"><b>02</b><span>खाली पद की जानकारी</span></div>
             <div className="form-grid">
