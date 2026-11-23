@@ -114,7 +114,7 @@ export function readAuthSession(): AuthSession | null {
     const raw = sessionStorage.getItem('sabkaam-auth-session')
     if (!raw) return null
     const saved = JSON.parse(raw) as StoredAuthSession
-    if (!saved.access_token || !saved.user?.id || saved.expires_at <= Date.now()) {
+    if (!saved.access_token || !saved.refresh_token || !saved.user?.id) {
       sessionStorage.removeItem('sabkaam-auth-session')
       return null
     }
@@ -123,6 +123,38 @@ export function readAuthSession(): AuthSession | null {
     sessionStorage.removeItem('sabkaam-auth-session')
     return null
   }
+}
+
+let refreshInFlight: Promise<AuthSession | null> | null = null
+
+export function refreshAuthSession(): Promise<AuthSession | null> {
+  if (refreshInFlight) return refreshInFlight
+
+  const current = readAuthSession() as StoredAuthSession | null
+  if (!current) return Promise.resolve(null)
+
+  const expiresAt = current.expires_at || Date.now() + current.expires_in * 1000
+  if (expiresAt > Date.now() + 60_000) return Promise.resolve(current)
+
+  refreshInFlight = (async () => {
+    try {
+      const refreshed = await request<AuthSession>('/auth/v1/token?grant_type=refresh_token', {
+        method: 'POST',
+        body: { refresh_token: current.refresh_token },
+      })
+      saveAuthSession(refreshed)
+      return refreshed
+    } catch (error) {
+      if (error instanceof BackendError && (error.status === 400 || error.status === 401)) {
+        clearAuthSession()
+      }
+      throw error
+    } finally {
+      refreshInFlight = null
+    }
+  })()
+
+  return refreshInFlight
 }
 
 export function saveAuthSession(session: AuthSession) {
