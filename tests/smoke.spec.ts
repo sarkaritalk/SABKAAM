@@ -89,6 +89,20 @@ test.describe('SABKAAM desktop and mobile smoke tests', () => {
     await expect(page.getByText(/डेमो प्रोफ़ाइल/)).toBeVisible()
   })
 
+  test('candidate profile accepts only valid Indian mobile numbers and real district options', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('button', { name: 'प्रोफ़ाइल' }).click()
+    const phone = page.getByLabel('मोबाइल नंबर')
+    await phone.fill('5123456789')
+    expect(await phone.evaluate(input => (input as HTMLInputElement).checkValidity())).toBe(false)
+    await phone.fill('9876543210')
+    expect(await phone.evaluate(input => (input as HTMLInputElement).checkValidity())).toBe(true)
+    const district = page.getByLabel('आपका जिला')
+    await expect(district.locator('option')).toHaveCount(38)
+    await district.selectOption({ index: 1 })
+    await expect(district).toHaveValue(await district.inputValue())
+  })
+
   test('job detail and application demo form work', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('button', { name: /सभी श्रेणियाँ/ }).click()
