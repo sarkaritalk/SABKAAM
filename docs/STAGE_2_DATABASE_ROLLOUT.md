@@ -1,43 +1,38 @@
-# Stage 2 database rollout notes
+# Stage 2 database rollout record
 
-## Why the migration history needs repair
+## Production rollout
 
-The live project schema contains the original tables, base RLS policies, and seven protected-field triggers from migration `202611220001`, but migration `202611220002` is not applied: its staff/admin helper functions and reviewer/admin policies are absent. The `supabase_migrations.schema_migrations` ledger currently records only:
+Project: `SABKAAM` (`fonzrxwlljmphehlozqr`), production, region `ap-south-1`.
 
-- `20261123001536`
-- `20261123001543`
-- `20261123001947`
+The controlled rollout for PR #18 was completed on 2026-11-23. The production SQL was reviewed against the exact migration files at PR head `0eb9a21d6b3206bf792b6374bf0eef2165b462a4` before execution. Migrations were applied in transactions through the Supabase SQL connection, then their history entries were reconciled with `supabase migration repair`. The base schema and the three earlier Stage 2 migrations were not replayed.
 
-The repository already contains the intervening migrations `202611220003` through `202611220009`. Live schema inspection confirmed that several of their effects are absent: India-wide LGD columns on employers, verification requests, and job posts; employer contact person; public employer display name; candidate-only application insert policy; and application notification triggers.
+The following migration versions are now recorded as applied both locally and remotely:
 
-Migration `202611220003` now uses the same `*_lgd_code_positive_check` names as the already-applied candidate-profile migration and checks for each constraint before adding it. This prevents duplicate profile checks when the pending older migration is applied after the newer recorded profile migration. Migration `202611220004` recreates the same restricted candidate/employer signup-role mapping already installed by `20261123001947`; PostgreSQL `CREATE OR REPLACE FUNCTION` retains the existing function ACL, so the client-execution revocation remains in force. Verify this again after rollout.\n\nDo not run `supabase db push` against production until the baseline history is reconciled. Otherwise the CLI may try to replay the initial table-creation migration against tables that already exist. The missing authorization-hardening migration `202611220002` must remain pending so its security functions and policies are actually installed.
+- `202611220001` through `202611220009`
+- `20261123001536`, `20261123001543`, and `20261123001947`
+- `20261123003000`
 
-## Controlled production rollout
+Verification performed:
 
-This is a runbook only. No production migration or migration-history repair was run as part of this PR.
+- `npx supabase migration list --remote`: all 13 local and remote versions match.
+- `npx supabase db push --dry-run --include-all --remote`: returned `Remote database is up to date.`; this was a dry-run and made no database changes.
+- The India-wide LGD columns and related positive constraints were checked.
+- The candidate-only application insert policy was checked.
+- The application-created and application-status-changed notification triggers were checked and both exist.
+- The notification trigger function remains available to the database owner, while direct EXECUTE permission is denied to `anon` and `authenticated`.
+- The application-notification function is SECURITY DEFINER with an empty search_path.
+- The existing production tables inspected before rollout had no application data rows; no user records were inserted as part of this rollout.
 
-1. Take/confirm a current database backup and link the intended project.
-2. Run `supabase migration list --remote` and confirm the remote history matches the versions above.
-3. Verify that the live schema really contains the complete base schema from `202611220001` (all eight application tables, base policies, and seven protection triggers). Do not mark `202611220002` as applied: live inspection found its staff/admin helpers and reviewer/admin policies missing. Mark only the already-installed first migration as applied in the history table:
+## Backup note
 
-   ```sh
-   supabase migration repair 202611220001 --status applied --remote
-   ```
+A production database archive was created at the user's machine and `pg_restore --list` successfully read its archive directory. This confirms archive readability only; a full restore test was not performed.
 
-   This command changes migration history only; it does not execute the old SQL.
-4. Run `supabase migration list --remote` again. Confirm `202611220001` is recorded and `202611220002` through `202611220009` remain pending. The later profile/security migrations already recorded on the remote must remain recorded.
-5. Preview all missing migrations, including the older versions that are behind the latest recorded timestamp:
+## Design boundary
 
-   ```sh
-   supabase db push --include-all --dry-run --remote
-   ```
+This PR changes application logic, validation, tests, SQL migrations, and this runbook only. It does not change CSS, theme, colors, layout, animations, icons, or logo assets.
 
-6. Review the preview. It should include `202611220002` through `202611220009` and the new notification-function hardening migration, but must not replay `202611220001` or the three already-recorded `2026112300...` migrations. With explicit production approval and a fresh backup, apply the reviewed set:
+## Rollout safety
 
-   ```sh
-   supabase db push --include-all --yes --remote
-   ```
+Do not replay the initial schema migration or run a non-dry-run `supabase db push` merely because the dry-run says the database is current. The production migration rollout is complete; any future schema change should be reviewed as a new migration, backed up, and separately approved.
 
-7. Verify the LGD columns, removed two-state constraints, candidate-only application policy, notification triggers, and notification-function privileges. Re-run the browser and database tests after deployment.
-
-The current Supabase CLI v3 defaults database commands to the local stack; `--remote` is required for the hosted project. Hosted changes require confirmation, and unattended commands require `--yes`. See the [Supabase CLI v3 migration guide](https://supabase.com/docs/guides/local-development/cli/migrating-to-v3) and [migration repair reference](https://supabase.com/docs/reference/cli/supabase-migration-repair).
+The hosted project uses Supabase CLI commands with `--remote`. See the [Supabase CLI v3 migration guide](https://supabase.com/docs/guides/local-development/cli/migrating-to-v3) and [migration repair reference](https://supabase.com/docs/reference/cli/supabase-migration-repair).
