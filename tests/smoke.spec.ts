@@ -89,6 +89,20 @@ test.describe('SABKAAM desktop and mobile smoke tests', () => {
     await expect(page.getByText(/डेमो प्रोफ़ाइल/)).toBeVisible()
   })
 
+  test('candidate profile accepts only valid Indian mobile numbers and real district options', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('button', { name: 'प्रोफ़ाइल' }).click()
+    const phone = page.getByLabel('मोबाइल नंबर')
+    await phone.fill('5123456789')
+    expect(await phone.evaluate(input => (input as HTMLInputElement).checkValidity())).toBe(false)
+    await phone.fill('9876543210')
+    expect(await phone.evaluate(input => (input as HTMLInputElement).checkValidity())).toBe(true)
+    const district = page.getByLabel('आपका जिला')
+    await expect(district.locator('option')).toHaveCount(38)
+    await district.selectOption({ index: 1 })
+    expect(await district.inputValue()).not.toBe('')
+  })
+
   test('job detail and application demo form work', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('button', { name: /सभी श्रेणियाँ/ }).click()
@@ -107,4 +121,23 @@ test.describe('SABKAAM desktop and mobile smoke tests', () => {
     await page.getByRole('button', { name: /शिकायत भेजें/ }).click()
     await expect(page.getByText(/डेमो शिकायत तैयार हुई/)).toBeVisible()
   })
+
+  test('restores a valid tab session and clears it on sign-out', async ({ page }) => {
+    await page.addInitScript(() => {
+      sessionStorage.setItem('sabkaam-auth-session', JSON.stringify({
+        access_token: 'test-access-token',
+        refresh_token: 'test-refresh-token',
+        expires_in: 3600,
+        expires_at: Date.now() + 3_600_000,
+        token_type: 'bearer',
+        user: { id: '00000000-0000-0000-0000-000000000001', user_metadata: { account_type: 'candidate' } },
+      }))
+    })
+    await page.goto('/')
+    await page.getByRole('button', { name: /नौकरी देने वाले/ }).click()
+    await expect(page.getByRole('button', { name: 'लॉगआउट' })).toBeVisible()
+    await page.getByRole('button', { name: 'लॉगआउट' }).click()
+    await expect.poll(() => page.evaluate(() => sessionStorage.getItem('sabkaam-auth-session'))).toBeNull()
+  })
+
 })

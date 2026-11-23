@@ -207,12 +207,18 @@ export async function getMyProfile(accessToken: string, userId: string) {
 }
 
 export async function updateMyProfile(accessToken: string, userId: string, payload: {
-  full_name: string; phone: string; district: string; state_code: string
+  full_name: string; phone: string; district: string; state_code: string | null
   state_lgd_code: number; district_lgd_code: number; preferred_language: string; skills: string; preferred_work_type: string
 }) {
-  return request<Array<{ id: string }>>(`/rest/v1/profiles?id=eq.${encodeURIComponent(userId)}`, {
-    method: 'PATCH', accessToken, prefer: 'return=representation', body: payload,
+  const rows = await request<Array<{ id: string }>>('/rest/v1/profiles?on_conflict=id', {
+    method: 'POST',
+    accessToken,
+    prefer: 'resolution=merge-duplicates,return=representation',
+    body: { id: userId, ...payload },
   })
+  const savedProfile = rows?.find(row => row.id === userId)
+  if (!savedProfile) throw new BackendError('प्रोफ़ाइल सेव होने की पुष्टि नहीं मिली। कृपया दोबारा कोशिश करें।')
+  return savedProfile
 }
 
 export async function markNotificationRead(accessToken: string, notificationId: string) {

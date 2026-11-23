@@ -2,12 +2,13 @@ import { useEffect, useState, type FormEvent } from 'react'
 import './employer-dashboard.css'
 import { LanguageSelect, Localized, type Language } from './i18n'
 import { stateNames, getStateLabel, getDistrictOptions, getStateCode, getDistrictCode, getDistrictEnglishName, type StateName } from './locations'
-import { backendConfigured, createEmployer, createJobDraft, getMyEmployer, getEmployerApplications, updateApplicationStatus, submitJobForReview, type AuthSession, type EmployerApplication } from './lib/backend'
+import { backendConfigured, createEmployer, createJobDraft, getMyEmployer, getEmployerApplications, updateApplicationStatus, submitJobForReview, getMyProfile, type AuthSession, type EmployerApplication } from './lib/backend'
 
 type Props = { onBack: () => void; language: Language; onLanguageChange: (language: Language) => void; session: AuthSession | null; onSignIn: () => void; onSignOut: () => void }
 
 
 export default function EmployerDashboard({ onBack, language, onLanguageChange, session, onSignIn, onSignOut }: Props) {
+  const [accountRole, setAccountRole] = useState('')
   const [company, setCompany] = useState('')
   const [contact, setContact] = useState('')
   const [phone, setPhone] = useState('')
@@ -27,7 +28,8 @@ export default function EmployerDashboard({ onBack, language, onLanguageChange, 
   const [refreshApplications, setRefreshApplications] = useState(0)
   useEffect(() => { const options = getDistrictOptions(stateName, language); if (!options.includes(district)) setDistrict(options[0] ?? '') }, [stateName, language])
 
-  useEffect(() => { if (!session || session.user.user_metadata?.account_type !== 'employer') { setApplications([]); return } getMyEmployer(session.access_token, session.user.id).then(employer => employer ? getEmployerApplications(session.access_token, employer.id) : []).then(setApplications).catch(error => setApplicationsError(error instanceof Error ? error.message : 'आवेदन लोड नहीं हुए')) }, [session?.access_token, refreshApplications])
+  useEffect(() => { if (!session) { setAccountRole(''); return } getMyProfile(session.access_token, session.user.id).then(profile => setAccountRole(profile?.role ?? '')).catch(() => setAccountRole('')) }, [session?.access_token])
+  useEffect(() => { if (!session || accountRole !== 'employer') { setApplications([]); return } getMyEmployer(session.access_token, session.user.id).then(employer => employer ? getEmployerApplications(session.access_token, employer.id) : []).then(setApplications).catch(error => setApplicationsError(error instanceof Error ? error.message : 'आवेदन लोड नहीं हुए')) }, [session?.access_token, accountRole, refreshApplications])
 
   async function changeApplicationStatus(applicationId: string, status: 'viewed' | 'shortlisted' | 'interview' | 'hired' | 'rejected') { setApplicationBusy(applicationId); setApplicationsError(''); try { await updateApplicationStatus(session!.access_token, applicationId, status); setRefreshApplications(value => value + 1) } catch (error) { setApplicationsError(error instanceof Error ? error.message : 'स्थिति अपडेट नहीं हुई') } finally { setApplicationBusy('') } }
 
@@ -37,7 +39,7 @@ export default function EmployerDashboard({ onBack, language, onLanguageChange, 
     setSubmitMessage('')
     if (!backendConfigured) { setSuccess(true); setSubmitMessage('Backend अभी connect नहीं है। यह केवल preview है; जानकारी सेव या प्रकाशित नहीं हुई।'); return }
     if (!session) { setSubmitMessage('पोस्ट भेजने के लिए employer account से लॉगिन करें।'); onSignIn(); return }
-    if (session.user.user_metadata?.account_type !== 'employer') { setSubmitMessage('इस खाते का प्रकार candidate है। Employer खाता बनाकर लॉगिन करें।'); return }
+    if (accountRole !== 'employer') { setSubmitMessage('इस खाते का प्रकार candidate है। Employer खाता बनाकर लॉगिन करें।'); return }
     try {
       let employer = await getMyEmployer(session.access_token, session.user.id)
       if (!employer) {
@@ -93,7 +95,7 @@ export default function EmployerDashboard({ onBack, language, onLanguageChange, 
           </form>
           <aside className="employer-aside"><div className="aside-card"><span className="aside-icon">✓</span><h3>अच्छी नौकरी पोस्ट कैसी हो?</h3><ul><li>वेतन साफ-साफ लिखें</li><li>काम के घंटे बताएँ</li><li>सही जगह और संपर्क दें</li><li>जरूरी योग्यता ही माँगें</li><li>कोई फीस या सिक्योरिटी जमा न माँगें</li></ul></div><div className="aside-note"><strong>उम्मीदवार का भरोसा जरूरी है</strong><p>SABKAAM पर संदिग्ध पोस्ट की रिपोर्ट और नियोक्ता सत्यापन की सुविधा उपलब्ध है।</p></div></aside>
         </div>
-        {session?.user.user_metadata?.account_type === 'employer' && backendConfigured && <section className="employer-applicants">
+        {session && accountRole === 'employer' && backendConfigured && <section className="employer-applicants">
           <div className="applicants-heading"><div><span className="employer-kicker">CANDIDATE PIPELINE</span><h2>आपके पास आए आवेदन</h2><p>उम्मीदवारों की जानकारी केवल आपके employer खाते में दिखाई जाती है।</p></div><span className="applicant-count">{applications.length} आवेदन</span></div>
           {applicationsError && <p className="applicant-error" role="alert">{applicationsError}</p>}
           {applications.length ? <div className="applicant-list">{applications.map(application => <article className="applicant-card" key={application.id}>
