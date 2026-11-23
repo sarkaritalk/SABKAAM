@@ -9,7 +9,7 @@ import { LanguageSelect, Localized, type Language } from './i18n'
 
 import { stateNames, getStateLabel, getDistrictOptions, getStateCode, getDistrictCode, getDistrictNameByCode, getDistrictEnglishName, type StateName } from './locations'
 import { getWorkAreaSuggestions, normalizeWorkAreaQuery, type WorkAreaSuggestion } from './work-areas'
-import { backendConfigured, listPublishedJobs, readAuthSession, clearAuthSession, submitApplication, getMyProfile, type AuthSession, type PublishedJob } from './lib/backend'
+import { backendConfigured, listPublishedJobs, readAuthSession, refreshAuthSession, clearAuthSession, submitApplication, getMyProfile, type AuthSession, type PublishedJob } from './lib/backend'
 
 type Category = { name: string; icon: string; count: string }
 type JobListing = { id?: string; title: string; state: string; district?: string; locality?: string; company: string; place: string; pay: string; type: string; category: string; description?: string; isDemo?: boolean }
@@ -68,6 +68,39 @@ function App() {
     const saved = localStorage.getItem('sabkaam-selected-role')
     return saved === 'employer' ? 'employer' : 'candidate'
   })
+
+  useEffect(() => {
+    let active = true
+    let refreshing = false
+
+    const syncSession = async () => {
+      if (refreshing) return
+      refreshing = true
+      try {
+        const nextSession = await refreshAuthSession()
+        if (active) setSession(nextSession)
+      } catch {
+        if (active && !readAuthSession()) setSession(null)
+      } finally {
+        refreshing = false
+      }
+    }
+
+    void syncSession()
+    const refreshTimer = window.setInterval(() => {
+      if (document.visibilityState === 'visible') void syncSession()
+    }, 30_000)
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') void syncSession()
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+
+    return () => {
+      active = false
+      window.clearInterval(refreshTimer)
+      document.removeEventListener('visibilitychange', handleVisibility)
+    }
+  }, [])
 
   useEffect(() => {
     const introTimer = window.setTimeout(() => {
