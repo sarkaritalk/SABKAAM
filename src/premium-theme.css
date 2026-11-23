@@ -707,3 +707,15 @@ body {
   .topbar { background: #fff; }
   .categories-section { background: #fff; }
 }
+
+
+/* Subtle search feedback and clearer no-results dialog */
+.search-button{transition:transform .16s ease,box-shadow .16s ease,filter .16s ease}
+.search-button:active{transform:translateY(1px) scale(.985);filter:brightness(1.08)}
+.search-button:disabled{cursor:wait;opacity:.94}
+.search-button.is-searching span{display:inline-block;animation:sabkaam-search-nudge .72s ease-in-out infinite}
+@keyframes sabkaam-search-nudge{0%,100%{transform:translateX(0) rotate(0)}35%{transform:translateX(3px) rotate(8deg)}70%{transform:translateX(-2px) rotate(-6deg)}}
+.search-empty-overlay{z-index:90}
+.search-empty-modal .category-modal-icon{font-size:34px}
+.search-empty-modal p{max-width:390px;margin:12px auto 0}
+@media(prefers-reduced-motion:reduce){.search-button.is-searching span{animation:none}.search-button{transition:none}}
