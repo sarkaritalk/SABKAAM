@@ -22,11 +22,20 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     throw new BackendError('SABKAAM backend is not configured. Add the Supabase URL and publishable key.')
   }
 
+  let accessToken = options.accessToken
+  if (accessToken) {
+    const savedSession = readAuthSession()
+    if (savedSession?.access_token === accessToken) {
+      const refreshedSession = await refreshAuthSession()
+      accessToken = refreshedSession?.access_token ?? accessToken
+    }
+  }
+
   const response = await fetch(`${supabaseUrl}${path}`, {
     method: options.method ?? 'GET',
     headers: {
       apikey: publishableKey,
-      Authorization: `Bearer ${options.accessToken ?? publishableKey}`,
+      Authorization: `Bearer ${accessToken ?? publishableKey}`,
       'Content-Type': 'application/json',
       ...(options.prefer ? { Prefer: options.prefer } : {}),
     },
