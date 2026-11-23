@@ -23,4 +23,13 @@ $function$;
 
 -- These functions are invoked only by their attached database triggers, never as client RPCs.
 revoke all on function public.handle_new_user() from public, anon, authenticated;
-revoke all on function public.rls_auto_enable() from public, anon, authenticated;
+
+-- Some environments include this optional helper; the clean local test schema does not.
+-- Revoke client execution only when the function exists.
+do $migration$
+begin
+  if to_regprocedure('public.rls_auto_enable()') is not null then
+    execute 'revoke all on function public.rls_auto_enable() from public, anon, authenticated';
+  end if;
+end;
+$migration$;
