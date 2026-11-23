@@ -377,8 +377,16 @@ const copy: Record<string, [string, string]> = {
 export function translateText(value: string, language: Language): string {
   if (language === 'hi') return value
   const trimmed = value.trim()
-  const translated = copy[trimmed]?.[language === 'en' ? 0 : 1]
-  return translated ? value.replace(trimmed, translated) : value
+  const column = language === 'en' ? 0 : 1
+  const exact = copy[trimmed]?.[column]
+  if (exact) return value.replace(trimmed, exact)
+  // Translate known phrases inside interpolated text nodes without altering user-entered names.
+  let result = value
+  const phrases = Object.entries(copy).filter(([source]) => source.length >= 8).sort((a, b) => b[0].length - a[0].length)
+  for (const [source, translations] of phrases) {
+    if (result.includes(source)) result = result.replaceAll(source, translations[column])
+  }
+  return result
 }
 
 function translateTree(node: ReactNode, language: Language): ReactNode {
@@ -406,7 +414,6 @@ export function LanguageSelect({ language, onChange }: { language: Language; onC
       <select aria-label="Website language" value={language} onChange={(event) => onChange(event.target.value as Language)}>
         <option value="hi">हिंदी</option>
         <option value="en">English</option>
-        <option value="hinglish">Hinglish</option>
       </select>
     </label>
   )
