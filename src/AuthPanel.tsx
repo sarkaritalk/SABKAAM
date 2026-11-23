@@ -50,7 +50,7 @@ export default function AuthPanel({ language, onClose, onSuccess, defaultAccount
     <div className="auth-overlay" role="presentation" onClick={onClose}>
       <section className="auth-dialog" role="dialog" aria-modal="true" aria-labelledby="auth-title" onClick={event => event.stopPropagation()}>
         <button className="auth-close" type="button" onClick={onClose} aria-label="बंद करें">×</button>
-        <div className="auth-brand-lockup"><img src={`${import.meta.env.BASE_URL}sabkaam-mark.svg`} alt="" /><span className="section-kicker">SABKAAM ACCOUNT</span></div>
+        <div className="auth-brand-lockup"><img src={`${import.meta.env.BASE_URL}sabkaam-mark.webp`} alt="" /><span className="section-kicker">SABKAAM ACCOUNT</span></div>
         <h2 id="auth-title">{mode === 'signin' ? 'अपने खाते में लॉगिन करें' : 'SABKAAM पर खाता बनाएँ'}</h2>
         <p>ईमेल और पासवर्ड से सुरक्षित रूप से प्रवेश करें। ईमेल पुष्टि आपके Supabase Auth सेटअप पर निर्भर करेगी।</p>
         <form onSubmit={submit}>

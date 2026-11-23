@@ -62,7 +62,7 @@ export default function EmployerDashboard({ onBack, language, onLanguageChange, 
     <Localized language={language}><div className="employer-page">
       <header className="employer-header">
         <button className="back-button" onClick={onBack}>← रोल बदलें</button>
-        <div className="employer-brand"><img src={`${import.meta.env.BASE_URL}sabkaam-mark.svg`} alt="" /><strong>SABKAAM <small>EMPLOYER DESK</small></strong></div>
+        <div className="employer-brand"><img src={`${import.meta.env.BASE_URL}sabkaam-mark.webp`} alt="" /><strong>SABKAAM <small>EMPLOYER DESK</small></strong></div>
         <LanguageSelect language={language} onChange={onLanguageChange} />{session ? <button className="back-button" onClick={onSignOut}>लॉगआउट</button> : backendConfigured ? <button className="back-button" onClick={onSignIn}>लॉगिन</button> : <span className="preview-pill">Preview mode</span>}<span className="preview-pill">प्रारंभिक संस्करण</span>
       </header>
       <main className="employer-main">
