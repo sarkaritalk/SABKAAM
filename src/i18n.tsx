@@ -390,7 +390,7 @@ export function translateText(value: string, language: Language): string {
   let result = value
   const phrases = Object.entries(copy).filter(([source]) => source.length >= 8).sort((a, b) => b[0].length - a[0].length)
   for (const [source, translations] of phrases) {
-    if (result.includes(source)) result = result.replaceAll(source, translations[column])
+    if (result.includes(source)) result = result.split(source).join(translations[column])
   }
   return result
 }
