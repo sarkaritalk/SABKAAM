@@ -319,15 +319,15 @@ function App() {
             <h2 id="category-modal-title">{selectedCategoryInfo.name}</h2>
             <p>{selectedCategoryInfo.count} से जुड़े अवसर इस श्रेणी में मिलेंगे। अपना राज्य और जिला चुनकर नज़दीकी काम खोजें।</p>
             <div className="category-modal-actions">
-              <button className="category-modal-primary" onClick={() => { setSelectedCategoryInfo(null); setActiveTab('होम'); setShowDemo(true) }}>इस क्षेत्र के काम देखें <span>→</span></button>
+              <button className="category-modal-primary" onClick={() => { setSelectedCategoryInfo(null); setActiveTab('होम'); setShowDemo(true); window.requestAnimationFrame(() => document.getElementById('jobs-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })) }}>इस क्षेत्र के काम देखें <span>→</span></button>
               <button className="category-modal-secondary" onClick={() => { setSelectedCategory(''); setSelectedCategoryInfo(null) }}>दूसरी श्रेणी चुनें</button>
             </div>
           </section>
         </div>}
 
-        {showDemo && <section className="jobs-section">
+        {showDemo && <section id="jobs-section" className="jobs-section" style={{ scrollMarginTop: '24px' }}>
           <div className="section-heading"><div><span className="section-kicker">{backendConfigured ? "Live listings" : "उदाहरण के लिए"}</span><h2>{backendConfigured ? "उपलब्ध नौकरियाँ" : "काम के नमूने"}</h2></div><span className="demo-label">{backendConfigured ? "प्रकाशित नौकरी" : "डेमो डेटा · असली नौकरी नहीं"}</span></div>
-          {jobsLoading && <p className="empty-state">नौकरियाँ लोड हो रही हैं...</p>}{jobsError && <p className="empty-state">नौकरी लोड नहीं हुई: {jobsError}</p>}{visibleJobs.length ? <div className="job-list">{visibleJobs.map((job) => <article className="job-card" key={job.title} onClick={() => { setSelectedJob(job); setApplicationSent(false) }}><div><span className="job-type">{job.type}</span><h3>{job.title}</h3><p>{job.company} · 📍 {job.place}</p></div><div className="job-pay">{job.pay}<small>वेतन का डेमो उदाहरण</small><button type="button" className="job-detail-button">विवरण देखें →</button></div></article>)}</div> : <p className="empty-state">इस फ़िल्टर के लिए अभी कोई डेमो उदाहरण नहीं है। फ़िल्टर बदलकर देखें।</p>}
+          {jobsLoading && <p className="empty-state">नौकरियाँ लोड हो रही हैं...</p>}{jobsError && <p className="empty-state">नौकरी लोड नहीं हुई: {jobsError}</p>}{!jobsLoading && !jobsError && (visibleJobs.length ? <div className="job-list">{visibleJobs.map((job) => <article className="job-card" key={job.id || job.title} onClick={() => { setSelectedJob(job); setApplicationSent(false) }}><div><span className="job-type">{job.type}</span><h3>{job.title}</h3><p>{job.company} · 📍 {job.place}</p></div><div className="job-pay">{job.pay}{job.isDemo && <small>वेतन का डेमो उदाहरण</small>}<button type="button" className="job-detail-button">विवरण देखें →</button></div></article>)}</div> : <p className="empty-state">{selectedCategory ? 'इस श्रेणी में अभी कोई प्रकाशित नौकरी उपलब्ध नहीं है। नई नौकरियाँ प्रकाशित होने पर यहाँ दिखाई देंगी।' : 'इस फ़िल्टर के लिए अभी कोई नौकरी उपलब्ध नहीं है। फ़िल्टर बदलकर देखें।'}</p>)}
           {!backendConfigured && <p className="demo-note">ये केवल स्क्रीन समझाने के लिए काल्पनिक उदाहरण हैं। SABKAAM पर अभी वास्तविक नौकरी की लिस्टिंग उपलब्ध नहीं है।</p>}
         </section>}
 
