@@ -408,14 +408,14 @@ function App() {
             }}>
               <h3>इस नौकरी के लिए आवेदन करें</h3>
               <label>आपका नाम *<input required name="full_name" defaultValue={session.user.user_metadata?.full_name || ''} /></label>
-              <label>मोबाइल नंबर *<input required name="phone" type="tel" inputMode="numeric" pattern="[0-9]{10}" maxLength={10} placeholder="10 अंकों का नंबर" /></label>
+              <label>मोबाइल नंबर *<input required name="phone" type="tel" inputMode="numeric" pattern="[6-9][0-9]{9}" maxLength={10} placeholder="10 अंकों का नंबर" /></label>
               <label>संदेश (वैकल्पिक)<textarea name="message" rows={3} placeholder="अपने अनुभव के बारे में लिखें" /></label>
               {liveApplyMessage && <p role="status">{liveApplyMessage}</p>}
               <button type="submit" disabled={liveApplyBusy}>{liveApplyBusy ? 'भेजा जा रहा है...' : 'आवेदन भेजें →'}</button>
             </form> : <div className="application-confirm"><strong>उम्मीदवार खाता जरूरी है।</strong><p>वास्तविक नौकरी में आवेदन करने के लिए candidate खाते से लॉगिन करें।</p><button type="button" onClick={() => setShowAuth(true)}>लॉगिन करें</button></div>) : applicationSent ? <div className="application-confirm"><strong>डेमो आवेदन तैयार हुआ।</strong><p>आपका विवरण केवल इस स्क्रीन पर दिखाया गया है; कहीं सेव या भेजा नहीं गया।</p></div> : <form className="apply-form" onSubmit={event => { event.preventDefault(); setApplicationSent(true) }}>
               <h3>आवेदन का नमूना</h3>
               <label>आपका नाम *<input required placeholder="पूरा नाम" /></label>
-              <label>मोबाइल नंबर *<input required type="tel" inputMode="numeric" pattern="[0-9]{10}" maxLength={10} placeholder="10 अंकों का नंबर" /></label>
+              <label>मोबाइल नंबर *<input required type="tel" inputMode="numeric" pattern="[6-9][0-9]{9}" maxLength={10} placeholder="10 अंकों का नंबर" /></label>
               <label>आपके बारे में (वैकल्पिक)<textarea rows={3} placeholder="अनुभव या काम की जानकारी लिखें" /></label>
               <button type="submit">डेमो आवेदन देखें →</button>
             </form>}
