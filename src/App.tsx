@@ -127,16 +127,16 @@ function App() {
 
   function changeLanguage(next: Language) { setLanguage(next); localStorage.setItem('sabkaam-language', next) }
 
-  if (showBrandIntro) return <div className="brand-intro-screen" role="status" aria-label="SABKAAM खुल रहा है">
+  if (showBrandIntro) return <Localized language={language}><div className="brand-intro-screen" role="status" aria-label="SABKAAM खुल रहा है">
     <div className="brand-intro-glow brand-intro-glow-one" /><div className="brand-intro-glow brand-intro-glow-two" />
     <div className="brand-intro-orbit brand-intro-orbit-one" /><div className="brand-intro-orbit brand-intro-orbit-two" />
     <div className="brand-intro-lockup"><img src={`${import.meta.env.BASE_URL}sabkaam-mark.webp`} alt="" /><span><strong>SABKAAM</strong><small>हर काम, हर इंसान के लिए।</small></span></div>
     <div className="brand-intro-progress"><span /></div>
     <p>काम के नए अवसर खुल रहे हैं</p>
     <small className="brand-intro-foot">JOBS · WORK · OPPORTUNITIES</small>
-  </div>
+  </div></Localized>
 
-  if (showRolePicker) return <div className="role-gateway">
+  if (showRolePicker) return <Localized language={language}><div className="role-gateway">
     <div className="gateway-glow gateway-glow-one" /><div className="gateway-glow gateway-glow-two" />
     <header className="gateway-header"><div className="gateway-brand"><img src={`${import.meta.env.BASE_URL}sabkaam-mark.webp`} alt="" /><span><strong>SABKAAM</strong><small>हर काम, हर इंसान के लिए।</small></span></div><LanguageSelect language={language} onChange={changeLanguage} /></header>
     <main className="gateway-content">
@@ -155,7 +155,7 @@ function App() {
       <div className="gateway-last-choice">आपकी पिछली पसंद: <strong>{selectedRole === 'employer' ? 'कामगार / कर्मचारी चाहिए' : 'काम / नौकरी चाहिए'}</strong></div>
     </main>
     <footer className="gateway-footer"><span>© SABKAAM</span><span>हर काम, हर इंसान के लिए।</span><span>MADE FOR INDIA</span></footer>
-  </div>
+  </div></Localized>
 
   if (showAdmin && session) return <AdminDashboard session={session} language={language} onBack={() => setShowAdmin(false)} onLanguageChange={changeLanguage} />
 
@@ -254,7 +254,7 @@ function App() {
               <div className="area-suggestion-hint">सूची के बाहर का इलाका भी लिखकर खोजें</div>
             </div>}
           </div>
-          <div className="search-foot"><span>⌖ {getStateLabel(stateName)} में अवसर खोजें</span><button onClick={startVoiceSearch} disabled={voiceStatus === 'listening'}>🎙️ {voiceStatus === 'listening' ? 'सुन रहा हूँ...' : 'बोलकर खोजें'} <small>{voiceStatus === 'unsupported' ? 'इस ब्राउज़र में उपलब्ध नहीं' : voiceStatus === 'error' ? 'माइक अनुमति जाँचें' : voiceStatus === 'listening' ? 'बोलिए' : 'हिंदी / English'}</small></button></div>
+          <div className="search-foot"><span>⌖ {getStateLabel(stateName, language)} में अवसर खोजें</span><button onClick={startVoiceSearch} disabled={voiceStatus === 'listening'}>🎙️ {voiceStatus === 'listening' ? 'सुन रहा हूँ...' : 'बोलकर खोजें'} <small>{voiceStatus === 'unsupported' ? 'इस ब्राउज़र में उपलब्ध नहीं' : voiceStatus === 'error' ? 'माइक अनुमति जाँचें' : voiceStatus === 'listening' ? 'बोलिए' : 'हिंदी / English'}</small></button></div>
         </section>
 
         <section className="categories-section">
