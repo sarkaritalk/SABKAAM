@@ -38,7 +38,7 @@ const demoJobs: JobListing[] = [
 
 function App() {
   const [session, setSession] = useState<AuthSession | null>(() => readAuthSession())
-  const [showAuth, setShowAuth] = useState(false)
+  const [showAuth, setShowAuth] = useState(() => localStorage.getItem('sabkaam-auth-panel-open') === 'true')
   const [accountRole, setAccountRole] = useState('')
   const [showAdmin, setShowAdmin] = useState(false)
   const [liveApplyBusy, setLiveApplyBusy] = useState(false)
@@ -68,6 +68,11 @@ function App() {
     const saved = localStorage.getItem('sabkaam-selected-role')
     return saved === 'employer' ? 'employer' : 'candidate'
   })
+
+  useEffect(() => {
+    if (showAuth) localStorage.setItem('sabkaam-auth-panel-open', 'true')
+    else localStorage.removeItem('sabkaam-auth-panel-open')
+  }, [showAuth])
 
   useEffect(() => {
     let active = true
