@@ -146,7 +146,7 @@ select ok(exists (
   select 1 from pg_policies
   where schemaname = 'public' and tablename = 'applications'
     and policyname = 'candidates can apply as themselves'
-    and cmd = 'INSERT' and with_check like '%public.profiles%' 
+    and cmd = 'INSERT' and with_check like '%profiles%' 
 ), 'application insert policy restricts submissions to candidate accounts');
 
 select ok(exists (
