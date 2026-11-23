@@ -112,9 +112,9 @@ select is((select count(*)::int from public.applications), 1, 'employer reads ap
 select ok(not public.is_sabkaam_staff(), 'employer is not staff');
 select is((select count(*)::int from public.notifications), 1, 'employer receives a notification for a new application');
 select throws_ok(
-  $ insert into public.applications (job_id, candidate_id, full_name, phone)
+  $test$ insert into public.applications (job_id, candidate_id, full_name, phone)
      values ('30000000-0000-0000-0000-000000000001',
-       '00000000-0000-0000-0000-000000000003', 'Employer A', '9000000003') $,
+       '00000000-0000-0000-0000-000000000003', 'Employer A', '9000000003') $test$,
   '42501',
   'new row violates row-level security policy for table "applications"',
   'employer accounts cannot submit candidate applications'
